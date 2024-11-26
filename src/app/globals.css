@@ -1,0 +1,316 @@
+:root {
+  --first-color: #ff505b;
+}
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+html, body {
+  width: 100%;
+  height: 100%;
+  font-family: Montserrat-Regular;
+  font-size: 16px;
+  color: #000000;
+}
+a {
+  text-decoration: none;
+  color: #000000;
+}
+a:hover {
+  color: #000000;
+}
+ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+p {
+  margin: 0;
+}
+body:has(.menu_open){
+  overflow: hidden;
+}
+@font-face {
+  font-family: Montserrat-Black;
+  src: url("./fonts/Montserrat-Black.otf");
+  font-display: swap;
+}
+@font-face {
+  font-family: Montserrat-Bold;
+  src: url("./fonts/Montserrat-Bold.otf");
+  font-display: swap;
+}
+@font-face {
+  font-family: Montserrat-Medium;
+  src: url("./fonts/Montserrat-Medium.otf");
+  font-display: swap;
+}
+@font-face {
+  font-family: Montserrat-SemiBold;
+  src: url("./fonts/Montserrat-SemiBold.otf");
+  font-display: swap;
+}
+@font-face {
+  font-family: Montserrat-Regular;
+  src: url("./fonts/Montserrat-Regular.otf");
+  font-display: swap;
+}
+/* Utility classes start */
+.inner_mainbox {
+  display: grid;
+  grid-template-columns: 16% 1fr;
+  transition-duration: 0.7s;
+}
+.inner_mainbox.toggled-class {
+  display: grid;
+  grid-template-columns: 5% 1fr;
+  transition-duration: 0.7s;
+}
+.toggled-class .toggle-button img {
+  transform: rotate(180deg);
+}
+.inner_left {
+  padding: 120px 0 0 0;
+  background-color: var(--first-color);
+}
+.inner_right {
+  padding: 120px 50px 50px 50px;
+  background-color: #ebeef4;
+}
+.sidemenu_main {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.toggle-button {
+  position: absolute;
+  width: 18px;
+  height: 40px;
+  background-color: var(--first-color);
+  right: -18px;
+  top: 0px;
+  border-radius: 0px 6px 6px 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.toggle-button img {
+  transition-duration: 0.5s;
+}
+/* Utility classes ends */
+/* Header start */
+.header_mainbox {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 30px;
+  -webkit-box-shadow: 0 6px 6px rgba(31, 107, 255, .1);
+  box-shadow: 0 6px 6px rgba(31, 107, 255, .1);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #ffffff;
+  z-index: 999;
+}
+/* Header ends */
+/* Login page start */
+.main_section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background-image: linear-gradient(62deg, rgb(245,245,245,0.6),rgb(255,80,91,0.6));
+}
+.login_mainbox {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  /* box-shadow: 4px 4px 12px #ccc; */
+  border-radius: 12px;
+  position: relative;
+  z-index: 10;
+}
+.login_formbox {
+  padding: 30px 60px;
+  background-color: #ffffff;
+  border-radius: 0 12px 12px 0;
+}
+.login_imgbox {
+  background-color: var(--first-color);
+  display: flex;
+  height: 100%;
+  align-items: end;
+  border-radius: 12px 0 0 12px;
+  position: relative;
+  z-index: 10;
+}
+.login_imgbox::after {
+  content: "";
+  position: absolute;
+  right: -15px;
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+  width: 30px;
+  height: 30px;
+  background-color: var(--first-color);
+}
+.login_form_heading h1 {
+  font-family: Montserrat-Bold;
+  font-size: 30px;
+}
+.login_form_heading h1 span {
+  color: var(--first-color);
+}
+.login_form_para p {
+  font-size: 14px;
+  margin: 10px 0 10px 0;
+}
+.form_group:not(:last-child) {
+  margin: 0 0 10px 0;
+}
+.form_group:last-child input {
+  border: 0;
+  background-color: var(--first-color);
+  color: #ffffff;
+  font-family: Montserrat-Medium;
+  padding: 8px;
+  border-radius: 6px;
+}
+.form_group:last-child {
+  margin: 30px 0 0 0;
+}
+.form_group input {
+  width: 100%;
+  padding: 10px 0 10px 5px;
+  border: 0;
+  border-bottom: 2px solid #f2f2f2;
+  line-height: normal;
+}
+.form_group input::placeholder {
+  font-size: 14px;
+}
+.form_group input:focus {
+  border: 0;
+  outline: none;
+  border-bottom: 2px solid var(--first-color);
+}
+.form_group:nth-child(3) {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: start;
+  align-items: center;
+  gap: 10px;
+  margin: 20px 0 10px 0;
+}
+.form_group:nth-child(3) > * {
+  width: auto;
+  margin: 0;
+  color: #000000;
+  font-size: 14px;
+}
+.login_form {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.form_group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.form_icon {
+  display: inline-flex;
+}
+input[type="checkbox"] {
+  accent-color: var(--first-color);
+  cursor: pointer;
+}
+/* Login page ends */
+/* Add service center page start */
+.inner_form_group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  position: relative;
+}
+.inner_form_group.inner_form_group_submit {
+  display: flex;
+  flex-direction: row;
+}
+.add_service_formbox form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  column-gap: 30px;
+  row-gap: 10px;
+}
+.inner_form_group input,
+.inner_form_group select,
+.inner_form_group textarea {
+  font-size: 12px;
+  position: relative;
+  z-index: 10;
+}
+.inner_form_group label {
+  font-size: 12px;
+  font-family: Montserrat-Medium;
+}
+.inner_form_group .form-control {
+  padding: 10px;
+  background-color: transparent;
+}
+.add_service_formbox {
+  padding: 30px;
+  border: 1px solid #657eae40;
+  background-color: #ffffff;
+  border-radius: 12px;
+}
+.submite_btn {
+  padding: 10px 30px;
+  border: 0;
+  background-color: var(--first-color);
+  width: fit-content;
+  font-family: Montserrat-Medium;
+  margin: 10px 0 0 0;
+  color: #ffffff;
+  border-radius: 6px;
+}
+.close_btn {
+  padding: 10px 30px;
+  border: 1px solid #cccc;
+  background-color: transparent;
+  width: fit-content;
+  font-family: Montserrat-Medium;
+  margin: 10px 0 0 0;
+  color: #000000;
+  border-radius: 6px;
+}
+.inner_form_group span {
+  color: red;
+}
+.service_form_heading {
+  grid-column: 1/3;
+  line-height: normal;
+  font-size: 14px;
+  font-family: Montserrat-Bold;
+  border-bottom: 1px solid #dee2e6;
+  padding: 0 0 10px 0;
+  margin: 0 0 10px 0;
+}
+.service_form_heading_second {
+  margin: 20px 0 10px 0;
+}
+.erro_message {
+  font-size: 10px;
+  color: red;
+}
+.down_arrow_btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  z-index: 1;
+}
+/* Add service center page ends */
