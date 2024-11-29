@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { logout } from "@/app/dashboard/action";
 
 const Header = () => {
     const [isToggled_new, setIsToggled_new] = useState(false);
@@ -41,7 +42,10 @@ const Header = () => {
                         <ul>
                             <li><Link href="">Edit Profile</Link></li>
                             <li><Link href="">Change Password</Link></li>
-                            <li><Link href="">Log Out</Link></li>
+                            {/* <li><Link href="">Log Out</Link></li> */}
+                            <li>
+                <button onClick={logout}>Logout</button>
+            </li>
                         </ul>
                     </div>
                 </div>
