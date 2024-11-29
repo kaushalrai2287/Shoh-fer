@@ -32,28 +32,50 @@ export default function LoginForm() {
   });
 
   // Handle form submission
-  const onSubmit = async (data: z.infer<typeof formSchema>) => {
-    setServerError(null);
-    setIsLoading(true);
+// const onSubmit = async (data: z.infer<typeof formSchema>) => {
+//   setServerError(null);
+//   setIsLoading(true);
 
-    try {
-      const response = await loginUser({
-        email: data.email,
-        password: data.password,
-      });
+//   try {
+//     const { error, message } = await loginUser({
+//       email: data.email,
+//       password: data.password,
+//     });
 
-      if (response.error) {
-        setServerError(response.message);
-      } else {
-        // Redirect on successful login
-        router.push("/dashboard");
-      }
-    } catch (error) {
-      setServerError("An unexpected error occurred. Please try again.");
-    } finally {
-      setIsLoading(false);
+//     if (error) {
+//       setServerError(message);
+//     } else {
+//       // Redirect on successful login
+//       router.push("/dashboard");
+//     }
+//   } catch (error) {
+//     setServerError("An unexpected error occurred. Please try again.");
+//   } finally {
+//     setIsLoading(false);
+//   }
+// };
+
+const onSubmit = async (data: z.infer<typeof formSchema>) => {
+  setServerError(null);
+  setIsLoading(true);
+
+  try {
+    const { error, message } = await loginUser({
+      email: data.email,
+      password: data.password,
+    });
+
+    if (error) {
+      setServerError(message);
+    } else {
+      // Redirect on successful login
+      router.push("/dashboard");
     }
-  };
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   return (
     <main className="main_section">

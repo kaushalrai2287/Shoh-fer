@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -5,10 +6,10 @@ import { FieldError, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
-import { redirect } from "next/navigation";
-import Sidemenu from '../../../components/Sidemenu';
-import Header from '../../../components/Header';
-import { createClient } from "../../../utils/supabase/client";
+import { redirect, useRouter } from "next/navigation";
+import Sidemenu from "../../../../components/Sidemenu";
+import Header from "../../../../components/Header";
+import { createClient } from "../../../../utils/supabase/client";
 
 
 const formSchema = z.object({
@@ -58,6 +59,14 @@ const formSchema = z.object({
 });
 
 type FormValues = z.infer<typeof formSchema>;
+type State = {
+    states_id: number;
+    name: string;
+};
+type Services = {
+    service_id: number;
+    name: string;
+};
 
 const Page = () => {
     
@@ -72,7 +81,7 @@ useEffect(() => {
     fetchUser();
 }, []);
     const [states, setStates] = useState<State[]>([]);
-    const [services, setServices] = useState<State[]>([]);
+    const [services, setServices] = useState<Services[]>([]);
 
     const [isToggled, setIsToggled] = useState(false); 
 
@@ -87,12 +96,38 @@ useEffect(() => {
     const toggleClass = () => {
         setIsToggled(!isToggled);
     };
+    const maxFileSize = 2 * 1024 * 1024;
+    const router  =  useRouter();
     const onSubmit = async (data: FormValues) => {
         try {
+          
             const supabase = createClient();
     
-            // Extract and validate the uploaded file
+          
+            if (data.business_registration_no) {
+                const { data: existingServiceCenters, error: checkError } = await supabase
+                    .from("service_centers")
+                    .select("business_registration_no")
+                    .eq("business_registration_no", data.business_registration_no);
+    
+                if (checkError) {
+                    console.error("Error checking business registration number:", checkError.message);
+                    alert("Error checking registration number. Please try again.");
+                    return;
+                }
+    
+                if (existingServiceCenters && existingServiceCenters.length > 0) {
+                    alert("This business registration number already exists.");
+                    return; 
+                }
+            }
+    
+           
             const file = data.document_upload?.[0];
+            if (file && file.size > maxFileSize) {
+                alert("File size exceeds the 2MB limit.");
+                return;
+            }
             if (!file) {
                 console.error("No file found in document_upload.");
                 alert("Please upload a document before submitting.");
@@ -114,7 +149,7 @@ useEffect(() => {
                 return;
             }
     
-            // Generate public URL for the uploaded file
+            
             const { data: fileData, error: urlError } = supabase.storage
                 .from("ServiceCenterDocs")
                 .getPublicUrl(filePath);
@@ -126,12 +161,11 @@ useEffect(() => {
             }
     
             console.log("File uploaded successfully. Public URL:", fileData.publicUrl);
-           
+    
             const generatedPassword = generateRandomPassword();
             const saltRounds = 10;
             const hashedPassword = await bcrypt.hash(generatedPassword, saltRounds);
     
-           
             const { state, servicesoffered, ...rest } = data;
             const payload = {
                 ...rest,
@@ -142,52 +176,22 @@ useEffect(() => {
             };
     
             // Insert the payload into the database
-            const { error } = await supabase.from("service_centers").insert(payload);
-    
+            const { data: insertedData, error } = await supabase.from("service_centers").insert(payload).select('service_center_id');
+           
             if (error) {
                 console.error("Error inserting data:", error.message);
                 alert("Error submitting the form. Please try again.");
             } else {
                 alert("Form submitted successfully!");
+                const serviceCenterId = insertedData[0].service_center_id; // Extract the ID
+                router.push(`/add-service-center/edit/${serviceCenterId}`); // Redirect
             }
         } catch (err) {
             console.error("Unexpected error:", err);
             alert("Unexpected error occurred.");
         }
     };
-
-    // const onSubmit = async (data: FormValues) => {
-    //     try {
-    //         const generatedPassword = generateRandomPassword();
-    //         console.log(generatedPassword);
-    //         const saltRounds = 10;
-    //         const hashedPassword = await bcrypt.hash(generatedPassword, saltRounds);
-         
-    //         console.log(hashedPassword);
-    //         const { state, servicesoffered, ...rest } = data;
-    //         const payload = {
-    //             ...rest,
-    //             state_id: Number(state),
-    //             services_id: Number(servicesoffered),
-    //             password: hashedPassword,
-    //         };
     
-    //         const supabase = createClient();
-    //         const { error } = await supabase
-    //             .from("service_centers")
-    //             .insert(payload);
-    
-    //         if (error) {
-    //             console.error("Error inserting data:", error.message);
-    //             alert("Error submitting the form. Please try again.");
-    //         } else {
-    //             alert("Form submitted successfully!");
-    //         }
-    //     } catch (err) {
-    //         console.error("Unexpected error:", err);
-    //         alert("Unexpected error occurred.");
-    //     }
-    // };
 
     useEffect(() => {
         const fetchStates = async () => {
