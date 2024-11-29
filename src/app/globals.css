@@ -425,6 +425,9 @@ input[type="checkbox"] {
   margin: 10px 0 0 0;
   color: #000000;
   border-radius: 6px;
+  font-family: 'Montserrat-Regular';
+    font-size: 12px;
+    display: inline-block;
 }
 .inner_form_group span {
   color: red;
@@ -492,7 +495,7 @@ input[type="checkbox"] {
   padding: 20px 0 0 0;
 }
 .filter_formbox .inner_form_group.inner_form_group_submit {
-  grid-column: 1/2;
+  grid-column: 1/-1;
 }
 .filter_data_table {
   margin: 20px 0 0 0;
