@@ -9,7 +9,6 @@ import Header from "../../../../components/Header";
 import { useRouter } from "next/navigation";
 import { createClient } from "../../../../utils/supabase/client";
 import { CSVLink } from "react-csv";
-
 import Link from "next/link";
 
 
@@ -181,6 +180,7 @@ const ListingPage = () => {
                   Filter By
                 </div>
                 <div className="filter_btn">
+           
                   <button className="submite_btn"><Link className ="text-white" href="/add-service-center/create">Add</Link></button>
                 </div>
               </div>
@@ -240,11 +240,14 @@ const ListingPage = () => {
                                     <input type="submit" className="close_btn" value="Export All" />
                                 </div> */}
                   <div className="inner_form_group inner_form_group_submit">
+                    <div>
                     <input
                       type="submit"
                       className="submite_btn"
                       value="Search"
                     />
+                    </div>
+                    <div>
                     {filteredCenters.length > 0 && (
                       <CSVLink
                         data={filteredCenters}
@@ -266,6 +269,7 @@ const ListingPage = () => {
                         Export All
                       </CSVLink>
                     )}
+                    </div>
                   </div>
                 </form>
               </div>
