@@ -179,7 +179,7 @@ const ListingPage = () => {
                   Filter By
                 </div>
                 <div className="filter_btn">
-                  <button className="submite_btn">Add</button>
+                  <button className="submite_btn"><Link className ="text-white" href="/add-service-center/create">Add</Link></button>
                 </div>
               </div>
               <div className="filter_formbox">
