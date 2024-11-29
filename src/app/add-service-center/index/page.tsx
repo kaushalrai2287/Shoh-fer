@@ -1,13 +1,16 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Image from "next/image";
+
 
 import Sidemenu from "../../../../components/Sidemenu";
 import { DataTable } from "../../../../components/ui/datatable";
 import Header from "../../../../components/Header";
 import { useRouter } from "next/navigation";
 import { createClient } from "../../../../utils/supabase/client";
+import { CSVLink } from "react-csv";
+
+
 
 type ServiceCenter = {
     service_center_id: number;
@@ -37,6 +40,7 @@ const ListingPage = () => {
     const [filteredCenters, setFilteredCenters] = useState<ServiceCenter[]>([]);
     const [serviceAreaQuery, setServiceAreaQuery] = useState(""); // New state for Service Area
     const [cityAreaQuery,setCityAreaQuery] = useState("")
+    const [contactNoQuery,setContactNoQuery] = useState("")
     const [isToggled, setIsToggled] = useState(false);
     const router = useRouter();
 
@@ -74,7 +78,7 @@ const ListingPage = () => {
     }, []);
 
     const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchQuery(event.target.value); // Update search query
+        setSearchQuery(event.target.value); 
     };
     const handleSearchSubmit = (event: React.FormEvent) => {
         event.preventDefault();
@@ -83,12 +87,13 @@ const ListingPage = () => {
             const matchesName = center.name?.toLowerCase().includes(searchQuery.toLowerCase()) || false;
             const matchesArea = center.service_area?.toLowerCase().includes(serviceAreaQuery.toLowerCase()) || false;
             const matchesCity = center.city?.toLowerCase().includes(cityAreaQuery.toLowerCase()) || false;
+            const contactNo = center.contact_number?.toLowerCase().includes(contactNoQuery.toLocaleLowerCase()) || false;
             
     
-            return matchesName && matchesArea && matchesCity; // Match both name and area
+            return matchesName && matchesArea && matchesCity && contactNo; // Match both name and area
         });
     
-        setFilteredCenters(filtered); // Update filtered results
+        setFilteredCenters(filtered); 
     };
     
 
@@ -97,6 +102,7 @@ const ListingPage = () => {
     const handleEdit = (id: number) => {
         router.push(`/add-service-center/edit/${id}`);
     };
+
 
     const columns = {
         name: "Service Center Name",
@@ -142,102 +148,150 @@ const ListingPage = () => {
         city: center.city,
         state_id:  center.state_name,
         pincode: center.pincode,
-        status: "active", // Assuming a default status
+        status: "active", 
+        // editLink: '', // Edit page link
+        onEdit: () => handleEdit(center.service_center_id),
+     deleteLink: '#',
     }));
 
+
+
+ 
+
     return (
-        <main className="Service_center_list_main">
-            <Header />
-            <div className={`inner_mainbox ${isToggled ? "toggled-class" : ""}`}>
-                <div className="inner_left">
-                    <Sidemenu onToggle={toggleClass} />
+      <main className="Service_center_list_main">
+        <Header />
+        <div className={`inner_mainbox ${isToggled ? "toggled-class" : ""}`}>
+          <div className="inner_left">
+            <Sidemenu onToggle={toggleClass} />
+          </div>
+          <div className="inner_right">
+            <div className="filter_box">
+              <div className="filter_heading_btnbox">
+                <div className="service_form_heading">
+                  <span>
+                    <img
+                      src="/images/settings-sliders.svg"
+                      alt=""
+                      className="img-fluid"
+                    />
+                  </span>
+                  Filter By
                 </div>
-                <div className="inner_right">
-                    <div className="filter_box">
-                        <div className="filter_heading_btnbox">
-                            <div className="service_form_heading">
-                                <span>
-                                    <img src="/images/settings-sliders.svg" alt="" className="img-fluid" />
-                                </span>
-                                Filter By
-                            </div>
-                            <div className="filter_btn">
-                                <button className="submite_btn">Add</button>
-                            </div>
-                        </div>
-                        <div className="filter_formbox">
-                        <form onSubmit={handleSearchSubmit}>
-                                <div className="inner_form_group">
-                                    <label htmlFor="search_service_name">Service Center Name</label>
-                                    <input
-                                        className="form-control"
-                                        type="text"
-                                        name="search_service_name"
-                                        id="search_service_name"
-                                        value={searchQuery}
-                                        onChange={handleSearchChange}
-                                    />
-                                </div>
-                                <div className="inner_form_group">
-                                    <label htmlFor="search_service_area">Service Area</label>
-                                    {/* <input
-                                        className="form-control"
-                                        type="text"
-                                        name="search_service_area"
-                                        id="search_service_area"
-                                    /> */}
-                                        <input
-                                    className="form-control"
-                                     type="text"
-                                     name="search_service_area"
-                                    id="search_service_area"
-                                     value={serviceAreaQuery} // Bind to state
-                                     onChange={(e) => setServiceAreaQuery(e.target.value)} // Update state on change
-                                  />
-                                </div>
-                                <div className="inner_form_group">
-                                    <label htmlFor="search_service_city">City</label>
-                                    <input
-                                        className="form-control"
-                                        type="text"
-                                        name="search_service_city"
-                                        id="search_service_city"
-                                        value={cityAreaQuery} 
-                                        onChange={(e) => setCityAreaQuery(e.target.value)} 
-                                    />
-                                </div>
-                                <div className="inner_form_group">
-                                    <label htmlFor="search_service_number">Contact Number</label>
-                                    <input
-                                        className="form-control"
-                                        type="text"
-                                        name="search_service_number"
-                                        id="search_service_number"
-                                    />
-                                </div>
-                                <div className="inner_form_group inner_form_group_submit">
+                <div className="filter_btn">
+                  <button className="submite_btn">Add</button>
+                </div>
+              </div>
+              <div className="filter_formbox">
+                <form onSubmit={handleSearchSubmit}>
+                  <div className="inner_form_group">
+                    <label htmlFor="search_service_name">
+                      Service Center Name
+                    </label>
+                    <input
+                      className="form-control"
+                      type="text"
+                      name="search_service_name"
+                      id="search_service_name"
+                      value={searchQuery}
+                      onChange={handleSearchChange}
+                    />
+                  </div>
+                  <div className="inner_form_group">
+                    <label htmlFor="search_service_area">Service Area</label>
+
+                    <input
+                      className="form-control"
+                      type="text"
+                      name="search_service_area"
+                      id="search_service_area"
+                      value={serviceAreaQuery}
+                      onChange={(e) => setServiceAreaQuery(e.target.value)} // Update state on change
+                    />
+                  </div>
+                  <div className="inner_form_group">
+                    <label htmlFor="search_service_city">City</label>
+                    <input
+                      className="form-control"
+                      type="text"
+                      name="search_service_city"
+                      id="search_service_city"
+                      value={cityAreaQuery}
+                      onChange={(e) => setCityAreaQuery(e.target.value)}
+                    />
+                  </div>
+                  <div className="inner_form_group">
+                    <label htmlFor="search_service_number">
+                      Contact Number
+                    </label>
+                    <input
+                      className="form-control"
+                      type="text"
+                      name="search_service_number"
+                      id="search_service_number"
+                      value={contactNoQuery}
+                      onChange={(e) => setContactNoQuery(e.target.value)}
+                    />
+                  </div>
+                  {/* <div className="inner_form_group inner_form_group_submit">
                                     <input type="submit" className="submite_btn" value="Search" />
                                     <input type="submit" className="close_btn" value="Export All" />
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                    <div className="data_listing_box mt-3">
-                        <div className="filter_heading_btnbox">
-                            <div className="service_form_heading">
-                                <span>
-                                    <img src="/images/bars-sort.svg" alt="" className="img-fluid" />
-                                </span>
-                                Service Center List
-                            </div>
-                        </div>
-                        <div className="filter_data_table">
-                            <DataTable columns={columns} data={mappedData} hiddenColumns={hiddenColumns} />
-                        </div>
-                    </div>
-                </div>
+                                </div> */}
+                  <div className="inner_form_group inner_form_group_submit">
+                    <input
+                      type="submit"
+                      className="submite_btn"
+                      value="Search"
+                    />
+                    {filteredCenters.length > 0 && (
+                      <CSVLink
+                        data={filteredCenters}
+                        headers={[
+                          { label: "Service Center Name", key: "name" },
+                          {
+                            label: "Registration Number",
+                            key: "business_registration_no",
+                          },
+                          { label: "Services Offered", key: "services_offerd" },
+                          { label: "Area", key: "service_area" },
+                          { label: "City", key: "city" },
+                          { label: "Contact No.", key: "contact_number" },
+                          { label: "Email", key: "email" },
+                        ]}
+                        filename="service_centers.csv"
+                        className="close_btn"
+                      >
+                        Export All
+                      </CSVLink>
+                    )}
+                  </div>
+                </form>
+              </div>
             </div>
-        </main>
+            <div className="data_listing_box mt-3">
+              <div className="filter_heading_btnbox">
+                <div className="service_form_heading">
+                  <span>
+                    <img
+                      src="/images/bars-sort.svg"
+                      alt=""
+                      className="img-fluid"
+                    />
+                  </span>
+                  Service Center List
+                </div>
+              </div>
+              <div className="filter_data_table">
+                <DataTable
+                  columns={columns}
+                  data={mappedData}
+                  hiddenColumns={hiddenColumns}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
     );
 };
 

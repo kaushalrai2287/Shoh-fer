@@ -32,12 +32,12 @@ export async function updateSession(request: NextRequest) {
   );
 
   const { data: { user } } = await supabase.auth.getUser();
-  console.log("User:", user);  // Debugging: Check if user is null or not
+  console.log("User:", user); 
   
   if (
     !user &&
     !request.nextUrl.pathname.startsWith("/login") 
-    // !request.nextUrl.pathname.startsWith("/auth")
+    
   ) {
     console.log("Redirecting to login...");
     const url = request.nextUrl.clone();

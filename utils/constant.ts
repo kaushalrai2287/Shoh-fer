@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import multiparty from "multiparty";
 import { Readable } from "stream";
 
-import { apiStatusFailureCode, failedWithException, wentWrong } from "./stringConstants";
+
 import moment from "moment";
 export const runtime = "nodejs";
 
@@ -35,7 +35,7 @@ export function toIncomingMessage(req: NextRequest): any {
 
   pushChunk(); // Start reading
 
-  // Mimic IncomingMessage structure
+  
   return Object.assign(readable, {
     headers: Object.fromEntries(req.headers.entries()),
     method: req.method,
@@ -99,20 +99,6 @@ export const formatDate = (date: string, isTime = false) => {
 };
 
 
-export function funSendApiException(error: any) {
-  return NextResponse.json({
-    message: failedWithException,
-    error: error
-  }, { status: apiStatusFailureCode })
-}
-
-export function funSendApiErrorMessage(error: any) {
-  return NextResponse.json({
-    message: wentWrong,
-    error: error,
-
-  }, { status: apiStatusFailureCode })
-}  
 
 
 export const formatDateToISO = (now:Date) => {

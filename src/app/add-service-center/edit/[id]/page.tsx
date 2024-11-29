@@ -193,18 +193,18 @@ const EditPage = () => {
       }
   
       
-      const { data: fileData, error: urlError } = supabase.storage
-        .from("ServiceCenterDocs")
-        .getPublicUrl(filePath);
+      const { data: fileData } = supabase.storage
+      .from("ServiceCenterDocs")
+      .getPublicUrl(filePath);
   
-    
-      if (urlError || !fileData) {
-        console.error("Error generating public URL:", urlError || "No file data returned.");
-        alert("Unexpected error occurred while processing the document.");
-        return;
-      }
+  if (!fileData || !fileData.publicUrl) {
+      console.error("Error generating public URL: No file data returned.");
+      alert("Unexpected error occurred while processing the document.");
+      return;
+  }
   
-      const documentUrl = fileData.publicUrl; // Use the generated public UR
+  
+     // Use the generated public UR
       const { error } = await supabase
       .from("service_centers")
       .update({

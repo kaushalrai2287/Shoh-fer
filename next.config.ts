@@ -13,6 +13,7 @@ const nextConfig: NextConfig = {
   // Add your Next.js config options here
   experimental: {
     serverActions: {
+      
       bodySizeLimit: '10mb',
     },
   },

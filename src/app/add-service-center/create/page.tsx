@@ -150,17 +150,18 @@ useEffect(() => {
             }
     
             
-            const { data: fileData, error: urlError } = supabase.storage
-                .from("ServiceCenterDocs")
-                .getPublicUrl(filePath);
-    
-            if (urlError || !fileData) {
-                console.error("Error generating public URL:", urlError || "No file data returned.");
-                alert("Unexpected error occurred while processing the document.");
-                return;
-            }
-    
-            console.log("File uploaded successfully. Public URL:", fileData.publicUrl);
+            const { data: fileData } = supabase.storage
+            .from("ServiceCenterDocs")
+            .getPublicUrl(filePath);
+        
+        if (!fileData || !fileData.publicUrl) {
+            console.error("Error generating public URL: No file data returned.");
+            alert("Unexpected error occurred while processing the document.");
+            return;
+        }
+        
+        console.log("File uploaded successfully. Public URL:", fileData.publicUrl);
+        
     
             const generatedPassword = generateRandomPassword();
             const saltRounds = 10;

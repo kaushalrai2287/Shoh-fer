@@ -397,7 +397,7 @@ input[type="checkbox"] {
   font-family: Montserrat-Medium;
 }
 .inner_form_group .form-control {
-  padding: 10px;
+  padding: 6px 10px;
   background-color: transparent;
 }
 .add_service_formbox {
@@ -407,7 +407,7 @@ input[type="checkbox"] {
   border-radius: 12px;
 }
 .submite_btn {
-  padding: 10px 30px;
+  padding: 8px 30px;
   border: 0;
   background-color: var(--first-color);
   width: fit-content;
@@ -417,7 +417,7 @@ input[type="checkbox"] {
   border-radius: 6px;
 }
 .close_btn {
-  padding: 10px 30px;
+  padding: 8px 30px;
   border: 1px solid #cccc;
   background-color: transparent;
   width: fit-content;
@@ -461,6 +461,7 @@ input[type="checkbox"] {
 .filter_btn .submite_btn {
   padding: 6px 30px;
   margin: 0;
+  line-height: normal;
 }
 .filter_heading_btnbox {
   padding: 0 0 10px 0;
@@ -504,6 +505,7 @@ input[type="checkbox"] {
   border: 0;
   outline: none;
   padding: 0;
+  background-color: unset;
 }
 .action_btns button:nth-child(2) {
   margin: 0 10px;
@@ -511,8 +513,25 @@ input[type="checkbox"] {
 .expanded_tr td .flex-column {
   gap: 10px;
 }
+.expanded_tr td {
+  padding: 20px;
+}
 .expanded_tr strong {
   font-weight: bolder;
   margin: 0 5px 0 0;
 }
-/* List service center page ends */
+.expanded_tr td .flex-column div:not(:last-child) {
+  padding: 0 0 10px 0;
+  border-bottom: 1px dotted #cccc;
+}
+.filter_data_table thead tr th{
+  background-color: #ed5f61;
+  color: #ffffff;
+}
+.filter_data_table .table>:not(caption)>*>* {
+  padding: 12px 10px;
+}
+.action_btns {
+  display: flex;
+  gap: 8px;
+}
