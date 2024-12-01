@@ -29,6 +29,10 @@ const formSchema = z.object({
         .min(10, "Contact Number must be at least 10 digits")
         .max(15, "Contact Number must be at most 15 digits"),
     email: z.string().email("Invalid email address").optional(),
+    alternate_contact: z
+    .string()
+    .regex(/^\d*$/, "Alternate Contact Number must contain only digits")
+    .optional(),
     altebusiness_registration_no: z
         .string()
         .regex(/^\d*$/, "Alternate Contact Number must contain only digits")
@@ -316,8 +320,8 @@ useEffect(() => {
                                 )}
                             </div>
                             <div className="inner_form_group">
-                                <label htmlFor="alternumber">Alternate Contact Number</label>
-                                <input className="form-control" type="text" name="alternumber" id="alternumber" />
+                                <label htmlFor="alternate_contact">Alternate Contact Number</label>
+                                <input className="form-control" {...register("alternate_contact")}type="text" name="alternate_contact" id="alternate_contact" />
                             </div>
                             <div className="service_form_heading service_form_heading_second">
                                 Address
