@@ -9,6 +9,7 @@ import Header from "../../../../components/Header";
 import { useRouter } from "next/navigation";
 import { createClient } from "../../../../utils/supabase/client";
 import { CSVLink } from "react-csv";
+import Link from "next/link";
 
 
 
@@ -103,6 +104,36 @@ const ListingPage = () => {
         router.push(`/add-service-center/edit/${id}`);
     };
 
+    const handleDelete = async (id: number) => {
+      const confirmDelete = window.confirm("Are you sure you want to delete this service center?");
+      if (!confirmDelete) return;
+    
+      try {
+        const supabase = createClient();
+        const { error } = await supabase
+          .from("service_centers")
+          .delete()
+          .eq("service_center_id", id);
+    
+        if (error) {
+          console.error("Error deleting service center:", error);
+          alert("Failed to delete the service center.");
+        } else {
+          alert("Service center deleted successfully.");
+          setServiceCenters((prev) =>
+            prev.filter((center) => center.service_center_id !== id)
+          );
+          setFilteredCenters((prev) =>
+            prev.filter((center) => center.service_center_id !== id)
+          );
+        }
+      } catch (err) {
+        console.error("Unexpected error deleting service center:", err);
+        alert("An unexpected error occurred.");
+      }
+    };
+    
+
 
     const columns = {
         name: "Service Center Name",
@@ -151,7 +182,8 @@ const ListingPage = () => {
         status: "active", 
         // editLink: '', // Edit page link
         onEdit: () => handleEdit(center.service_center_id),
-     deleteLink: '#',
+    //  deleteLink: '#',
+     onDelete: () => handleDelete(center.service_center_id),
     }));
 
 
@@ -179,7 +211,8 @@ const ListingPage = () => {
                   Filter By
                 </div>
                 <div className="filter_btn">
-                  <button className="submite_btn">Add</button>
+           
+                  <button className="submite_btn"><Link className ="text-white" href="/add-service-center/create">Add</Link></button>
                 </div>
               </div>
               <div className="filter_formbox">
@@ -238,11 +271,14 @@ const ListingPage = () => {
                                     <input type="submit" className="close_btn" value="Export All" />
                                 </div> */}
                   <div className="inner_form_group inner_form_group_submit">
+                    <div>
                     <input
                       type="submit"
                       className="submite_btn"
                       value="Search"
                     />
+                    </div>
+                    <div>
                     {filteredCenters.length > 0 && (
                       <CSVLink
                         data={filteredCenters}
@@ -264,6 +300,7 @@ const ListingPage = () => {
                         Export All
                       </CSVLink>
                     )}
+                    </div>
                   </div>
                 </form>
               </div>

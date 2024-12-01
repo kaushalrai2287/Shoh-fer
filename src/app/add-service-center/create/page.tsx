@@ -347,16 +347,7 @@ useEffect(() => {
                                                  </option>
                                                          ))}
                                 </select>
-                                {/* <select className="form-control" {...register("state")} id="state">
-                                <option value="">Select your state</option>
-                                     {states.map((state) => (
-     
-                                      <option key={state.states_id} value={state.name}>
-                                                  {state.name}
-                                              </option>
-                                                ))}
-                               
-                                </select> */}
+             
                                 {errors.state && (
                                     <p className="erro_message">{errors.state.message}</p>
                                 )}

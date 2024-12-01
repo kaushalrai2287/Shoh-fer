@@ -49,12 +49,12 @@ export function DataTable({ columns, data, hiddenColumns = [] }: DataTableProps)
                                )}
 
                   {/* Dynamic Delete Button */}
-                  {row.deleteLink && (
-                    <Link href={row.deleteLink}>
-                      <button className="">
+                  {row.onDelete && (
+                    // <Link href={row.deleteLink}>
+                      <button className="" onClick={row.onDelete}>
                         <img src="/images/delete.svg" alt="Delete" title="Delete" className="img-fluid" />
                       </button>
-                    </Link>
+                    // </Link>
                   )}
                 </td>
               </tr>
