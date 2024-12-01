@@ -241,7 +241,7 @@ const EditPage = () => {
   
       // Confirm successful update and navigate to another page if needed
       alert("Service center updated successfully!");
-      router.push("/add-service-center/listing");
+      router.push("/add-service-center/index");
   
     } catch (err) {
       // Catch any unexpected errors
