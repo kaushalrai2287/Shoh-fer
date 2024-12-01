@@ -10,6 +10,7 @@ import { FieldError, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createClient } from "../../../../../utils/supabase/client";
+import bcrypt from "bcryptjs";
 
 
 const formSchema = z.object({
@@ -30,9 +31,18 @@ const formSchema = z.object({
     .max(15, "Contact Number must be at most 15 digits"),
   email: z.string().email("Invalid email address").optional(),
   alternate_contact: z
-    .string()
-    .regex(/^\d*$/, "Alternate Contact Number must contain only digits")
-    .optional(),
+  .string()
+  .optional()
+  .refine((value) => !value || /^\d+$/.test(value), {
+    message: "Alternate Contact Number must contain only digits",
+  })
+  .refine((value) => !value || value.length >= 10, {
+    message: "Alternate Contact Number must be at least 10 digits",
+  })
+  .refine((value) => !value || value.length <= 15, {
+    message: "Alternate Contact Number must be at most 15 digits",
+  }),
+
   address: z.string().min(1, "Address is required"),
   city: z
     .string()
@@ -48,12 +58,27 @@ const formSchema = z.object({
     .regex(/^\d+$/, "Pincode must contain only digits"),
   servicesoffered: z.string().min(1, "Services Offered is required"),
   document_upload: z
-    .any()
-    .refine((fileList) => fileList && fileList.length > 0, "Please upload a file.")
-    .refine((fileList) => {
+  .any()
+  .refine(
+    (fileList) => {
+      // If fileList is empty, return false to trigger error
+      return (
+        (fileList && fileList.length > 0) || 
+        typeof fileList === "string" // Allow previously uploaded files
+      );
+    },
+    "Please upload a file."
+  )
+  .refine(
+    (fileList) => {
+      if (typeof fileList === "string") return true; // Skip validation for existing file paths
       const file = fileList[0];
       return file && ["application/pdf", "image/jpeg", "image/png"].includes(file.type);
-    }, "Only PDF, JPG, and PNG files are allowed."),
+    },
+    "Only PDF, JPG, and PNG files are allowed."
+  ),
+  password: z.string().optional(),
+
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -123,6 +148,7 @@ const EditPage = () => {
         setValue("pincode", data.pincode);
         setValue("servicesoffered", data.services_id);
         setValue("document_upload", data.document_upload || []);
+        // setValue("password",data.password);
        
  
 
@@ -176,7 +202,9 @@ const EditPage = () => {
       }
   
     
-      const sanitizedFileName = file.name.replace(/[^a-z0-9.]/gi, '_').toLowerCase();
+      // const sanitizedFileName = file.name.replace(/[^a-z0-9.]/gi, '_').toLowerCase();
+      const sanitizedFileName = (file?.name || "").replace(/[^a-z0-9.]/gi, '_').toLowerCase();
+
       const filePath = `documents/${Date.now()}_${sanitizedFileName}`;
       console.log("Uploading file to path:", filePath);
   
@@ -202,6 +230,13 @@ const EditPage = () => {
       alert("Unexpected error occurred while processing the document.");
       return;
   }
+
+  let encryptedPassword = null;
+        if (data.password) {
+            const saltRounds = 10;
+            encryptedPassword = await bcrypt.hash(data.password, saltRounds);
+        }
+
   
   
      // Use the generated public UR
@@ -221,6 +256,8 @@ const EditPage = () => {
         pincode: data.pincode,
         services_id: data.servicesoffered, 
         document_upload:  fileData.publicUrl || [],
+        
+        ...(encryptedPassword && { password: encryptedPassword }), 
       })
       .eq("service_center_id", id); 
   
@@ -375,8 +412,18 @@ const EditPage = () => {
                                 )}
                             </div>
                             <div className="inner_form_group">
-                                <label htmlFor="alternumber">Alternate Contact Number</label>
-                                <input className="form-control" type="text" name="alternumber" id="alternumber" />
+                                <label htmlFor="alternate_contact">Alternate Contact Number</label>
+                                <input className="form-control" {...register("alternate_contact")} type="text" name="alternate_contact" id="alternate_contact" />
+                                {errors.alternate_contact && (
+                                    <p className="erro_message">{errors.alternate_contact.message}</p>
+                                )}
+                            </div>
+                            <div className="inner_form_group">
+                                <label htmlFor="password">Change Password <span>*</span></label>
+                                <input className="form-control" type="text" {...register("password")} id="password" />
+                                {errors.password && (
+                                    <p className="erro_message">{errors.password.message}</p>
+                                )}
                             </div>
                             <div className="service_form_heading service_form_heading_second">
                                 Address
@@ -420,6 +467,7 @@ const EditPage = () => {
                                     <p className="erro_message">{errors.pincode.message}</p>
                                 )}
                             </div>
+                     
                             <div className="inner_form_group inner_form_group_submit">
                                 <input type="submit" className='submite_btn' value="Submit" />
                                 <input type="submit" className='close_btn' value="Close" />
