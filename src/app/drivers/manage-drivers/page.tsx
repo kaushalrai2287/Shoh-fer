@@ -7,7 +7,7 @@ import Sidemenu from "../../../../components/Sidemenu";
 import { DataTable } from "../../../../components/ui/datatable";
 import Link from "next/link";
 
-const page = () => {
+const ManageDriver = () => {
     const [isToggled, setIsToggled] = useState(false); // State for toggle
 
     const toggleClass = () => {
@@ -148,4 +148,4 @@ const page = () => {
     );
 };
 
-export default page;
+export default ManageDriver;
