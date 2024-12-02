@@ -44,15 +44,24 @@ const formSchema = z.object({
     city: z.string().min(1, "City is required")
         .regex(/^[a-zA-Z\s]+$/, "City must only contain letters"),
         state: z
-        .string()
-        .refine((value) => /^\d+$/.test(value), "State is required"),
-
+    .union([z.string(), z.number()])  // Accepts both string and number
+    .refine((value) => /^\d+$/.test(String(value)), "State must be provided"),
     pincode: z
         .string()
         .min(6, "Pincode must be 6 digits")
         .max(6, "Pincode must be 6 digits")
         .regex(/^\d+$/, "Pincode must contain only digits"),
-        servicesoffered: z.string().min(1, "Services Offered is required"),
+        // servicesoffered: z.string().min(1, "Services Offered is required"),
+        servicesoffered: z
+        .union([z.string(), z.number()]) // Accepts both string and number
+        .optional()
+        .refine((value) => !value || (typeof value === 'string' && value.trim() !== ""), {
+          message: "Services Offered is required when provided",
+        })
+        .refine((value) => !value || (typeof value === 'string' && value.length > 0), {
+          message: "Services Offered cannot be empty",
+        }),
+      
         document_upload: z
         .any()
         .refine((fileList) => fileList && fileList.length > 0, "Please upload a file.")
@@ -191,8 +200,9 @@ useEffect(() => {
                 alert("Error submitting the form. Please try again.");
             } else {
                 alert("Form submitted successfully!");
-                const serviceCenterId = insertedData[0].service_center_id; // Extract the ID
-                router.push(`/add-service-center/edit/${serviceCenterId}`); // Redirect
+                // const serviceCenterId = insertedData[0].service_center_id; // Extract the ID
+                // router.push(`/add-service-center/edit/${serviceCenterId}`); // Redirect
+                router.push('/add-service-center/index')
             }
         } catch (err) {
             console.error("Unexpected error:", err);
