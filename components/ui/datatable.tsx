@@ -6,22 +6,47 @@ interface DataTableProps {
   hiddenColumns?: string[];
   showRequestButton?: boolean;
   showStatusButton?: boolean;
-  onStatusChange?: (row: any) => void;
+  toggleStatus?: (row: any) => void; // Callback for status change
   showBillingButton?: boolean;
+  toggleRequest?: (row: any) => void; // Callback for request change
+  toggleBilling?: (row: any) => void; // Callback for billing change
 }
 
 export function DataTable({
   columns,
   data,
   hiddenColumns = [],
-  showRequestButton = false, // Default is false
+  showRequestButton = false,
   showStatusButton = false,
   showBillingButton = false,
-  onStatusChange,
+  toggleStatus,
+  toggleRequest,
+  toggleBilling
 }: DataTableProps) {
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
 
   const isHidden = (column: string) => hiddenColumns.includes(column);
+
+  const handleStatusChange = (row: any) => {
+    if (toggleStatus) {
+      toggleStatus(row); // Call toggleStatus handler passed from parent
+    }
+    setExpandedRow(null); // Close expanded row after status change
+  };
+
+  const handleRequestChange = (row: any) => {
+    if (toggleRequest) {
+      toggleRequest(row); // Call toggleRequest handler passed from parent
+    }
+    setExpandedRow(null); // Close expanded row after request change
+  };
+
+  const handleBillingChange = (row: any) => {
+    if (toggleBilling) {
+      toggleBilling(row); // Call toggleBilling handler passed from parent
+    }
+    setExpandedRow(null); // Close expanded row after billing change
+  };
 
   return (
     <div className="table-responsive">
@@ -90,20 +115,19 @@ export function DataTable({
                         </div>
                       ))}
                       {showStatusButton && (
-                      <div>
-                        <strong>Status: </strong>
-                        <button
-                          className={`btn btn-sm ${row.Status === 'Active' ? 'btn-success' : 'btn-secondary'}`}
-                          onClick={() => {
-                            row.Status = row.Status === 'Active' ? 'Inactive' : 'Active';
-                            setExpandedRow(null); 
-                          }}
-                        >
-                          {row.Status === 'Active' ? 'Active' : 'Inactive'}
-                        </button>
-                      </div>
+                        <div>
+                          <strong>Status: </strong>
+                          <button
+                            className={`btn btn-sm ${row.Status === 'Active' ? 'btn-success' : 'btn-secondary'}`}
+                            onClick={() => {
+                              row.Status = row.Status === 'Active' ? 'Inactive' : 'Active';
+                              handleStatusChange(row); // Call handler to update status
+                            }}
+                          >
+                            {row.Status === 'Active' ? 'Active' : 'Inactive'}
+                          </button>
+                        </div>
                       )}
-                      {/* Request Button: Conditionally rendered */}
                       {showRequestButton && (
                         <div>
                           <strong>Request: </strong>
@@ -111,7 +135,7 @@ export function DataTable({
                             className={`btn btn-sm ${row.Request === 'Approved' ? 'btn-success' : 'btn-secondary'}`}
                             onClick={() => {
                               row.Request = row.Request === 'Approved' ? 'Reject' : 'Approved';
-                              setExpandedRow(null); // Trigger re-render
+                              handleRequestChange(row); 
                             }}
                           >
                             {row.Request === 'Approved' ? 'Approved' : 'Reject'}
@@ -125,7 +149,7 @@ export function DataTable({
                             className={`btn btn-sm ${row.Billing === 'Paid' ? 'btn-success' : 'btn-secondary'}`}
                             onClick={() => {
                               row.Billing = row.Billing === 'Paid' ? 'Pending' : 'Paid';
-                              setExpandedRow(null); // Trigger re-render
+                              handleBillingChange(row); // Call handler to update billing
                             }}
                           >
                             {row.Billing === 'Paid' ? 'Paid' : 'Pending'}
