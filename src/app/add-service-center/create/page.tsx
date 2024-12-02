@@ -27,12 +27,15 @@ const formSchema = z.object({
         .string()
         .regex(/^\d+$/, "Contact Number must contain only digits")
         .min(10, "Contact Number must be at least 10 digits")
-        .max(15, "Contact Number must be at most 15 digits"),
+        .max(10, "Contact Number must be at most 10 digits"),
     email: z.string().email("Invalid email address").optional(),
     alternate_contact: z
     .string()
-    .regex(/^\d*$/, "Alternate Contact Number must contain only digits")
-    .optional(),
+    .optional()
+    .refine((value) => !value || /^\d{1,10}$/.test(value), {
+      message: "Alternate Contact Number must contain only digits and be at most 10 digits long",
+    }),
+  
     altebusiness_registration_no: z
         .string()
         .regex(/^\d*$/, "Alternate Contact Number must contain only digits")
@@ -265,7 +268,7 @@ useEffect(() => {
                                 )}
                             </div>
                             <div className="inner_form_group">
-                                <label htmlFor="servicesoffered">Services Offered</label>
+                                <label htmlFor="servicesoffered">Services Offered <span>*</span></label>
                                 <select
                                        className="form-control"
                                     {...register("servicesoffered")}
@@ -322,6 +325,9 @@ useEffect(() => {
                             <div className="inner_form_group">
                                 <label htmlFor="alternate_contact">Alternate Contact Number</label>
                                 <input className="form-control" {...register("alternate_contact")}type="text" name="alternate_contact" id="alternate_contact" />
+                                {errors.alternate_contact && (
+                                    <p className="erro_message">{errors.alternate_contact.message}</p>
+                                )}
                             </div>
                             <div className="service_form_heading service_form_heading_second">
                                 Address

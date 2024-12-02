@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import 'bootstrap/dist/css/bootstrap.min.css';
 // import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import BootstrapClient from "../../components/BootstrapClient";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -17,6 +18,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         {children}
+        <BootstrapClient/>
       </body>
     </html>
   );
