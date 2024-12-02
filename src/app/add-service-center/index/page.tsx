@@ -104,7 +104,52 @@ const ListingPage = () => {
     const handleEdit = (id: number) => {
         router.push(`/add-service-center/edit/${id}`);
     };
-
+    const handleStatusToggle = async (id: number, currentStatus: boolean) => {
+      const confirmToggle = window.confirm("Are you sure you want to change the status?");
+      if (!confirmToggle) return;
+    
+      try {
+        const supabase = createClient();
+        
+        // Show a loading indicator
+        setIsToggled(true);  // Optionally use a separate loading state
+    
+        // Toggle the status
+        const { error } = await supabase
+          .from("service_centers")
+          .update({ is_active: !currentStatus }) // Toggle status
+          .eq("service_center_id", id);
+    
+        if (error) {
+          console.error("Error updating service center status:", error);
+          alert("Failed to update the status.");
+          setIsToggled(false); // Hide loading indicator
+        } else {
+          // Update the status in the local state
+          setServiceCenters((prev) =>
+            prev.map((center) =>
+              center.service_center_id === id
+                ? { ...center, is_active: !currentStatus }
+                : center
+            )
+          );
+          setFilteredCenters((prev) =>
+            prev.map((center) =>
+              center.service_center_id === id
+                ? { ...center, is_active: !currentStatus }
+                : center
+            )
+          );
+          alert("Status updated successfully.");
+          setIsToggled(false);  // Hide loading indicator
+        }
+      } catch (err) {
+        console.error("Unexpected error updating status:", err);
+        alert("An unexpected error occurred.");
+        setIsToggled(false); // Hide loading indicator
+      }
+    };
+    
     const handleDelete = async (id: number) => {
       const confirmDelete = window.confirm("Are you sure you want to delete this service center?");
       if (!confirmDelete) return;
@@ -151,7 +196,8 @@ const ListingPage = () => {
         city: "City",
         state_id: "State",
         pincode: "Pincode",
-        status: "Status",
+        // status: "Status",
+        Status: "Status",
     };
 
     const hiddenColumns = [
@@ -181,7 +227,20 @@ const ListingPage = () => {
         city: center.city,
         state_id:  center.state_name,
         pincode: center.pincode,
-        status: center.is_active ? "Active" : "Inactive",
+      
+        Status: (
+          <span
+              onClick={() => handleStatusToggle(center.service_center_id, center.is_active)}
+              style={{
+                  cursor: "pointer", 
+                  color: center.is_active ? "green" : "red", 
+                  fontWeight: "bold"
+              }}
+          >
+              {center.is_active ? "Active" : "Inactive"}
+          </span>
+      ),
+      
         // editLink: '', // Edit page link
         onEdit: () => handleEdit(center.service_center_id),
     //  deleteLink: '#',
@@ -325,6 +384,7 @@ const ListingPage = () => {
                   columns={columns}
                   data={mappedData}
                   hiddenColumns={hiddenColumns}
+                  showStatusButton={true}
                 />
               </div>
             </div>
