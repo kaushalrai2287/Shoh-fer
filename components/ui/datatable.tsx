@@ -114,7 +114,7 @@ export function DataTable({
                           <span>{row[col]}</span>
                         </div>
                       ))}
-                      {showStatusButton && (
+                      {/* {showStatusButton && (
                         <div>
                           <strong>Status: </strong>
                           <button
@@ -127,7 +127,7 @@ export function DataTable({
                             {row.Status === 'Active' ? 'Active' : 'Inactive'}
                           </button>
                         </div>
-                      )}
+                      )} */}
                       {showRequestButton && (
                         <div>
                           <strong>Request: </strong>
