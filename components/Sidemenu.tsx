@@ -34,7 +34,7 @@ const Sidemenu = ({ onToggle }: { onToggle: () => void }) => {
               <div className="accordion-body">
                 <div className="sidemunu_submenu_listing">
                   <ul>
-                    <li><Link href="/">Manage Service Centers</Link></li>
+                    <li><Link href="/add-service-center/index">Manage Service Centers</Link></li>
                     <li><Link href="">Billing & Payments</Link></li>
                   </ul>
                 </div>
@@ -58,8 +58,8 @@ const Sidemenu = ({ onToggle }: { onToggle: () => void }) => {
               <div className="accordion-body">
                 <div className="sidemunu_submenu_listing">
                   <ul>
-                    <li><Link href="/">Manage Drivers</Link></li>
-                    <li><Link href="">Driver Payments</Link></li>
+                    <li><Link href="/drivers/manage-drivers">Manage Drivers</Link></li>
+                    <li><Link href="/drivers/driver-payments">Driver Payments</Link></li>
                   </ul>
                 </div>
               </div>
@@ -107,9 +107,8 @@ const Sidemenu = ({ onToggle }: { onToggle: () => void }) => {
               <div className="accordion-body">
                 <div className="sidemunu_submenu_listing">
                   <ul>
-                    <li><Link href="">Manage Roles</Link></li>
+                    <li><Link href="/rolls-permission/list">Manage Roles</Link></li>
                     <li><Link href="">Assign Permissions</Link></li>
-                    <li><Link href="">User Role Mapping</Link></li>
                   </ul>
                 </div>
               </div>

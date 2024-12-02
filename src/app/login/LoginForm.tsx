@@ -69,7 +69,7 @@ const onSubmit = async (data: z.infer<typeof formSchema>) => {
       setServerError(message);
     } else {
       // Redirect on successful login
-      router.push("/dashboard");
+      router.push("/add-service-center/index");
     }
   } finally {
     setIsLoading(false);

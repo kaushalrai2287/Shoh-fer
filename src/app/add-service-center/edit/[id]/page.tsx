@@ -24,23 +24,18 @@ const formSchema = z.object({
     .string()
     .min(1, "Primary Contact Person is required")
     .regex(/^[a-zA-Z\s]+$/, "Contact person name must only contain letters"),
-  contact_number: z
+    contact_number: z
     .string()
     .regex(/^\d+$/, "Contact Number must contain only digits")
     .min(10, "Contact Number must be at least 10 digits")
-    .max(15, "Contact Number must be at most 15 digits"),
+    .max(10, "Contact Number must be at most 10 digits"),
   email: z.string().email("Invalid email address").optional(),
+
   alternate_contact: z
   .string()
   .optional()
-  .refine((value) => !value || /^\d+$/.test(value), {
-    message: "Alternate Contact Number must contain only digits",
-  })
-  .refine((value) => !value || value.length >= 10, {
-    message: "Alternate Contact Number must be at least 10 digits",
-  })
-  .refine((value) => !value || value.length <= 15, {
-    message: "Alternate Contact Number must be at most 15 digits",
+  .refine((value) => !value || /^\d{1,10}$/.test(value), {
+    message: "Alternate Contact Number must contain only digits and be at most 10 digits long",
   }),
 
   address: z.string().min(1, "Address is required"),
@@ -48,15 +43,34 @@ const formSchema = z.object({
     .string()
     .min(1, "City is required")
     .regex(/^[a-zA-Z\s]+$/, "City must only contain letters"),
-  state: z
-    .string()
-    .refine((value) => /^\d+$/.test(value), "State is required"),
+    state: z
+    .union([z.string(), z.number()])  // Accepts both string and number
+    .refine((value) => /^\d+$/.test(String(value)), "State must be provided"),
+  
   pincode: z
     .string()
     .min(6, "Pincode must be 6 digits")
     .max(6, "Pincode must be 6 digits")
     .regex(/^\d+$/, "Pincode must contain only digits"),
-  servicesoffered: z.string().min(1, "Services Offered is required"),
+    // servicesoffered: z
+    // .string()
+    // .optional()
+    // .refine((value) => !value || value.trim() !== "", {
+    //   message: "Services Offered is required when provided",
+    // }),
+    servicesoffered: z
+    .union([z.string(), z.number()]) // Accepts both string and number
+    .optional()
+    .refine((value) => !value || (typeof value === 'string' && value.trim() !== ""), {
+      message: "Services Offered is required when provided",
+    })
+    .refine((value) => !value || (typeof value === 'string' && value.length > 0), {
+      message: "Services Offered cannot be empty",
+    }),
+  
+  
+
+  
   document_upload: z
   .any()
   .refine(
@@ -187,6 +201,7 @@ const EditPage = () => {
     try {
       const supabase = createClient();
       const file = data.document_upload?.[0];
+      data.servicesoffered = String(data.servicesoffered)
 
       // File size validation (assuming maxFileSize is defined elsewhere, e.g., 2MB)
       if (file && file.size > maxFileSize) {
@@ -286,25 +301,6 @@ const EditPage = () => {
       alert("An unexpected error occurred while updating the service center. Please try again.");
     }
   };
-  
-  
-//   const onSubmit = async (data: FormValues) => {
-//     try {
-//         const supabase = createClient();
-//         const { error } = await supabase
-//           .from("service_centers")
-//           .update(data)
-//           .eq("service_center_id", id);
- 
-//         if (error) throw error;
- 
-//         alert("Service center updated successfully!");
-//         router.push("/add-service-center");
-//     } catch (err) {
-//         console.error("Error updating service center:", err);
-//         alert("An error occurred while updating the service center. Please try again.");
-//     }
-//  };
  
   return (
     <main className="edit_service_center_main">
@@ -334,23 +330,27 @@ const EditPage = () => {
                                 )}
                             </div>
                             <div className="inner_form_group">
-                                <label htmlFor="servicesoffered">Services Offered</label>
-                                <select
-                                       className="form-control"
-                                    {...register("servicesoffered")}
-                            id="servicesoffered"
-                            >
-                             <option value="">Services Offered</option>
-                      {services.map((service) => (
-                         <option key={service.service_id} value={service.service_id}>
-                               {service.name}
-                                       </option>
-                                    ))}
-                                       </select>
-                                <div className="down_arrow_btn">
-                                    <img src="/images/angle-small-down.svg" alt="" className="img-fluid" />
-                                </div>
-                            </div>
+  <label htmlFor="servicesoffered">Services Offered <span>*</span></label>
+  <select
+    className="form-control"
+    {...register("servicesoffered")}
+    id="servicesoffered"
+  >
+    <option value="">Services Offered</option>
+    {services.map((service) => (
+      <option key={service.service_id} value={String(service.service_id)}>
+        {service.name}
+      </option>
+    ))}
+  </select>
+  {errors.servicesoffered && (
+    <p className="erro_message">{errors.servicesoffered.message}</p>
+  )}
+  <div className="down_arrow_btn">
+    <img src="/images/angle-small-down.svg" alt="" className="img-fluid" />
+  </div>
+</div>
+
                             <div className="inner_form_group">
                                 <label htmlFor="service_area">Service Area <span>*</span></label>
                                 <input className="form-control" type="text" {...register("service_area")} id="service_area" />
@@ -419,7 +419,7 @@ const EditPage = () => {
                                 )}
                             </div>
                             <div className="inner_form_group">
-                                <label htmlFor="password">Change Password <span>*</span></label>
+                                <label htmlFor="password">Change Password </label>
                                 <input className="form-control" type="text" {...register("password")} id="password" />
                                 {errors.password && (
                                     <p className="erro_message">{errors.password.message}</p>
@@ -443,23 +443,22 @@ const EditPage = () => {
                                     <p className="erro_message">{errors.city.message}</p>
                                 )}
                             </div>
-                            
                             <div className="inner_form_group">
-                                <label htmlFor="state">State <span>*</span></label>
-                                <select className="form-control" {...register("state")} id="state">
-                                    <option value="">Select your state</option>
-                                       {states.map((state) => (
-                                      <option key={state.states_id} value={state.states_id}>
-                                                   {state.name}
-                                                 </option>
-                                                         ))}
-                                </select>
-                
-                                
-                                {errors.state && (
-                                    <p className="erro_message">{errors.state.message}</p>
-                                )}
-                            </div>
+  <label htmlFor="state">State <span>*</span></label>
+  <select className="form-control" {...register("state")} id="state">
+    <option value="">Select your state</option>
+    {states.map((state) => (
+      <option key={state.states_id} value={String(state.states_id)}>
+        {state.name}
+      </option>
+    ))}
+  </select>
+  {errors.state && (
+    <p className="erro_message">{errors.state.message}</p>
+  )}
+</div>
+
+
                             <div className="inner_form_group">
                                 <label htmlFor="pincode">Pincode <span>*</span></label>
                                 <input className="form-control" type="text" {...register("pincode")} id="pincode" />
