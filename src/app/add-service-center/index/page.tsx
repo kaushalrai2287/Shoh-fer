@@ -31,6 +31,7 @@ type ServiceCenter = {
     services_offerd: string;
     service_area: string;
     password: string;
+    is_active: boolean; 
 };
 
 const ListingPage = () => {
@@ -55,7 +56,7 @@ const ListingPage = () => {
                 const supabase = createClient();
                 const { data, error } = await supabase
                 .from("service_centers")
-                .select("*, states(name),service_centers_services_offerd(name)"); 
+                .select("*, states(name),service_centers_services_offerd(name),is_active"); 
               
 
                 const updatedData = data?.map((center: any) => ({
@@ -133,6 +134,7 @@ const ListingPage = () => {
       }
     };
     
+    
 
 
     const columns = {
@@ -179,7 +181,7 @@ const ListingPage = () => {
         city: center.city,
         state_id:  center.state_name,
         pincode: center.pincode,
-        status: "active", 
+        status: center.is_active ? "Active" : "Inactive",
         // editLink: '', // Edit page link
         onEdit: () => handleEdit(center.service_center_id),
     //  deleteLink: '#',
