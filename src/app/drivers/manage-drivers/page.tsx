@@ -132,7 +132,7 @@ const ManageDriver = () => {
                                 Drivers List
                             </div>
                         </div>
-                        <div className="filter_data_table">
+                        {/* <div className="filter_data_table">
                             <DataTable
                                 columns={columns}
                                 data={data}
@@ -140,7 +140,7 @@ const ManageDriver = () => {
                                 showStatusButton={true}
                                 showRequestButton={true}  // Pass true to show the Request button
                             />
-                        </div>
+                        </div> */}
                     </div>
                 </div>
             </div>
