@@ -44,8 +44,11 @@ const formSchema = z.object({
     .min(1, "City is required")
     .regex(/^[a-zA-Z\s]+$/, "City must only contain letters"),
     state: z
-    .union([z.string(), z.number()])  // Accepts both string and number
-    .refine((value) => /^\d+$/.test(String(value)), "State must be provided"),
+    .union([z.string(), z.number()]) // Accepts both string and number
+    .refine(
+        (value) => value !== "" && value !== null && value !== undefined && /^\d+$/.test(String(value)), 
+        "State must be provided"
+    ),
   
   pincode: z
     .string()
@@ -86,7 +89,20 @@ const formSchema = z.object({
     },
     "Only PDF, JPG, and PNG files are allowed."
   ),
-  password: z.string().optional(),
+  
+  password: z
+  .string()
+  .min(8, "Password must be at least 8 characters long")
+  .regex(/[!@#$%^&*(),.?":{}|<>]/, "Password must include at least one special character")
+  .optional() // This makes the field optional
+  .nullable() // Allows null values
+  .refine((value) => {
+    // Check if value is either an empty string or meets the minimum length
+    return value === "" || (typeof value === "string" && value.length >= 8);
+  }, {
+    message: "Password must be at least 8 characters long if provided.",
+  })
+
 
 });
 
@@ -157,7 +173,7 @@ const EditPage = () => {
         setValue("pincode", data.pincode);
         setValue("servicesoffered", data.services_id || null);
         setValue("document_upload", data.document_upload || []);
-        // setValue("password",data.password);
+        setValue("password",data.password);
        
  
 
