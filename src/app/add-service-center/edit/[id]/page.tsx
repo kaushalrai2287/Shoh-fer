@@ -59,14 +59,9 @@ const formSchema = z.object({
     //   message: "Services Offered is required when provided",
     // }),
     servicesoffered: z
-    .union([z.string(), z.number()]) // Accepts both string and number
-    .optional()
-    .refine((value) => !value || (typeof value === 'string' && value.trim() !== ""), {
-      message: "Services Offered is required when provided",
-    })
-    .refine((value) => !value || (typeof value === 'string' && value.length > 0), {
-      message: "Services Offered cannot be empty",
-    }),
+    .union([z.string(), z.number()]) // Accepts string or number
+    .nullable() // Allows null
+    .optional(), // Makes it optional
   
   
 
@@ -160,7 +155,7 @@ const EditPage = () => {
         setValue("city", data.city);
         setValue("state", data.state_id); 
         setValue("pincode", data.pincode);
-        setValue("servicesoffered", data.services_id);
+        setValue("servicesoffered", data.services_id || null);
         setValue("document_upload", data.document_upload || []);
         // setValue("password",data.password);
        
@@ -201,7 +196,9 @@ const EditPage = () => {
     try {
       const supabase = createClient();
       const file = data.document_upload?.[0];
-      data.servicesoffered = String(data.servicesoffered)
+      data.servicesoffered = data.servicesoffered || null;
+      // data.servicesoffered = String(data.servicesoffered)
+
 
       // File size validation (assuming maxFileSize is defined elsewhere, e.g., 2MB)
       if (file && file.size > maxFileSize) {
@@ -251,8 +248,7 @@ const EditPage = () => {
             const saltRounds = 10;
             encryptedPassword = await bcrypt.hash(data.password, saltRounds);
         }
-
-  
+     
   
      // Use the generated public UR
       const { error } = await supabase
@@ -301,6 +297,11 @@ const EditPage = () => {
       alert("An unexpected error occurred while updating the service center. Please try again.");
     }
   };
+  const handleClose = (event: { preventDefault: () => void; }) => {
+    event.preventDefault(); // Prevent default form behavior
+    router.push('/add-service-center/index'); // Navigate to the desired page
+};
+
  
   return (
     <main className="edit_service_center_main">
@@ -330,15 +331,15 @@ const EditPage = () => {
                                 )}
                             </div>
                             <div className="inner_form_group">
-  <label htmlFor="servicesoffered">Services Offered <span>*</span></label>
+  <label htmlFor="servicesoffered">Services Offered</label>
   <select
     className="form-control"
-    {...register("servicesoffered")}
+    {...register("servicesoffered")} // Registers the field
     id="servicesoffered"
   >
-    <option value="">Services Offered</option>
+    <option value="">No service selected</option> {/* Default empty value */}
     {services.map((service) => (
-      <option key={service.service_id} value={String(service.service_id)}>
+      <option key={service.service_id} value={service.service_id}>
         {service.name}
       </option>
     ))}
@@ -347,9 +348,11 @@ const EditPage = () => {
     <p className="erro_message">{errors.servicesoffered.message}</p>
   )}
   <div className="down_arrow_btn">
-    <img src="/images/angle-small-down.svg" alt="" className="img-fluid" />
+    <img src="/images/angle-small-down.svg" alt="Arrow" className="img-fluid" />
   </div>
 </div>
+
+      
 
                             <div className="inner_form_group">
                                 <label htmlFor="service_area">Service Area <span>*</span></label>
@@ -468,9 +471,14 @@ const EditPage = () => {
                             </div>
                      
                             <div className="inner_form_group inner_form_group_submit">
-                                <input type="submit" className='submite_btn' value="Submit" />
-                                <input type="submit" className='close_btn' value="Close" />
-                            </div>
+            <input type="submit" className="submite_btn" value="Submit" />
+            <input
+                type="button"
+                className="close_btn"
+                value="Close"
+                onClick={handleClose}
+            />
+        </div>
                         </form>
                     </div>
                 </div>

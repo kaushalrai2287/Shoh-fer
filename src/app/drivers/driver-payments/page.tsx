@@ -98,14 +98,14 @@ const DriverPay = () => {
                                 Driver Payments List
                             </div>
                         </div>
-                        {/* <div className="filter_data_table">
+                        <div className="filter_data_table">
                             <DataTable
                                 columns={columns}
                                 data={data}
                                 hiddenColumns={hiddenColumns}
                                 showBillingButton={true}
                             />
-                        </div> */}
+                        </div>
                     </div>
                 </div>
             </div>
