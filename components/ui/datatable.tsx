@@ -1,13 +1,28 @@
 import React, { useState } from 'react';
-import Link from 'next/link';
+
 interface DataTableProps {
   columns: Record<string, string>;
   data: Array<Record<string, any>>;
   hiddenColumns?: string[];
+  showRequestButton?: boolean;
+  showStatusButton?: boolean;
+  onStatusChange?: (row: any) => void;
+  showBillingButton?: boolean;
 }
-export function DataTable({ columns, data, hiddenColumns = [] }: DataTableProps) {
+
+export function DataTable({
+  columns,
+  data,
+  hiddenColumns = [],
+  showRequestButton = false, // Default is false
+  showStatusButton = false,
+  showBillingButton = false,
+  onStatusChange,
+}: DataTableProps) {
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
+
   const isHidden = (column: string) => hiddenColumns.includes(column);
+
   return (
     <div className="table-responsive">
       <table className="table table-striped table-bordered table-hover">
@@ -43,18 +58,24 @@ export function DataTable({ columns, data, hiddenColumns = [] }: DataTableProps)
                   </button>
                   {/* Dynamic Edit Button */}
                   {row.onEdit && (
-              <button className="" onClick={row.onEdit}>
-                     <img src="/images/edit.svg" alt="Edit" title="Edit" className="img-fluid" />
-                              </button>
-                               )}
-
-                  {/* Dynamic Delete Button */}
+                    <button className="" onClick={row.onEdit}>
+                      <img
+                        src="/images/edit.svg"
+                        alt="Edit"
+                        title="Edit"
+                        className="img-fluid"
+                      />
+                    </button>
+                  )}
                   {row.onDelete && (
-                    // <Link href={row.deleteLink}>
-                      <button className="" onClick={row.onDelete}>
-                        <img src="/images/delete.svg" alt="Delete" title="Delete" className="img-fluid" />
-                      </button>
-                    // </Link>
+                    <button className="" onClick={row.onDelete}>
+                      <img
+                        src="/images/delete.svg"
+                        alt="Delete"
+                        title="Delete"
+                        className="img-fluid"
+                      />
+                    </button>
                   )}
                 </td>
               </tr>
@@ -68,18 +89,49 @@ export function DataTable({ columns, data, hiddenColumns = [] }: DataTableProps)
                           <span>{row[col]}</span>
                         </div>
                       ))}
+                      {showStatusButton && (
                       <div>
                         <strong>Status: </strong>
                         <button
-                          className={`btn btn-sm ${row.Status === 'active' ? 'btn-success' : 'btn-secondary'}`}
+                          className={`btn btn-sm ${row.Status === 'Active' ? 'btn-success' : 'btn-secondary'}`}
                           onClick={() => {
-                            row.Status = row.Status === 'active' ? 'inactive' : 'active';
-                            setExpandedRow(null); // Trigger re-render
+                            row.Status = row.Status === 'Active' ? 'Inactive' : 'Active';
+                            setExpandedRow(null); 
                           }}
                         >
-                          {row.Status === 'active' ? 'Active' : 'Inactive'}
+                          {row.Status === 'Active' ? 'Active' : 'Inactive'}
                         </button>
                       </div>
+                      )}
+                      {/* Request Button: Conditionally rendered */}
+                      {showRequestButton && (
+                        <div>
+                          <strong>Request: </strong>
+                          <button
+                            className={`btn btn-sm ${row.Request === 'Approved' ? 'btn-success' : 'btn-secondary'}`}
+                            onClick={() => {
+                              row.Request = row.Request === 'Approved' ? 'Reject' : 'Approved';
+                              setExpandedRow(null); // Trigger re-render
+                            }}
+                          >
+                            {row.Request === 'Approved' ? 'Approved' : 'Reject'}
+                          </button>
+                        </div>
+                      )}
+                      {showBillingButton && (
+                        <div>
+                          <strong>Billing: </strong>
+                          <button
+                            className={`btn btn-sm ${row.Billing === 'Paid' ? 'btn-success' : 'btn-secondary'}`}
+                            onClick={() => {
+                              row.Billing = row.Billing === 'Paid' ? 'Pending' : 'Paid';
+                              setExpandedRow(null); // Trigger re-render
+                            }}
+                          >
+                            {row.Billing === 'Paid' ? 'Paid' : 'Pending'}
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </td>
                 </tr>
