@@ -8,7 +8,7 @@ import Sidemenu from "../../../../../components/Sidemenu";
 import { DataTable } from "../../../../../components/ui/datatable";
 import Link from "next/link";
 import { createClient } from "../../../../../utils/supabase/client";
-
+import { CSVLink } from "react-csv";
 
 type Driver = {
     driver_id: number;
@@ -37,6 +37,15 @@ const ManageDriver = () => {
     const [isToggled, setIsToggled] = useState(false); 
     const [driver, setDriver] = useState<Driver[]>([]);
 
+    const [searchQuery, setSearchQuery] = useState("");
+    const [contactNoQuery,setContactNoQuery] = useState("")
+    
+  
+    
+    const [filteredrivername, setFilteredDriver] = useState<Driver[]>([]);
+    const [statusFilter, setStatusFilter] = useState<string | "">("");
+    const [requestFilter, setRequestFilter] = useState<string | "">("");
+
     const toggleClass = () => {
         setIsToggled(!isToggled);
     };
@@ -49,16 +58,15 @@ const ManageDriver = () => {
                 .select("*"); 
               
 
-                // const updatedData = data?.map((center: any) => ({
-                //     ...center,
-                  
-                // }));
+            
                 console.log(data);
 
                 if (error) throw error;
 
                 setDriver(data || []);
-                // setDriver(updatedData || []); 
+                setFilteredDriver(data || []); // Initialize with unfiltered data
+               
+                
             } catch (err) {
                 console.error("Error fetching service centers:", err);
             }
@@ -68,45 +76,96 @@ const ManageDriver = () => {
         fetchDriver();
     }, []);
 
+
+
+    const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchQuery(event.target.value); 
+    };
+    // const handleSearchSubmit = (event: React.FormEvent) => {
+    //     event.preventDefault();
+    
+    //     if (!searchQuery && !contactNoQuery && !filteredrivername) {
+        
+    //         setFilteredDriver(driver);
+    //     } else {
+           
+    //         const filtered = driver.filter((center) => {
+    //             const matchesName = center.driver_name?.toLowerCase().includes(searchQuery.toLowerCase()) || false;
+    //             const matchesContactNo = center.phone_number?.toLowerCase().includes(contactNoQuery.toLowerCase()) || false;
+    //             return matchesName && matchesContactNo;
+    //         });
+    
+    //         setFilteredDriver(filtered);
+    //     }
+    // };
+
+    const handleSearchSubmit = (event: React.FormEvent) => {
+        event.preventDefault();
+    
+       
+        const filtered = driver.filter((center) => {
+          const matchesName = center.driver_name
+            ?.toLowerCase()
+            .includes(searchQuery.toLowerCase()) || false;
+
+          const matchesContactNo = center.phone_number
+            ?.toLowerCase()
+            .includes(contactNoQuery.toLowerCase()) || false;
+    
+          const matchesStatus =
+            statusFilter === "" || (statusFilter === "Active" ? center.is_active : !center.is_active);
+          const matchesRequest =
+            requestFilter === "" ||
+            (requestFilter === "Approved" ? center.is_approved : !center.is_approved);
+    
+          return matchesName && matchesContactNo && matchesStatus && matchesRequest;
+        });
+    
+        setFilteredDriver(filtered);
+      };
+    
+    
+
     const handleStatusToggle = async (id: number, currentStatus: boolean) => {
         const confirmToggle = window.confirm("Are you sure you want to change the status?");
         if (!confirmToggle) return;
-      
+    
         try {
-          const supabase = createClient();
-          
-          // Show a loading indicator
-          setIsToggled(true);  // Optionally use a separate loading state
-      
-          // Toggle the status
-          const { error } = await supabase
-            .from("drivers")
-            .update({ is_active: !currentStatus }) // Toggle status
-            .eq("driver_id", id);
-      
-          if (error) {
-            console.error("Error updating service center status:", error);
-            alert("Failed to update the status.");
-            setIsToggled(false); // Hide loading indicator
-          } else {
-            // Update the status in the local state
-            setDriver((prev) =>
-              prev.map((center) =>
-                center.driver_id === id
-                  ? { ...center, is_active: !currentStatus }
-                  : center
-              )
-            );
+            const supabase = createClient();
+    
+            // Show a loading indicator
+            setIsToggled(true);
+    
+            // Toggle the status
+            const { error } = await supabase
+                .from("drivers")
+                .update({ is_active: !currentStatus }) // Toggle status
+                .eq("driver_id", id);
+    
+            if (error) {
+                console.error("Error updating service center status:", error);
+                alert("Failed to update the status.");
+                setIsToggled(false); // Hide loading indicator
+            } else {
             
-            alert("Status updated successfully.");
-            setIsToggled(false);  // Hide loading indicator
-          }
+                const updatedDriver = driver.map((center) =>
+                    center.driver_id === id
+                        ? { ...center, is_active: !currentStatus }
+                        : center
+                );
+                setDriver(updatedDriver);
+                setFilteredDriver(updatedDriver);  
+    
+                alert("Status updated successfully.");
+                setIsToggled(false); 
+            }
         } catch (err) {
-          console.error("Unexpected error updating status:", err);
-          alert("An unexpected error occurred.");
-          setIsToggled(false); // Hide loading indicator
+            console.error("Unexpected error updating status:", err);
+            alert("An unexpected error occurred.");
+            setIsToggled(false); // Hide loading indicator
         }
-      };
+    };
+    
     const handleRequestToggle = async (id: number, currentStatus: boolean) => {
         const confirmToggle = window.confirm("Are you sure you want to change the status?");
         if (!confirmToggle) return;
@@ -114,28 +173,30 @@ const ManageDriver = () => {
         try {
           const supabase = createClient();
           
-          // Show a loading indicator
-          setIsToggled(true);  // Optionally use a separate loading state
+        
+          setIsToggled(true); 
       
-          // Toggle the status
+         
           const { error } = await supabase
             .from("drivers")
-            .update({ is_approved : !currentStatus }) // Toggle status
+            .update({ is_approved : !currentStatus }) 
             .eq("driver_id", id);
       
           if (error) {
             console.error("Error updating service center status:", error);
             alert("Failed to update the status.");
-            setIsToggled(false); // Hide loading indicator
+            setIsToggled(false); 
           } else {
-            // Update the status in the local state
-            setDriver((prev) =>
-              prev.map((center) =>
+            
+            const updatedDriver = driver.map((center) =>
                 center.driver_id === id
-                  ? { ...center, is_approved : !currentStatus }
-                  : center
-              )
+                    ? { ...center, is_approved: !currentStatus }
+                    : center
             );
+            setDriver(updatedDriver);
+            setFilteredDriver(updatedDriver); 
+
+            
             
             alert("Status updated successfully.");
             setIsToggled(false);  // Hide loading indicator
@@ -179,7 +240,7 @@ const ManageDriver = () => {
         'Language_Spoken',
     ];
 
-    const mappedData = driver.map((center) => ({
+    const mappedData = filteredrivername.map((center) => ({
         
         Name:  center.driver_name,
         DOB: center.dob,
@@ -216,7 +277,7 @@ const ManageDriver = () => {
                     fontWeight: "bold"
                 }}
             >
-                {center.is_approved ? "Approved" : "Declined"}
+                {center.is_approved ? "Approved" : "Pending"}
             </span>
         ),
 
@@ -244,18 +305,21 @@ const ManageDriver = () => {
                             </div>
                         </div>
                         <div className="filter_formbox">
-                            <form action="">
+                        <form onSubmit={handleSearchSubmit}>
                                 <div className="inner_form_group">
                                     <label htmlFor="driver_name">Name</label>
-                                    <input className="form-control" type="text" name="driver_name" id="driver_name" />
+                                    <input className="form-control" type="text" name="driver_name" id="driver_name" value={searchQuery} onChange={handleSearchChange} />
                                 </div>
                                 <div className="inner_form_group">
                                     <label htmlFor="driver_contact">Contact No.</label>
-                                    <input className="form-control" type="text" name="driver_contact" id="driver_contact" />
+                                    <input className="form-control" type="text" name="driver_contact" id="driver_contact"  value={contactNoQuery}
+                      onChange={(e) => setContactNoQuery(e.target.value)}
+                      />
                                 </div>
                                 <div className="inner_form_group">
                                     <label htmlFor="status">Status</label>
-                                    <select className="form-control" name="status" id="status">
+                                    <select className="form-control" name="status" id="status" value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}>
                                         <option value="">Select Status</option>
                                         <option value="Active">Active</option>
                                         <option value="Inactive">Inactive</option>
@@ -266,7 +330,8 @@ const ManageDriver = () => {
                                 </div>
                                 <div className="inner_form_group">
                                     <label htmlFor="request">Request</label>
-                                    <select className="form-control" name="request" id="request">
+                                    <select className="form-control" name="request" id="request" value={requestFilter}
+                    onChange={(e) => setRequestFilter(e.target.value)}>
                                         <option value="">Select Request</option>
                                         <option value="Approved">Approved</option>
                                         <option value="Pending">Pending</option>
@@ -275,10 +340,43 @@ const ManageDriver = () => {
                                         <img src="/images/angle-small-down.svg" alt="" className="img-fluid" />
                                     </div>
                                 </div>
-                                <div className="inner_form_group inner_form_group_submit">
-                                    <input type="submit" className='submite_btn' value="Search" />
-                                    <input type="submit" className='close_btn' value="Export All" />
-                                </div>
+                               
+                                 <div className="inner_form_group inner_form_group_submit">
+                    <div>
+                    <input
+                      type="submit"
+                      className="submite_btn"
+                      value="Search"
+                    />
+                    </div>
+                    <div>
+                    {filteredrivername.length > 0 && (
+                      <CSVLink
+                      data={mappedData}
+                        headers={[
+                            { label: "Driver Name", key: "Name" },
+                            { label: "DOB", key: "DOB" },
+                            { label: "Contact Number", key: "Contact_Number" },
+                            { label: "Email", key: "Email" },
+                            { label: "Emergency Number", key: "Emergency_Number" },
+                            { label: "Driving Licence", key: "Driving_Licence" },
+                            { label: "Photo", key: "Photo" },
+                            { label: "National ID", key: "National_Id" },
+                            { label: "Years of Experience", key: "Yrs_of_exp" },
+                            { label: "Type of Vehicle Driven", key: "Type_of_Vehicle_driven" },
+                            { label: "Brands", key: "Brands" },
+                            { label: "License Category", key: "License_Category" },
+                            { label: "Language Spoken", key: "Language_Spoken" },
+                          
+                        ]}
+                        filename="driver_details.csv"
+                        className="close_btn"
+                      >
+                        Export All
+                      </CSVLink>
+                    )}
+                    </div>
+                  </div>
                             </form>
                         </div>
                     </div>
@@ -297,7 +395,7 @@ const ManageDriver = () => {
                                 data={mappedData}
                                 hiddenColumns={hiddenColumns}
                                 showStatusButton={true}
-                                showRequestButton={true}  // Pass true to show the Request button
+                                showRequestButton={true}  
                             />
                         </div>
                     </div>
