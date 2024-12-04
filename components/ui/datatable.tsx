@@ -128,7 +128,7 @@ export function DataTable({
                           </button>
                         </div>
                       )} */}
-                      {showRequestButton && (
+                      {/* {showRequestButton && (
                         <div>
                           <strong>Request: </strong>
                           <button
@@ -141,7 +141,7 @@ export function DataTable({
                             {row.Request === 'Approved' ? 'Approved' : 'Reject'}
                           </button>
                         </div>
-                      )}
+                      )} */}
                       {showBillingButton && (
                         <div>
                           <strong>Billing: </strong>

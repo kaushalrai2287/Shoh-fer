@@ -171,7 +171,7 @@ const EditPage = () => {
         setValue("city", data.city);
         setValue("state", data.state_id); 
         setValue("pincode", data.pincode);
-        setValue("servicesoffered", data.services_id || null);
+        setValue("servicesoffered", data.services_id);
         setValue("document_upload", data.document_upload || []);
         setValue("password",data.password);
        
