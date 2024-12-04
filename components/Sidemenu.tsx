@@ -58,7 +58,7 @@ const Sidemenu = ({ onToggle }: { onToggle: () => void }) => {
               <div className="accordion-body">
                 <div className="sidemunu_submenu_listing">
                   <ul>
-                    <li><Link href="/drivers/manage-drivers">Manage Drivers</Link></li>
+                    <li><Link href="/drivers/manage-drivers/listing">Manage Drivers</Link></li>
                     <li><Link href="/drivers/driver-payments">Driver Payments</Link></li>
                   </ul>
                 </div>

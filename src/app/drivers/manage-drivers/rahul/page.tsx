@@ -2,10 +2,13 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import Header from '../../../../components/Header';
-import Sidemenu from "../../../../components/Sidemenu";
-import { DataTable } from "../../../../components/ui/datatable";
+import Header from "../../../../../components/Header";
+import Sidemenu from "../../../../../components/Sidemenu";
+// import Header from '../../../../components/Header';
+// import Sidemenu from "../../../../components/Sidemenu";
+// import { DataTable } from "../../../../components/ui/datatable";
 import Link from "next/link";
+import { DataTable } from "../../../../../components/ui/datatable";
 
 const ManageDriver = () => {
     const [isToggled, setIsToggled] = useState(false); // State for toggle
