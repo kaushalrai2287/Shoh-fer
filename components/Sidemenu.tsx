@@ -82,7 +82,7 @@ const Sidemenu = ({ onToggle }: { onToggle: () => void }) => {
               <div className="accordion-body">
                 <div className="sidemunu_submenu_listing">
                   <ul>
-                    <li><Link href="">Manage Bookings</Link></li>
+                    <li><Link href="/bookings/manage-bookings/list">Manage Bookings</Link></li>
                     <li><Link href="">Driver Assignments</Link></li>
                     <li><Link href="">Tracking</Link></li>
                   </ul>
