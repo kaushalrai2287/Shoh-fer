@@ -56,7 +56,8 @@ const ListingPage = () => {
                 const supabase = createClient();
                 const { data, error } = await supabase
                 .from("service_centers")
-                .select("*, states(name),service_centers_services_offerd(name),is_active"); 
+                .select("*, states(name),service_centers_services_offerd(name),is_active")
+                .order("created_at", { ascending: false }); 
               
 
                 const updatedData = data?.map((center: any) => ({
@@ -327,10 +328,7 @@ const ListingPage = () => {
                       onChange={(e) => setContactNoQuery(e.target.value)}
                     />
                   </div>
-                  {/* <div className="inner_form_group inner_form_group_submit">
-                                    <input type="submit" className="submite_btn" value="Search" />
-                                    <input type="submit" className="close_btn" value="Export All" />
-                                </div> */}
+           
                   <div className="inner_form_group inner_form_group_submit">
                     <div>
                     <input
