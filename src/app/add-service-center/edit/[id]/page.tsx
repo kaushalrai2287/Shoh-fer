@@ -420,6 +420,7 @@ const EditPage = () => {
                                 <label htmlFor="contact_number">Contact Number <span>*</span></label>
                                 <input className="form-control" type="text" {...register("contact_number")} id="contact_number" />
                                 {errors.contact_number && (
+                                  
                                     <p className="erro_message">{errors.contact_number.message}</p>
                                 )}
                             </div>
