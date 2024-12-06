@@ -28,7 +28,10 @@ const formSchema = z.object({
         .regex(/^\d+$/, "Contact Number must contain only digits")
         .min(10, "Contact Number must be at least 10 digits")
         .max(10, "Contact Number must be at most 10 digits"),
-    email: z.string().email("Invalid email address").optional(),
+        email: z
+        .string()
+        .nonempty("Email is required") // This checks if email is empty
+        .email("Please enter a valid email address"), 
     alternate_contact: z
     .string()
     .optional()
@@ -341,7 +344,7 @@ useEffect(() => {
                             </div>
                             <div className="inner_form_group">
                                 <label htmlFor="email">Email <span>*</span></label>
-                                <input className="form-control" type="email" {...register("email")} id="email" />
+                                <input className="form-control" type="text" {...register("email")} id="email" />
                                 {errors.email && (
                                     <p className="erro_message">{errors.email.message}</p>
                                 )}
