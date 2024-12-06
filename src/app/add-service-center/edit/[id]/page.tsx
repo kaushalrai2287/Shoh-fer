@@ -381,7 +381,7 @@ useEffect(() => {
                             </div>
                             
                             <div className="inner_form_group">
-                           <label htmlFor="document_upload">Upload Document <span>*</span> (max 2mb pdf, jpg, png)</label>
+                           <label htmlFor="document_upload">Upload Document <span>*</span> (max 2mb doc,pdf, jpg, png)</label>
                           {serviceCenterData?.document_upload ? (
                             <div className="uploaded-document">
                               <p>
