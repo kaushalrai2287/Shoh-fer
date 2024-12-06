@@ -124,6 +124,8 @@ const EditPage = () => {
   const [states, setStates] = useState<State[]>([]);
   const [services, setServices] = useState<Services[]>([]);
   const [serviceCenterData, setServiceCenterData] = useState<FormValues | null>(null);
+  const [statesLoading, setStatesLoading] = useState(true);
+  const [servicesLoading, setServicesLoading] = useState(true);
 
 
 
@@ -142,70 +144,78 @@ const EditPage = () => {
     setIsToggled(!isToggled);
   };
 
-  useEffect(() => {
-    const fetchServiceCenter = async () => {
-      try {
-        const supabase = createClient();
-        const { data, error } = await supabase
-          .from("service_centers")
-          .select("*") 
-          .eq("service_center_id", id)
-          .single();
 
-          console.log(data.document_upload);
-     
-          
-          
 
-        if (error) throw error;
-        setServiceCenterData(data);
+useEffect(() => {
+  const fetchServiceCenter = async () => {
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("service_centers")
+        .select("*")
+        .eq("service_center_id", id)
+        .single();
 
-        setValue("name", data.name);
-        setValue("business_registration_no", data.business_registration_no || "");
-        setValue("service_area", data.service_area);
-        setValue("primary_contact_person", data.primary_contact_person);
-        setValue("contact_number", data.contact_number);
-        setValue("email", data.email || "");
-        setValue("alternate_contact", data.alternate_contact || "");
-        setValue("address", data.address);
-        setValue("city", data.city);
-        setValue("state", data.state_id); 
-        setValue("pincode", data.pincode);
-        setValue("servicesoffered", data.services_id);
-        setValue("document_upload", data.document_upload || []);
-        setValue("password",data.password);
-       
- 
+      if (error) throw error;
+      setServiceCenterData(data);
 
-      } catch (err) {
-        console.error("Error fetching service center:", err);
-      }
-    };
+      setValue("name", data.name);
+      setValue("business_registration_no", data.business_registration_no || "");
+      setValue("service_area", data.service_area);
+      setValue("primary_contact_person", data.primary_contact_person);
+      setValue("contact_number", data.contact_number);
+      setValue("email", data.email || "");
+      setValue("alternate_contact", data.alternate_contact || "");
+      setValue("address", data.address);
+      setValue("city", data.city);
+      setValue("state", data.state_id);
+      setValue("pincode", data.pincode);
+      setValue("servicesoffered", data.services_id);
+      setValue("document_upload", data.document_upload || []);
+      setValue("password", data.password);
+    } catch (err) {
+      console.error("Error fetching service center:", err);
+    }
+  };
 
-    const fetchServices = async () => {
-        const supabase = createClient();
-        const { data, error } = await supabase.from("service_centers_services_offerd").select("*");
-        if (error) {
-          console.error("Error fetching services:", error);
-        } else {
-          setServices(data);
-        }
-      };
 
-    const fetchStates = async () => {
+  const fetchServices = async () => {
+    setServicesLoading(true);
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase.from("service_centers_services_offerd").select("*");
+      if (error) throw error;
+      setServices(data);
+    } catch (err) {
+      console.error("Error fetching services:", err);
+    } finally {
+      setServicesLoading(false);
+    }
+  };
+
+
+  const fetchStates = async () => {
+    setStatesLoading(true);
+    try {
       const supabase = createClient();
       const { data, error } = await supabase.from("states").select("*");
-      if (error) {
-        console.error("Error fetching states:", error);
-      } else {
-        setStates(data);
-      }
-    };
+      if (error) throw error;
+      setStates(data);
+    } catch (err) {
+      console.error("Error fetching states:", err);
+    } finally {
+      setStatesLoading(false);
+    }
+  };
 
-    fetchServiceCenter();
-    fetchServices();
-    fetchStates();
-  }, [id, setValue]);
+
+  fetchServiceCenter();
+  fetchStates();
+  fetchServices();
+}, [id, setValue]);
+
+
+
 
   const maxFileSize = 2 * 1024 * 1024;
   const onSubmit = async (data: FormValues) => {
@@ -213,8 +223,7 @@ const EditPage = () => {
       const supabase = createClient();
       const file = data.document_upload?.[0];
       data.servicesoffered = data.servicesoffered || null;
-      // data.servicesoffered = String(data.servicesoffered)
-
+     
 
       // File size validation (assuming maxFileSize is defined elsewhere, e.g., 2MB)
       if (file && file.size > maxFileSize) {
@@ -266,7 +275,7 @@ const EditPage = () => {
         }
      
   
-     // Use the generated public UR
+ 
       const { error } = await supabase
       .from("service_centers")
       .update({
@@ -347,27 +356,20 @@ const EditPage = () => {
                                 )}
                             </div>
                             <div className="inner_form_group">
-  <label htmlFor="servicesoffered">Services Offered</label>
-  <select
-    className="form-control"
-    {...register("servicesoffered")} // Registers the field
-    id="servicesoffered"
-  >
-    <option value="">No service selected</option> {/* Default empty value */}
-    {services.map((service) => (
-      <option key={service.service_id} value={service.service_id}>
-        {service.name}
-      </option>
-    ))}
-  </select>
-  {errors.servicesoffered && (
-    <p className="erro_message">{errors.servicesoffered.message}</p>
-  )}
-  <div className="down_arrow_btn">
-    <img src="/images/angle-small-down.svg" alt="Arrow" className="img-fluid" />
-  </div>
-</div>
-
+                <label htmlFor="servicesoffered">Services Offered</label>
+                {servicesLoading ? (
+                  <div>Loading services...</div>
+                ) : (
+                  <select className="form-control" {...register("servicesoffered")}>
+                    {services.map((service) => (
+                      <option key={service.service_id} value={service.service_id}>
+                        {service.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
+                {errors.servicesoffered && <p className="erro_message">{errors.servicesoffered.message}</p>}
+              </div>
       
 
                             <div className="inner_form_group">
@@ -379,7 +381,7 @@ const EditPage = () => {
                             </div>
                             
                             <div className="inner_form_group">
-                           <label htmlFor="document_upload">Upload Document <span>*</span></label>
+                           <label htmlFor="document_upload">Upload Document <span>*</span> (max 2mb pdf, jpg, png)</label>
                           {serviceCenterData?.document_upload ? (
                             <div className="uploaded-document">
                               <p>
@@ -464,20 +466,20 @@ const EditPage = () => {
                                 )}
                             </div>
                             <div className="inner_form_group">
-  <label htmlFor="state">State <span>*</span></label>
-  <select className="form-control" {...register("state")} id="state">
-    <option value="">Select your state</option>
-    {states.map((state) => (
-      <option key={state.states_id} value={String(state.states_id)}>
-        {state.name}
-      </option>
-    ))}
-  </select>
-  {errors.state && (
-    <p className="erro_message">{errors.state.message}</p>
-  )}
-</div>
-
+                            <label htmlFor="state">State</label>
+                               {statesLoading ? (
+                              <div>Loading states...</div>
+                               ) : (
+                           <select className="form-control" {...register("state")}>
+                           {states.map((state) => (
+                           <option key={state.states_id} value={state.states_id}>
+                           {state.name}
+                           </option>
+                            ))}
+                          </select>
+                            )}
+                          {errors.state && <p className="erro_message">{errors.state.message}</p>}
+                           </div>
 
                             <div className="inner_form_group">
                                 <label htmlFor="pincode">Pincode <span>*</span></label>
@@ -488,14 +490,14 @@ const EditPage = () => {
                             </div>
                      
                             <div className="inner_form_group inner_form_group_submit">
-            <input type="submit" className="submite_btn" value="Submit" />
-            <input
+               <input type="submit" className="submite_btn" value="Submit" />
+                <input
                 type="button"
                 className="close_btn"
                 value="Close"
                 onClick={handleClose}
-            />
-        </div>
+                 />
+               </div>
                         </form>
                     </div>
                 </div>
