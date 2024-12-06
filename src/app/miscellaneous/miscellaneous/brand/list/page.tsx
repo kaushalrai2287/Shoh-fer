@@ -51,7 +51,7 @@ const BrandList = () => {
                                 Filter By
                             </div>
                             <div className="filter_btn">
-                                <Link href="/miscellaneous/brand/add">
+                                <Link href="/miscellaneous/miscellaneous/brand/add">
                                     <button className="submite_btn">Add</button>
                                 </Link>
                             </div>

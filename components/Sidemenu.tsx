@@ -179,7 +179,7 @@ const Sidemenu = ({ onToggle }: { onToggle: () => void }) => {
               </div>
             </div>
           </div>
-          <Link href="">
+          {/* <Link href="">
             <div className="sidemenu_listing">
               <div className="sidemenu_icon">
                 <img src="/images/dashboard/miscellaneous.svg" alt="" className="img-fluid" />
@@ -188,7 +188,32 @@ const Sidemenu = ({ onToggle }: { onToggle: () => void }) => {
                 <h3>Miscellaneous/ Category management</h3>
               </div>
             </div>
-          </Link>
+          </Link> */}
+
+<div className="accordion-item">
+            <div className="accordion-header" id="flush-headingNine">
+              <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseNine" aria-expanded="false" aria-controls="flush-collapseNine">
+                <div className="sidemenu_listing">
+                  <div className="sidemenu_icon">
+                    <img src="/images/dashboard/miscellaneous.svg" alt="" className="img-fluid" />
+                  </div>
+                  <div className="sidemenu_heading">
+                    <h3>Miscellaneous/ Category management</h3>
+                  </div>
+                </div>
+              </button>
+            </div>
+            <div id="flush-collapseNine" className="accordion-collapse collapse" aria-labelledby="flush-headingNine" data-bs-parent="#accordionFlushExample">
+              <div className="accordion-body">
+                <div className="sidemunu_submenu_listing">
+                  <ul>
+                    <li><Link href="/miscellaneous/miscellaneous/brand/list">Brand</Link></li>
+                    <li><Link href="/miscellaneous/miscellaneous/model/list">Model</Link></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
           <Link href="">
             <div className="sidemenu_listing">
               <div className="sidemenu_icon">

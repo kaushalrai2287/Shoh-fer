@@ -10,8 +10,8 @@ import { loginUser } from "./action";
 const formSchema = z.object({
   email: z
   .string()
-  .nonempty("Email is required") // This checks if email is empty
-  .email("Please enter a valid email address"), // This ensures a valid email format
+  .nonempty("Email is required") 
+  .email("Please enter a valid email address"), 
  
   password: z
   .string()
