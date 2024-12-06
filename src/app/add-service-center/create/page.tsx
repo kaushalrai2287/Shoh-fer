@@ -320,7 +320,7 @@ useEffect(() => {
                                 )}
                             </div>
                             <div className="inner_form_group">
-                                <label htmlFor="document_upload">Upload Document <span>*</span></label>
+                                <label htmlFor="document_upload">Upload Document <span>*</span> (max 2mb doc,pdf, jpg, png)</label>
                                 <input className="form-control" type="file" {...register("document_upload")} id="document_upload" />
                                 {errors.document_upload && (
                                     <p className="erro_message">{(errors.document_upload as FieldError).message}</p>
