@@ -62,7 +62,7 @@ const ListingPage = () => {
 
                 const updatedData = data?.map((center: any) => ({
                     ...center,
-                    state_name: center.states?.name || "", // Add state name
+                    state_name: center.states?.name || "", 
                     services_offerd:center.service_centers_services_offerd?.name||"",
                 }));
                 console.log(updatedData);
@@ -124,9 +124,9 @@ const ListingPage = () => {
         if (error) {
           console.error("Error updating service center status:", error);
           alert("Failed to update the status.");
-          setIsToggled(false); // Hide loading indicator
+          setIsToggled(false); 
         } else {
-          // Update the status in the local state
+          
           setServiceCenters((prev) =>
             prev.map((center) =>
               center.service_center_id === id
