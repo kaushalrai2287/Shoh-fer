@@ -12,12 +12,13 @@ const formSchema = z.object({
   .string()
   .nonempty("Email is required") // This checks if email is empty
   .email("Please enter a valid email address"), // This ensures a valid email format
-  // password: z.string().nonempty("Password is required"),
+ 
   password: z
   .string()
+  .nonempty("Password is required") 
   .min(8, "Password must be at least 8 characters long")
   .refine((value) => {
-    // Check if value is either an empty string or meets the minimum length
+  
     return value === "" || (typeof value === "string" && value.length >= 8);
   }, {
     message: "Password must be at least 8 characters long if provided.",
@@ -90,7 +91,7 @@ export default function LoginForm() {
                         placeholder="Email"
                       />
                         {errors.email && (
-                                    <p className="erro_message">{errors.email.message}</p>
+                                    <p className="erro_message ">{errors.email.message}</p>
                                 )}
                     </div>
 
