@@ -318,7 +318,23 @@ useEffect(() => {
                                 {errors.service_area && (
                                     <p className="erro_message">{errors.service_area.message}</p>
                                 )}
-                            </div>
+                            </div><div className="inner_form_group inner_form_group_submit">
+    {/* Submit Button */}
+    <input
+        type="button"
+        className="submite_btn"
+        value="Submit"
+        onClick={handleSubmit(onSubmit)} // Explicitly trigger the form submission
+    />
+    {/* Close Button */}
+    <input
+        type="button"
+        className="close_btn"
+        value="Close"
+        onClick={() => console.log("Close button clicked")} // Add your close logic
+    />
+</div>
+
                             <div className="inner_form_group">
                                 <label htmlFor="document_upload">Upload Document <span>*</span> (max 2mb doc,pdf, jpg, png)</label>
                                 <input className="form-control" type="file" {...register("document_upload")} id="document_upload" />

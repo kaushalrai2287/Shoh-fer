@@ -242,7 +242,7 @@ const ListingPage = () => {
           </span>
       ),
       
-        // editLink: '', // Edit page link
+        
         onEdit: () => handleEdit(center.service_center_id),
     //  deleteLink: '#',
      onDelete: () => handleDelete(center.service_center_id),
