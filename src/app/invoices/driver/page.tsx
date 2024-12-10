@@ -1,3 +1,4 @@
+// final code 
 "use client";
 
 import React, { useState } from "react";
@@ -7,49 +8,43 @@ import Sidemenu from "../../../../components/Sidemenu";
 import { DataTable } from "../../../../components/ui/datatable";
 import Link from "next/link";
 
-const page = () => {
+const InvoceService = () => {
     const [isToggled, setIsToggled] = useState(false); // State for toggle
+
 
     const toggleClass = () => {
         setIsToggled(!isToggled); // Toggle the state
     };
 
     const columns = {
-        Role_Name: "Role Name",
+        Driver_Name: "Driver Name",
+        Service_Center_Name: "Service Center Name",
+        Trip_Id: "Trip Id",
+        Trip_Status: "Trip Status",
+        Date: "Date",
+        Cost: "Cost",
+        Status: "Status", // Add Status to columns
     };
 
     const data = [
         {
-            Role_Name: 'Rahul',
-            editLink: '#',
-            deleteLink: '#',
-        },
-        {
-            Role_Name: 'Rahul',
-            editLink: '#',
-            deleteLink: '#',
-        },
-        {
-            Role_Name: 'Rahul',
-            editLink: '#',
-            deleteLink: '#',
-        },
-        {
-            Role_Name: 'Rahul',
-            editLink: '#',
-            deleteLink: '#',
-        },
-        {
-            Role_Name: 'Rahul',
-            editLink: '#',
-            deleteLink: '#',
+            Driver_Name: 'Rahul',
+            Service_Center_Name: 'abc services',
+            Trip_Id: '889',
+            Trip_Status: 'Completed',
+            Date: '12-04-2024',
+            Cost: '1200',
+            Status: 'Active',
+            editLink: '#', // Edit page link
+            deleteLink: '#', // Delete page link
         },
     ];
 
     const hiddenColumns = [];
 
+
     return (
-        <main className="rolls_list_main">
+        <main className="Service_center_list_main">
             <Header />
             <div className={`inner_mainbox ${isToggled ? "toggled-class" : ""}`}>
                 <div className="inner_left">
@@ -64,17 +59,28 @@ const page = () => {
                                 </span>
                                 Filter By
                             </div>
-                            <div className="filter_btn">
-                                <Link href="/rolls-permission/add">
-                                    <button className="submite_btn">Add</button>
-                                </Link>
-                            </div>
                         </div>
                         <div className="filter_formbox">
                             <form action="">
                                 <div className="inner_form_group">
-                                    <label htmlFor="role_name">Role Name</label>
-                                    <input className="form-control" type="text" name="role_name" id="role_name" />
+                                    <label htmlFor="status">Status</label>
+                                    <select className="form-control" name="status" id="status">
+                                        <option value="">Select Status</option>
+                                        <option value="Paid">Paid</option>
+                                        <option value="In Process">In Process</option>
+                                        <option value="Pending">Pending</option>
+                                    </select>
+                                    <div className="down_arrow_btn">
+                                        <img src="/images/angle-small-down.svg" alt="" className="img-fluid" />
+                                    </div>
+                                </div>
+                                <div className="inner_form_group">
+                                    <label htmlFor="start_date">Start Date</label>
+                                    <input className="form-control" type="date" name="start_date" id="start_date" />
+                                </div>
+                                <div className="inner_form_group">
+                                    <label htmlFor="end_date">End Date</label>
+                                    <input className="form-control" type="date" name="end_date" id="end_date" />
                                 </div>
                                 <div className="inner_form_group inner_form_group_submit">
                                     <input type="submit" className='submite_btn' value="Search" />
@@ -87,22 +93,20 @@ const page = () => {
                         <div className="filter_heading_btnbox">
                             <div className="service_form_heading">
                                 <span>
-                                    <img src="/images/user-list.svg" alt="" className="img-fluid" />
+                                    <img src="/images/driver-list.svg" alt="" className="img-fluid" />
                                 </span>
-                                Roll List
+                                Driver Invoices List
                             </div>
                         </div>
                         <div className="filter_data_table">
-                            <DataTable
-                                columns={columns}
-                                data={data}
-                            />
+                            <DataTable columns={columns} data={data}
+                                showStatusButton={true} />
                         </div>
                     </div>
                 </div>
             </div>
         </main>
-    );
-};
+    )
+}
 
-export default page;
+export default InvoceService

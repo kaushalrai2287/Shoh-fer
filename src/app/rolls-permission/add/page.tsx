@@ -17,7 +17,7 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-const RollsPermission = () => {
+const page = () => {
 
     const [isToggled, setIsToggled] = useState(false); // State for toggle
 
@@ -104,4 +104,4 @@ const RollsPermission = () => {
 }
 
 
-export default RollsPermission
+export default page
