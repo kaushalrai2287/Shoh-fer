@@ -56,7 +56,7 @@ export default function LoginForm() {
       if (error) {
         setServerError(message);
       } else {
-        router.push("/add-service-center/index");
+        router.push("/add-service-center/list");
       }
     } finally {
       setIsLoading(false);

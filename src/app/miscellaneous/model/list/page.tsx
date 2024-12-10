@@ -1,55 +1,41 @@
+// final code 
 "use client";
 
 import React, { useState } from "react";
 import Image from "next/image";
-import Header from '../../../../components/Header';
-import Sidemenu from "../../../../components/Sidemenu";
-import { DataTable } from "../../../../components/ui/datatable";
+import Header from "../../../../../components/Header";
+import Sidemenu from "../../../../../components/Sidemenu";
+import { DataTable } from "../../../../../components/ui/datatable";
+
 import Link from "next/link";
 
-const page = () => {
+const BrandList = () => {
     const [isToggled, setIsToggled] = useState(false); // State for toggle
+
 
     const toggleClass = () => {
         setIsToggled(!isToggled); // Toggle the state
     };
 
     const columns = {
-        Role_Name: "Role Name",
+        Model: "Model",
+        Transmission_Type: "Transmission Type",
     };
 
     const data = [
         {
-            Role_Name: 'Rahul',
-            editLink: '#',
-            deleteLink: '#',
-        },
-        {
-            Role_Name: 'Rahul',
-            editLink: '#',
-            deleteLink: '#',
-        },
-        {
-            Role_Name: 'Rahul',
-            editLink: '#',
-            deleteLink: '#',
-        },
-        {
-            Role_Name: 'Rahul',
-            editLink: '#',
-            deleteLink: '#',
-        },
-        {
-            Role_Name: 'Rahul',
-            editLink: '#',
-            deleteLink: '#',
+            Model: 'SUV',
+            Transmission_Type: 'Manual',
+            editLink: '#', // Edit page link
+            deleteLink: '#', // Delete page link
         },
     ];
 
     const hiddenColumns = [];
 
+
     return (
-        <main className="rolls_list_main">
+        <main className="modal_list_main">
             <Header />
             <div className={`inner_mainbox ${isToggled ? "toggled-class" : ""}`}>
                 <div className="inner_left">
@@ -65,7 +51,7 @@ const page = () => {
                                 Filter By
                             </div>
                             <div className="filter_btn">
-                                <Link href="/rolls-permission/add">
+                                <Link href="/miscellaneous/model/add">
                                     <button className="submite_btn">Add</button>
                                 </Link>
                             </div>
@@ -73,8 +59,28 @@ const page = () => {
                         <div className="filter_formbox">
                             <form action="">
                                 <div className="inner_form_group">
-                                    <label htmlFor="role_name">Role Name</label>
-                                    <input className="form-control" type="text" name="role_name" id="role_name" />
+                                    <label htmlFor="model">Model</label>
+                                    <select className="form-control" name="model" id="model">
+                                        <option value="">Select Model</option>
+                                        <option value="Model one">Model one</option>
+                                        <option value="Model two">Model two</option>
+                                        <option value="Model three">Model three</option>
+                                    </select>
+                                    <div className="down_arrow_btn">
+                                        <img src="/images/angle-small-down.svg" alt="" className="img-fluid" />
+                                    </div>
+                                </div>
+                                <div className="inner_form_group">
+                                    <label htmlFor="brand">Transmission Type</label>
+                                    <select className="form-control" name="brand" id="brand">
+                                        <option value="">Select Transmission</option>
+                                        <option value="Automatic">Automatic</option>
+                                        <option value="Manual">Manual</option>
+                                        <option value="Clutchless Manual">Clutchless Manual</option>
+                                    </select>
+                                    <div className="down_arrow_btn">
+                                        <img src="/images/angle-small-down.svg" alt="" className="img-fluid" />
+                                    </div>
                                 </div>
                                 <div className="inner_form_group inner_form_group_submit">
                                     <input type="submit" className='submite_btn' value="Search" />
@@ -87,22 +93,19 @@ const page = () => {
                         <div className="filter_heading_btnbox">
                             <div className="service_form_heading">
                                 <span>
-                                    <img src="/images/user-list.svg" alt="" className="img-fluid" />
+                                    <img src="/images/bars-sort.svg" alt="" className="img-fluid" />
                                 </span>
-                                Roll List
+                                Model List
                             </div>
                         </div>
                         <div className="filter_data_table">
-                            <DataTable
-                                columns={columns}
-                                data={data}
-                            />
+                            <DataTable columns={columns} data={data} />
                         </div>
                     </div>
                 </div>
             </div>
         </main>
-    );
-};
+    )
+}
 
-export default page;
+export default BrandList

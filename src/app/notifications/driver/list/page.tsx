@@ -3,15 +3,12 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-
-import Header from "../../../../../../components/Header";
-import Sidemenu from "../../../../../../components/Sidemenu";
-import { DataTable } from "../../../../../../components/ui/datatable";
-
-
+import Header from '../../../../../components/Header';
+import Sidemenu from "../../../../../components/Sidemenu";
+import { DataTable } from "../../../../../components/ui/datatable";
 import Link from "next/link";
 
-const BrandList = () => {
+const NotificatioDriverlist = () => {
     const [isToggled, setIsToggled] = useState(false); // State for toggle
 
 
@@ -20,12 +17,18 @@ const BrandList = () => {
     };
 
     const columns = {
-        Brand: "Brand",
+        Driver_Name: "Driver Name",
+        Title: "Title",
+        Upload_Document: "Document",
+        Message: "Message",
     };
 
     const data = [
         {
-            Brand: 'Mahindra',
+            Driver_Name: 'Rahul',
+            Title: 'Lorem sed tempor incididunt ut',
+            Upload_Document: 'image',
+            Message: '"Lorem ipsum dolor sit amet"',
             editLink: '#', // Edit page link
             deleteLink: '#', // Delete page link
         },
@@ -35,7 +38,7 @@ const BrandList = () => {
 
 
     return (
-        <main className="brand_list_main">
+        <main className="Service_center_list_main">
             <Header />
             <div className={`inner_mainbox ${isToggled ? "toggled-class" : ""}`}>
                 <div className="inner_left">
@@ -51,7 +54,7 @@ const BrandList = () => {
                                 Filter By
                             </div>
                             <div className="filter_btn">
-                                <Link href="/miscellaneous/miscellaneous/brand/add">
+                                <Link href="/notifications/driver/add">
                                     <button className="submite_btn">Add</button>
                                 </Link>
                             </div>
@@ -59,16 +62,12 @@ const BrandList = () => {
                         <div className="filter_formbox">
                             <form action="">
                                 <div className="inner_form_group">
-                                    <label htmlFor="brand">Brand</label>
-                                    <select className="form-control" name="brand" id="brand">
-                                        <option value="">Select Brand</option>
-                                        <option value="Brand one">Brand one</option>
-                                        <option value="Brand two">Brand two</option>
-                                        <option value="Brand three">Brand three</option>
-                                    </select>
-                                    <div className="down_arrow_btn">
-                                        <img src="/images/angle-small-down.svg" alt="" className="img-fluid" />
-                                    </div>
+                                    <label htmlFor="driver_name">Driver Name</label>
+                                    <input className="form-control" type="text" name="driver_name" id="driver_name" />
+                                </div>
+                                <div className="inner_form_group">
+                                    <label htmlFor="search_service_area">Title</label>
+                                    <input className="form-control" type="text" name="search_service_area" id="search_service_area" />
                                 </div>
                                 <div className="inner_form_group inner_form_group_submit">
                                     <input type="submit" className='submite_btn' value="Search" />
@@ -81,14 +80,13 @@ const BrandList = () => {
                         <div className="filter_heading_btnbox">
                             <div className="service_form_heading">
                                 <span>
-                                    <img src="/images/bars-sort.svg" alt="" className="img-fluid" />
+                                    <img src="/images/driver-list.svg" alt="" className="img-fluid" />
                                 </span>
-                                Brand List
+                                Driver Notification List
                             </div>
                         </div>
                         <div className="filter_data_table">
-                            <DataTable columns={columns} data={data}
-                                showStatusButton={true} />
+                            <DataTable columns={columns} data={data} />
                         </div>
                     </div>
                 </div>
@@ -97,4 +95,4 @@ const BrandList = () => {
     )
 }
 
-export default BrandList
+export default NotificatioDriverlist

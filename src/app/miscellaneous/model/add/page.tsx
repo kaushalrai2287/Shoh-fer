@@ -5,13 +5,14 @@ import { FieldError, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Image from "next/image";
-import Header from "../../../../../../components/Header";
-import Sidemenu from "../../../../../../components/Sidemenu";
+import Header from "../../../../../components/Header";
+import Sidemenu from "../../../../../components/Sidemenu";
 
 
 
 const formSchema = z.object({
-    brand: z.string().min(1, "Vehicle Type is required"),
+    model: z.string().min(1, "Vehicle Type is required"),
+    t_model: z.string().min(1, "Transmission Type is required"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -49,16 +50,31 @@ const BrandAdd = () => {
                                 Basic Information
                             </div>
                             <div className="inner_form_group">
-                                <label htmlFor="brand">Brand <span>*</span></label>
-                                <select className="form-control" id="brand" {...register("brand")}>
-                                    <option value="">Select Brand</option>
-                                    <option value="Brand one">Brand one</option>
-                                    <option value="Brand two">Brand two</option>
-                                    <option value="Brand three">Brand three</option>
-                                    <option value="Brand four">Brand four</option>
+                                <label htmlFor="model">Model <span>*</span></label>
+                                <select className="form-control" id="model" {...register("model")}>
+                                    <option value="">Select Model</option>
+                                    <option value="Model one">Model one</option>
+                                    <option value="Model two">Model two</option>
+                                    <option value="Model three">Model three</option>
+                                    <option value="Model four">Model four</option>
                                 </select>
-                                {errors.brand && (
-                                    <p className="erro_message">{errors.brand.message}</p>
+                                {errors.model && (
+                                    <p className="erro_message">{errors.model.message}</p>
+                                )}
+                                <div className="down_arrow_btn">
+                                    <img src="/images/angle-small-down.svg" alt="" className="img-fluid" />
+                                </div>
+                            </div>
+                            <div className="inner_form_group">
+                                <label htmlFor="t_model">Transmission Type <span>*</span></label>
+                                <select className="form-control" id="t_model" {...register("t_model")}>
+                                    <option value="">Select Transmission</option>
+                                    <option value="Automatic">Automatic</option>
+                                    <option value="Manual">Manual</option>
+                                    <option value="Clutchless Manual">Clutchless Manual</option>
+                                </select>
+                                {errors.t_model && (
+                                    <p className="erro_message">{errors.t_model.message}</p>
                                 )}
                                 <div className="down_arrow_btn">
                                     <img src="/images/angle-small-down.svg" alt="" className="img-fluid" />

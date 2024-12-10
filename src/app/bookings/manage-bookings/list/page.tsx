@@ -67,7 +67,7 @@ const ListBooking = () => {
         Previous_Experince: "Previous Experience",
         Driver_Rating: "Driver Rating",
         Status: "Status",
-        Booking: "Booking",
+        // Booking: "Booking",
     };
 
     const hiddenColumns = [
