@@ -9,6 +9,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createClient } from "../../../../../utils/supabase/client";
 import bcrypt from "bcryptjs";
+import HeadingBredcrum from "../../../../../components/HeadingBredcrum";
 
 const formSchema = z.object({
   name: z
@@ -318,7 +319,7 @@ const EditPage = () => {
   };
   const handleClose = (event: { preventDefault: () => void }) => {
     event.preventDefault(); // Prevent default form behavior
-    router.push("/add-service-center/index"); // Navigate to the desired page
+    router.push("/add-service-center/list"); // Navigate to the desired page
   };
 
   return (
@@ -329,6 +330,13 @@ const EditPage = () => {
           <Sidemenu onToggle={toggleClass} />
         </div>
         <div className="inner_right">
+        <HeadingBredcrum
+                        heading="Edit Service Center"
+                        breadcrumbs={[
+                            { label: 'Home', link: '/', active: false },
+                            { label: 'Edit Service Center', active: true },
+                        ]}
+                    />
           <div className="add_service_formbox">
             <form action="" onSubmit={handleSubmit(onSubmit)}>
               <div className="service_form_heading">Basic Information</div>

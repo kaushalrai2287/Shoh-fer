@@ -8,6 +8,7 @@ import { DataTable } from "../../../../../components/ui/datatable";
 import Link from "next/link";
 import { createClient } from "../../../../../utils/supabase/client";
 import router, { useRouter } from "next/navigation";
+import HeadingBredcrum from "../../../../../components/HeadingBredcrum";
 
 // Supabase client initialization
 const supabase = createClient();
@@ -263,6 +264,13 @@ const ListBooking = () => {
                     <Sidemenu onToggle={toggleClass} />
                 </div>
                 <div className="inner_right">
+                <HeadingBredcrum
+                        heading="Booking List"
+                        breadcrumbs={[
+                            { label: 'Home', link: '/', active: false },
+                            { label: 'Booking List', active: true },
+                        ]}
+                    />
                     <div className="filter_box">
                         <div className="filter_heading_btnbox">
                             <div className="service_form_heading">

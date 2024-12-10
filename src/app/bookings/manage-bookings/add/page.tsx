@@ -8,6 +8,7 @@ import Image from "next/image";
 import Header from '../../../../../components/Header';
 import Sidemenu from "../../../../../components/Sidemenu";
 import { createClient } from "../../../../../utils/supabase/client";
+import HeadingBredcrum from "../../../../../components/HeadingBredcrum";
 
 const formSchema = z.object({
     b_type: z.string().min(1, "Brand is required"),
@@ -165,6 +166,13 @@ const AddBookings = () => {
                     <Sidemenu onToggle={toggleClass} />
                 </div>
                 <div className="inner_right">
+                <HeadingBredcrum
+                        heading="Add Booking"
+                        breadcrumbs={[
+                            { label: 'Home', link: '/', active: false },
+                            { label: 'Add Booking', active: true },
+                        ]}
+                    />
                     <div className="add_service_formbox">
                     <form onSubmit={handleSubmit(onSubmit)}>
                             <div className="service_form_heading">

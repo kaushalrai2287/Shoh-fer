@@ -9,6 +9,7 @@ import { DataTable } from "../../../../../components/ui/datatable";
 import Link from "next/link";
 import { createClient } from "../../../../../utils/supabase/client";
 import { CSVLink } from "react-csv";
+import HeadingBredcrum from "../../../../../components/HeadingBredcrum";
 
 type Driver = {
     driver_id: number;
@@ -295,6 +296,13 @@ const ManageDriver = () => {
                     <Sidemenu onToggle={toggleClass} />
                 </div>
                 <div className="inner_right">
+                <HeadingBredcrum
+                        heading="Driver List"
+                        breadcrumbs={[
+                            { label: 'Home', link: '/', active: false },
+                            { label: 'Driver List', active: true },
+                        ]}
+                    />
                     <div className="filter_box">
                         <div className="filter_heading_btnbox">
                             <div className="service_form_heading">

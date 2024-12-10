@@ -3,6 +3,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 // import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import BootstrapClient from "../../components/BootstrapClient";
 import "./globals.css";
+import HeadingBredcrum from "../../components/HeadingBredcrum";
 
 export const metadata: Metadata = {
   title: "Create Next App",
