@@ -10,12 +10,13 @@ import Sidemenu from "../../../../../../components/Sidemenu";
 import { useRouter, useParams } from "next/navigation";
 
 import { createClient } from "../../../../../../utils/supabase/client";
+import HeadingBredcrum from "../../../../../../components/HeadingBredcrum";
 const formSchema = z.object({
   b_type: z.string().min(1, "Brand is required"),
-  model: z.string().optional(), // Add model here
-  s_list: z.string().optional(), // Add service center
-  driver_select: z.string().optional(), // Add driver selection
-  vehicle_condition: z.string().optional(), // Add vehicle condition
+  model: z.string(),
+  s_list: z.string(),
+  driver_select: z.string(), 
+  vehicle_condition: z.string(), 
   cnumber: z
     .string()
     .regex(/^\d+$/, "Contact Number must contain only digits")
@@ -49,11 +50,11 @@ const EditBookings = () => {
   const [serviceCenters, setServiceCenters] = useState<
     { service_center_id: string; name: string }[]
   >([]); // Service center state
-  const [selectedBrand, setSelectedBrand] = useState(""); // State to track selected brand
+  const [selectedBrand, setSelectedBrand] = useState(""); 
   const [drivers, setDrivers] = useState<
     { driver_id: string; driver_name: string }[]
   >([]);
-  const [loading, setLoading] = useState(false); // Loading state
+  const [loading, setLoading] = useState(false); 
   const {
     register,
     handleSubmit,
@@ -64,7 +65,7 @@ const EditBookings = () => {
   });
 
   const toggleClass = () => {
-    setIsToggled(!isToggled); // Toggle the state
+    setIsToggled(!isToggled); 
   };
 
   useEffect(() => {
@@ -181,124 +182,7 @@ const EditBookings = () => {
   useEffect(() => {
     fetchModels(selectedBrand);
   }, [selectedBrand]);
-  // useEffect(() => {
-  //   const fetchBookingData = async () => {
-  //     const supabase = createClient();
-  //     if (!bookingId) {
-  //       console.error("Booking ID is undefined or missing.");
-  //       return;
-  //     }
   
-  //     setLoading(true); // Start loading
-  //     const { data, error } = await supabase
-  //       .from("bookings")
-  //       .select(`
-  //         *,
-  //         service_centers(name),
-  //         drivers(*),
-  //         vehicles(*, brands(*), models(*))
-  //       `)
-  //       .eq("booking_id", bookingId)
-  //       .single();
-
-
-  //       // console.log(data.vehicles?.condition)
-  
-  //     if (error) {
-  //       console.error("Error fetching booking data:", error.message);
-  //     } else if (data) {
-  //       const brandId = data.vehicles?.brands?.id;
-  //       const modelId = data.vehicles?.models?.id;
-  
-  //       // Set brand, model, and other fields
-  //       setValue("b_type", brandId);
-  //       setValue("model", modelId);
-  //       setSelectedBrand(brandId); // Set the brand and trigger model fetching
-  //       setValue("cperson", data.customer_name);
-  //       setValue("cnumber", data.customer_phone);
-  //       setValue("p_location", data.pickup_address);
-  //       setValue("d_location", data.dropoff_address);
-  //       setValue("s_list", data.service_center_id || "");
-  //       setValue("driver_select", data.driver_id || "");
-  //       setValue("vehicle_condition",data.vehicles?.condition);
-  //       setValue("Vehicle_Number", data.vehicles?.license_plate_no);
-  //       setValue("p_experience",data.drivers?.experience_years)
-  
-  //       // Fetch models for the selected brand immediately
-  //       await fetchModels(brandId, modelId);
-  //     }
-  //     setLoading(false);
-  //   };
-  
-  //   const fetchModels = async (brandId: string, modelId?: string) => {
-  //     if (!brandId) return;
-  //     const supabase = createClient();
-  //     const { data, error } = await supabase
-  //       .from("models")
-  //       .select("id, brand_id, name")
-  //       .eq("brand_id", brandId);
-  
-  //     if (error) {
-  //       console.error("Error fetching models:", error.message);
-  //     } else {
-  //       setModels(data || []);
-  //       if (modelId) setValue("model", modelId); // Ensure model is set after fetching
-  //     }
-  //   };
-  
-  //   fetchBookingData();
-  // }, [bookingId]);
-
-  // const onSubmit = async (data: FormValues) => {
-  //   try {
-  //     const supabase = createClient();
-  //     setLoading(true);
-  
-  //     // 1. Update Vehicle Table with Brand and Model
-  //     const { error: vehicleError } = await supabase
-  //       .from("vehicles")
-  //       .update({
-  //         brand_id: data.b_type, // Update brand
-  //         model_id: data.model, // Update model
-  //         license_plate_no: data.Vehicle_Number, // Update Vehicle Number
-  //         condition: data.vehicle_condition, // Update condition
-  //       })
-  //       .eq("vehicle_id", bookingId); // Assuming vehicle_id is linked to bookingId
-  
-  //     if (vehicleError) {
-  //       console.error("Error updating vehicle:", vehicleError.message);
-  //       throw new Error("Failed to update vehicle details.");
-  //     }
-  
-  //     // 2. Update Bookings Table with Other Fields
-  //     const { error: bookingError } = await supabase
-  //       .from("bookings")
-  //       .update({
-  //         customer_name: data.cperson,
-  //         customer_phone: data.cnumber,
-  //         pickup_address: data.p_location,
-  //         dropoff_address: data.d_location,
-  //         service_center_id: data.s_list,
-  //         driver_id: data.driver_select,
-  //       })
-  //       .eq("booking_id", bookingId);
-  
-  //     if (bookingError) {
-  //       console.error("Error updating booking:", bookingError.message);
-  //       throw new Error("Failed to update booking details.");
-  //     }
-  
-  //     console.log("Booking and Vehicle updated successfully!");
-  //     alert("Booking updated successfully!");
-  
-  //   } catch (error: any) {
-  //     console.error("Error:", error.message);
-  //     alert("Failed to update booking. Please try again.");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
 
   const onSubmit = async (data: FormValues) => {
     try {
@@ -383,6 +267,13 @@ const EditBookings = () => {
           <Sidemenu onToggle={toggleClass} />
         </div>
         <div className="inner_right">
+        <HeadingBredcrum
+                        heading="Edit Booking"
+                        breadcrumbs={[
+                            { label: 'Home', link: '/', active: false },
+                            { label: 'Edit Booking', active: true },
+                        ]}
+                    />
           <div className="add_service_formbox">
             {loading ? (
               <div className="loading-indicator">Loading...</div>
@@ -513,7 +404,7 @@ const EditBookings = () => {
                   <label htmlFor="vehicle_condition">Vehicle Condition</label>
                   <textarea
                     className="form-control"
-                    // name="vehicle_condition"
+                  
                     {...register("vehicle_condition")}
 
                     id="vehicle_condition"
@@ -534,11 +425,6 @@ const EditBookings = () => {
                     <p className="erro_message">{errors.p_location.message}</p>
                   )}
                 </div>
-
-                {/* <div className="inner_form_group">
-                                    <label htmlFor="">Pickup Date</label>
-                                    <input className="form-control" type="datetime-local" name="" id="" />
-                                </div> */}
                 <div className="inner_form_group">
                   <label htmlFor="d_location">
                     Drop Location <span>*</span>

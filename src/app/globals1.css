@@ -196,12 +196,6 @@ body:has(.menu_open){
   width: 15px;
   height: 15px;
 }
-.sidemunu_submenu_listing ul li.heighlight::after {
-  background-image: url("../../public/images/dashboard/pointing-right-black.svg");
-}
-.sidemunu_submenu_listing ul li.heighlight a {
-  color: #000000;
-}
 .sidemenu_mainbox .accordion {
   --bs-accordion-bg: #ed5f61;
   --bs-accordion-border-color: transparent;
@@ -234,9 +228,6 @@ body:has(.menu_open){
   z-index: 999;
   display: none;
   border: 0;
-}
-.toggled-class .heighlight {
-  background-color: #ffffff;
 }
 .toggled-class .sidemenu_mainbox .accordion-button::after {
   display: none;
@@ -446,7 +437,6 @@ input[type="checkbox"] {
 .inner_form_group.inner_form_group_submit {
   display: flex;
   flex-direction: row;
-  align-items: center;
 }
 .add_service_formbox form {
   display: grid;
@@ -484,7 +474,6 @@ input[type="checkbox"] {
   margin: 10px 0 0 0;
   color: #ffffff;
   border-radius: 6px;
-  line-height: normal;
 }
 .close_btn {
   padding: 8px 30px;
@@ -492,12 +481,9 @@ input[type="checkbox"] {
   background-color: transparent;
   width: fit-content;
   font-family: Montserrat-Medium;
-  font-size: 12px;
   margin: 10px 0 0 0;
   color: #000000;
   border-radius: 6px;
-  display: inline-flex;
-  line-height: normal;
 }
 .inner_form_group span,
 .service_form_heading span {
@@ -568,7 +554,7 @@ input[type="checkbox"] {
   padding: 20px 0 0 0;
 }
 .filter_formbox .inner_form_group.inner_form_group_submit {
-  grid-column: 1/-1;
+  grid-column: 1/2;
 }
 .filter_data_table {
   margin: 20px 0 0 0;
@@ -586,15 +572,11 @@ input[type="checkbox"] {
 .action_btns button:nth-child(2) {
   margin: 0 10px;
 }
-.expanded_tr td {
-  column-count: 2;
-  gap: 20px;
-}
-/* .expanded_tr td .flex-column {
+.expanded_tr td .flex-column {
   gap: 10px;
-} */
+}
 .heighlight {
-  background-color: #ffffff;
+  background-color: var(--first-color);
   color: #ffffff;
   padding: 0px 0px 0px 30px!important;
   border-radius: 6px;
@@ -609,10 +591,8 @@ input[type="checkbox"] {
   font-weight: bolder;
   margin: 0 5px 0 0;
 }
-.expanded_tr td .flex-column div {
-  padding: 10px 0;
-}
 .expanded_tr td .flex-column div:not(:last-child) {
+  padding: 0 0 10px 0;
   border-bottom: 1px dotted #cccc;
 }
 .filter_data_table thead tr th{

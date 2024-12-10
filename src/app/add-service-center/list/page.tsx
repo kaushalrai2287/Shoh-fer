@@ -9,6 +9,8 @@ import { useRouter } from "next/navigation";
 import { createClient } from "../../../../utils/supabase/client";
 import { CSVLink } from "react-csv";
 import Link from "next/link";
+import HeadingBredcrum from "../../../../components/HeadingBredcrum";
+
 
 type ServiceCenter = {
   service_center_id: number;
@@ -248,6 +250,17 @@ const ListingPage = () => {
     //  deleteLink: '#',
     onDelete: () => handleDelete(center.service_center_id),
   }));
+  const handleClearFilters = () => {
+    // Reset all input fields to empty strings
+    setSearchQuery("");
+    setServiceAreaQuery("");
+    setCityAreaQuery("");
+    setContactNoQuery("");
+  
+    // Reset the filtered list to show all service centers
+    setFilteredCenters(serviceCenters);
+  };
+  
 
   return (
     <main className="Service_center_list_main">
@@ -257,6 +270,13 @@ const ListingPage = () => {
           <Sidemenu onToggle={toggleClass} />
         </div>
         <div className="inner_right">
+        <HeadingBredcrum
+                        heading="Service Center List"
+                        breadcrumbs={[
+                            { label: 'Home', link: '/', active: false },
+                            { label: 'Service Center List', active: true },
+                        ]}
+                    />
           <div className="filter_box">
             <div className="filter_heading_btnbox">
               <div className="service_form_heading">
@@ -361,6 +381,15 @@ const ListingPage = () => {
                       </CSVLink>
                     )}
                   </div>
+                  <div>
+                  <input
+                    type="button"
+                    className="close_btn"
+                    value="Clear"
+                    onClick={handleClearFilters} // Attach the handler here
+                  />
+                </div>
+
                 </div>
               </form>
             </div>

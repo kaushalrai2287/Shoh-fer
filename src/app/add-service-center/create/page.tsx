@@ -9,6 +9,7 @@ import { redirect, useRouter } from "next/navigation";
 import Sidemenu from "../../../../components/Sidemenu";
 import Header from "../../../../components/Header";
 import { createClient } from "../../../../utils/supabase/client";
+import HeadingBredcrum from "../../../../components/HeadingBredcrum";
 
 const formSchema = z.object({
   name: z
@@ -232,7 +233,7 @@ const Page = () => {
   };
   const handleClose = (event: { preventDefault: () => void }) => {
     event.preventDefault(); // Prevent default form behavior
-    router.push("/add-service-center/index"); // Navigate to the desired page
+    router.push("/add-service-center/list"); // Navigate to the desired page
   };
 
   useEffect(() => {
@@ -280,6 +281,13 @@ const Page = () => {
           <Sidemenu onToggle={toggleClass} />
         </div>
         <div className="inner_right">
+        <HeadingBredcrum
+                        heading="Add Service Center"
+                        breadcrumbs={[
+                            { label: 'Home', link: '/', active: false },
+                            { label: 'Add Service Center', active: true },
+                        ]}
+                    />
           <div className="add_service_formbox">
             <form action="" onSubmit={handleSubmit(onSubmit)}>
               <div className="service_form_heading">Basic Information</div>
