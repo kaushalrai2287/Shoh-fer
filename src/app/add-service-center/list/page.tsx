@@ -64,7 +64,7 @@ const ListingPage = () => {
           state_name: center.states?.name || "",
           services_offerd: center.service_centers_services_offerd?.name || "",
         }));
-        console.log(updatedData);
+        // console.log(updatedData);
 
         if (error) throw error;
 

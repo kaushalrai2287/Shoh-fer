@@ -1,52 +1,82 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Header from '../../../../components/Header';
 import Sidemenu from "../../../../components/Sidemenu";
 import { DataTable } from "../../../../components/ui/datatable";
 import Link from "next/link";
+import { createClient } from "../../../../utils/supabase/client";
+
+interface Role {
+    role_id: string;
+    role_name: string;
+}
 
 const RollsPermission = () => {
     const [isToggled, setIsToggled] = useState(false); // State for toggle
+    const [roles, setRoles] = useState<Role[]>([]); // State to store roles
+    const [loading, setLoading] = useState(true); // State for loading
+    const [error, setError] = useState<string | null>(null); // State for errors
 
     const toggleClass = () => {
         setIsToggled(!isToggled); // Toggle the state
     };
 
+    // Fetch roles from the API when the component mounts
+    useEffect(() => {
+        const fetchRoles = async () => {
+            try {
+                const response = await fetch('/api/roles/getrolls'); // API endpoint to get roles
+                if (!response.ok) {
+                    throw new Error('Failed to fetch roles');
+                }
+
+                const { roles } = await response.json();
+                setRoles(roles);
+                setLoading(false); // Set loading to false when data is fetched
+            } catch (err) {
+                setError('Failed to fetch roles');
+                setLoading(false); // Set loading to false on error
+            }
+        };
+
+        fetchRoles(); // Call the function to fetch roles
+    }, []); // Empty dependency array to run this effect only once when the component mounts
+
     const columns = {
         Role_Name: "Role Name",
     };
 
-    const data = [
-        {
-            Role_Name: 'Rahul',
-            editLink: '#',
-            deleteLink: '#',
-        },
-        {
-            Role_Name: 'Rahul',
-            editLink: '#',
-            deleteLink: '#',
-        },
-        {
-            Role_Name: 'Rahul',
-            editLink: '#',
-            deleteLink: '#',
-        },
-        {
-            Role_Name: 'Rahul',
-            editLink: '#',
-            deleteLink: '#',
-        },
-        {
-            Role_Name: 'Rahul',
-            editLink: '#',
-            deleteLink: '#',
-        },
-    ];
-
-    const hiddenColumns = [];
+    // Map the fetched roles to the DataTable format
+    const data = roles.map((role) => ({
+        Role_Name: role.role_name,
+        onDelete: () => handleDelete(role.role_id),
+    }));
+    const handleDelete = async (roleId: string) => {
+        if (window.confirm('Are you sure you want to delete this role?')) {
+            try {
+                const supabase = createClient()
+                
+                const { error } = await supabase
+                    .from('roles')
+                    .delete()
+                    .eq('role_id', roleId); 
+    
+                if (error) {
+                    throw new Error(error.message);
+                }
+    
+                // If successful, remove the role from the state
+                setRoles(roles.filter(role => role.role_id !== roleId));
+                alert('Role deleted successfully');
+            } catch (err) {
+                alert('Failed to delete role');
+            }
+        }
+    };
+    if (loading) return <div>Loading...</div>; // Show loading text while fetching
+    if (error) return <div>{error}</div>; // Show error message if fetching fails
 
     return (
         <main className="rolls_list_main">
@@ -93,10 +123,7 @@ const RollsPermission = () => {
                             </div>
                         </div>
                         <div className="filter_data_table">
-                            <DataTable
-                                columns={columns}
-                                data={data}
-                            />
+                            <DataTable columns={columns} data={data} />
                         </div>
                     </div>
                 </div>

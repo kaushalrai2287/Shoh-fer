@@ -1,25 +1,29 @@
 "use client";
 
-import React, { useState } from "react";
-import { FieldError, useForm } from "react-hook-form";
+import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import Image from "next/image";
-import Header from '../../../../components/Header';
+import { createClient } from "../../../../utils/supabase/client"; // Ensure the Supabase client is imported correctly
+import Header from "../../../../components/Header";
 import Sidemenu from "../../../../components/Sidemenu";
 
+// Validation Schema
 const formSchema = z.object({
     role_name: z
         .string()
-        .min(1, "Service Center Name is required")
+        .min(1, "Role Name is required")
         .regex(/^[a-zA-Z\s]+$/, "Name must only contain letters"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
-const RollsPermissionAdd = () => {
+const supabase = createClient(); // Initialize Supabase client
 
+const RollsPermissionAdd = () => {
     const [isToggled, setIsToggled] = useState(false); // State for toggle
+    const [permissions, setPermissions] = useState<{ permission_id: number; permission_name: string }[]>([]); // Permissions data
+    const [selectedPermissions, setSelectedPermissions] = useState<number[]>([]); // Selected permissions
 
     const {
         register,
@@ -29,13 +33,63 @@ const RollsPermissionAdd = () => {
         resolver: zodResolver(formSchema),
     });
 
-    const toggleClass = () => {
-        setIsToggled(!isToggled); // Toggle the state
+    // Fetch permissions from Supabase
+    useEffect(() => {
+        const fetchPermissions = async () => {
+            const { data, error } = await supabase.from("permissions").select("permission_id, permission_name");
+            if (error) {
+                console.error("Error fetching permissions:", error.message);
+            } else {
+                setPermissions(data || []);
+            }
+        };
+
+        fetchPermissions();
+    }, []);
+
+    // Handle checkbox changes
+    const handleCheckboxChange = (permissionId: number) => {
+        setSelectedPermissions((prev) =>
+            prev.includes(permissionId)
+                ? prev.filter((id) => id !== permissionId) // Remove if already selected
+                : [...prev, permissionId] // Add if not already selected
+        );
     };
 
-    const onSubmit = (data: FormValues) => {
-        console.log("Form Data:", data);
+    const onSubmit = async (data: FormValues) => {
+        try {
+            const response = await fetch("/api/roles/add", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    role_name: data.role_name,
+                    permissions: selectedPermissions,
+                }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error("Error:", errorData.error);
+                alert(`Error: ${errorData.error}`);
+                return;
+            }
+
+            const result = await response.json();
+            console.log("API Response:", result);
+            alert("Role and permissions added successfully!");
+        } catch (error) {
+            console.error("Server Error:", error);
+            alert("Something went wrong!");
+        }
     };
+
+    // Toggle menu
+    const toggleClass = () => {
+        setIsToggled(!isToggled);
+    };
+
     return (
         <main className="add_rolls_permission_main">
             <Header />
@@ -45,10 +99,8 @@ const RollsPermissionAdd = () => {
                 </div>
                 <div className="inner_right">
                     <div className="add_service_formbox checkbox_formbox">
-                        <form action="" onSubmit={handleSubmit(onSubmit)}>
-                            <div className="service_form_heading">
-                                Add Role
-                            </div>
+                        <form onSubmit={handleSubmit(onSubmit)}>
+                            <div className="service_form_heading">Add Role</div>
                             <div className="inner_form_group">
                                 <label htmlFor="name">Role Name <span>*</span></label>
                                 <input className="form-control" {...register("role_name")} type="text" id="name" />
@@ -56,52 +108,36 @@ const RollsPermissionAdd = () => {
                                     <p className="erro_message">{errors.role_name.message}</p>
                                 )}
                             </div>
+
                             <div className="service_form_heading service_form_heading_second">
-                                Enable Sections <span>*</span>
+                                Enable Permission <span>*</span>
                             </div>
-                            <div className="inner_form_group inner_form_group_checkbox mb-2">
-                                <label htmlFor="">Category Management</label>
-                                <input type="checkbox" name="" id="" />
-                            </div>
-                            <div className="inner_form_group inner_form_group_checkbox mb-2">
-                                <label htmlFor="">Notification</label>
-                                <input type="checkbox" name="" id="" />
-                            </div>
-                            <div className="inner_form_group inner_form_group_checkbox mb-2">
-                                <label htmlFor="">User Management</label>
-                                <input type="checkbox" name="" id="" />
-                            </div>
-                            <div className="inner_form_group inner_form_group_checkbox mb-2">
-                                <label htmlFor="">Product Management</label>
-                                <input type="checkbox" name="" id="" />
-                            </div>
-                            <div className="inner_form_group inner_form_group_checkbox mb-2">
-                                <label htmlFor="">Vendor Management</label>
-                                <input type="checkbox" name="" id="" />
-                            </div>
-                            <div className="inner_form_group inner_form_group_checkbox mb-2">
-                                <label htmlFor="">Order Management</label>
-                                <input type="checkbox" name="" id="" />
-                            </div>
-                            <div className="inner_form_group inner_form_group_checkbox mb-2">
-                                <label htmlFor="">Discount Management</label>
-                                <input type="checkbox" name="" id="" />
-                            </div>
-                            <div className="inner_form_group inner_form_group_checkbox">
-                                <label htmlFor="">Web and App Settings</label>
-                                <input type="checkbox" name="" id="" />
-                            </div>
+
+                            {/* Dynamic Permissions Checkboxes */}
+                            {permissions.map((permission) => (
+                                <div key={permission.permission_id} className="inner_form_group inner_form_group_checkbox mb-2">
+                                    <label htmlFor={`permission-${permission.permission_id}`}>
+                                        {permission.permission_name}
+                                    </label>
+                                    <input
+                                        type="checkbox"
+                                        id={`permission-${permission.permission_id}`}
+                                        onChange={() => handleCheckboxChange(permission.permission_id)}
+                                    />
+                                </div>
+                            ))}
+
+                            {/* Submit Buttons */}
                             <div className="inner_form_group inner_form_group_submit">
-                                <input type="submit" className='submite_btn' value="Submit" />
-                                <input type="submit" className='close_btn' value="Close" />
+                                <input type="submit" className="submite_btn" value="Submit" />
+                                <input type="button" className="close_btn" value="Close" />
                             </div>
                         </form>
                     </div>
                 </div>
             </div>
         </main>
-    )
-}
+    );
+};
 
-
-export default RollsPermissionAdd
+export default RollsPermissionAdd;
