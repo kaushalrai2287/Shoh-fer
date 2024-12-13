@@ -1,11 +1,140 @@
 "use client";
-import React from 'react'
+// import React from 'react'
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { redirect, usePathname } from "next/navigation";
+import React, { useEffect, useState, useCallback } from "react";
+import { createClient } from "../utils/supabase/client";
+
+const supabase  = createClient()
 
 
-const Sidemenu = ({ onToggle }: { onToggle: () => void }) => {
+ const Sidemenu = ({ onToggle }: { onToggle: () => void }) => {
+  const [permissions, setPermissions] = useState<string[]>([]);
+
   const pathname = usePathname(); // Get the current path
+  
+  useEffect(() => {
+    const fetchPermissions = async () => {
+      try {
+        const { data: sessionData, error } = await supabase.auth.getSession();
+        console.log(sessionData);
+
+        if (error || !sessionData?.session) {
+          redirect("/login");
+          return; // Prevent further execution if no session
+        }
+
+        // Use the token from Supabase session for authentication
+        const token = sessionData.session.access_token;
+        
+        // Check if user exists and error is null
+        // if (error || !user?.user) {
+        //   redirect("/login");
+        //   return; // Prevent further execution if no user
+        // }
+        
+        // // Use the token from Supabase for authentication
+        // const token = user?.user?.access_token; // Token from Supabase session
+        
+        const response = await fetch("/api/users/permission", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+        });
+  
+        // if (!response.ok) {
+        //   throw new Error("Network response was not ok " + response.statusText);
+        // }
+  
+        const contentType = response.headers.get("Content-Type");
+        if (!contentType || !contentType.includes("application/json")) {
+          throw new Error("Expected JSON response, but received: " + contentType);
+        }
+  
+        const data = await response.json();
+        setPermissions(data.permissions || []);
+      } catch (error) {
+        console.error("Error fetching permissions:", error);
+      }
+    };
+  
+    fetchPermissions();
+  }, []);
+  
+  // useEffect(() => {
+  //   const fetchPermissions = async () => {
+  //     try {
+  //       // const token = "your_bearer_token_here";
+  //       const { data:user, error } = await supabase.auth.getUser();
+  //       console.log(user);
+        
+  //       if (error || !user?.user) {
+  //         redirect("/login");
+  //       }
+  //         // Retrieve your token from wherever it's stored (e.g., localStorage, cookies)
+  
+  //       const response = await fetch("/api/users/permission", {
+  //         method: "GET",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           "Authorization": `Bearer ${}`,
+  //         },
+  //       });
+  //       console.log(response);
+  
+  //       if (!response.ok) {
+  //         throw new Error("Network response was not ok " + response.statusText);
+  //       }
+  
+  //       const contentType = response.headers.get("Content-Type");
+  //       if (!contentType || !contentType.includes("application/json")) {
+  //         throw new Error("Expected JSON response, but received: " + contentType);
+  //       }
+  
+  //       const data = await response.json();
+  //       setPermissions(data.permissions || []);
+  //     } catch (error) {
+  //       console.error("Error fetching permissions:", error);
+  //     }
+  //   };
+  
+  //   fetchPermissions();
+  // }, []);
+  
+  
+  // useEffect(() => {
+  //   const fetchPermissions = async () => {
+  //     try {
+  //       const response = await fetch("api/users/permissions");
+  
+  //       if (!response.ok) {
+  //         throw new Error("Network response was not ok " + response.statusText);
+  //       }
+  
+  //       const contentType = response.headers.get("Content-Type");
+  //       if (!contentType || !contentType.includes("application/json")) {
+  //         throw new Error("Expected JSON response, but received: " + contentType);
+  //       }
+  
+  //       const data = await response.json();
+  //       setPermissions(data.permissions || []); 
+  //     } catch (error) {
+  //       console.error("Error fetching permissions:", error);
+  //     }
+  //   };
+  
+  //   fetchPermissions();
+  // }, []);
+  
+
+  const hasPermission = useCallback(
+    (permission: string) => permissions.includes(permission),
+    [permissions]
+  );
+  // console.log(Permissions)
+
 
   // Function to check if a section should be open
   const isSectionOpen = (sectionPaths: string[]) => {
@@ -29,6 +158,10 @@ const Sidemenu = ({ onToggle }: { onToggle: () => void }) => {
               </div>
             </div>
           </Link>
+          {hasPermission("Manage_Service_Centers") && (
+           
+         
+
           <div className="accordion-item">
             <div className="accordion-header" id="flush-headingOne">
               <button
@@ -75,6 +208,8 @@ const Sidemenu = ({ onToggle }: { onToggle: () => void }) => {
               </div>
             </div>
           </div>       
+ )}
+          
           {/* Drivers */}
           <div className="accordion-item">
             <div className="accordion-header" id="flush-headingTwo">
