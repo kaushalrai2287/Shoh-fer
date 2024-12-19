@@ -158,7 +158,7 @@ const supabase  = createClient()
               </div>
             </div>
           </Link>
-          {hasPermission("Manage_Service_Centers") && (
+          {/* {hasPermission("Manage_Service_Centers") && ( */}
            
          
 
@@ -208,7 +208,7 @@ const supabase  = createClient()
               </div>
             </div>
           </div>       
- )}
+ {/* )} */}
           
           {/* Drivers */}
           <div className="accordion-item">

@@ -4,6 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import BootstrapClient from "../../components/BootstrapClient";
 import "./globals.css";
 import HeadingBredcrum from "../../components/HeadingBredcrum";
+import { Toaster } from "react-hot-toast";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -20,6 +21,7 @@ export default function RootLayout({
       <body>
         {children}
         <BootstrapClient/>
+        <Toaster position="top-right" />
       </body>
     </html>
   );

@@ -7,6 +7,7 @@ import { z } from "zod";
 import { createClient } from "../../../../utils/supabase/client"; // Ensure the Supabase client is imported correctly
 import Header from "../../../../components/Header";
 import Sidemenu from "../../../../components/Sidemenu";
+import { useRouter } from "next/navigation";
 
 // Validation Schema
 const formSchema = z.object({
@@ -24,7 +25,7 @@ const RollsPermissionAdd = () => {
     const [isToggled, setIsToggled] = useState(false); // State for toggle
     const [permissions, setPermissions] = useState<{ permission_id: number; permission_name: string }[]>([]); // Permissions data
     const [selectedPermissions, setSelectedPermissions] = useState<number[]>([]); // Selected permissions
-
+const router = useRouter();
     const {
         register,
         handleSubmit,
@@ -46,6 +47,13 @@ const RollsPermissionAdd = () => {
 
         fetchPermissions();
     }, []);
+
+    const handleClose = (event: { preventDefault: () => void }) => {
+        
+        event.preventDefault(); // Prevent default form behavior
+        router.push("/rolls-permission/list"); // Navigate to the desired page
+      };
+    
 
     // Handle checkbox changes
     const handleCheckboxChange = (permissionId: number) => {
@@ -130,7 +138,7 @@ const RollsPermissionAdd = () => {
                             {/* Submit Buttons */}
                             <div className="inner_form_group inner_form_group_submit">
                                 <input type="submit" className="submite_btn" value="Submit" />
-                                <input type="button" className="close_btn" value="Close" />
+                                <input type="button" className="close_btn" value="Close" onClick={handleClose} />
                             </div>
                         </form>
                     </div>

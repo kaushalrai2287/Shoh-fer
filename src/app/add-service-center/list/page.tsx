@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
 
 import Sidemenu from "../../../../components/Sidemenu";
@@ -10,7 +9,6 @@ import { createClient } from "../../../../utils/supabase/client";
 import { CSVLink } from "react-csv";
 import Link from "next/link";
 import HeadingBredcrum from "../../../../components/HeadingBredcrum";
-
 
 type ServiceCenter = {
   service_center_id: number;
@@ -99,7 +97,7 @@ const ListingPage = () => {
           ?.toLowerCase()
           .includes(contactNoQuery.toLocaleLowerCase()) || false;
 
-      return matchesName && matchesArea && matchesCity && contactNo; // Match both name and area
+      return matchesName && matchesArea && matchesCity && contactNo;
     });
 
     setFilteredCenters(filtered);
@@ -256,11 +254,10 @@ const ListingPage = () => {
     setServiceAreaQuery("");
     setCityAreaQuery("");
     setContactNoQuery("");
-  
+
     // Reset the filtered list to show all service centers
     setFilteredCenters(serviceCenters);
   };
-  
 
   return (
     <main className="Service_center_list_main">
@@ -270,13 +267,13 @@ const ListingPage = () => {
           <Sidemenu onToggle={toggleClass} />
         </div>
         <div className="inner_right">
-        <HeadingBredcrum
-                        heading="Service Center List"
-                        breadcrumbs={[
-                            { label: 'Home', link: '/', active: false },
-                            { label: 'Service Center List', active: true },
-                        ]}
-                    />
+          <HeadingBredcrum
+            heading="Service Center List"
+            breadcrumbs={[
+              { label: "Home", link: "/", active: false },
+              { label: "Service Center List", active: true },
+            ]}
+          />
           <div className="filter_box">
             <div className="filter_heading_btnbox">
               <div className="service_form_heading">
@@ -382,14 +379,13 @@ const ListingPage = () => {
                     )}
                   </div>
                   <div>
-                  <input
-                    type="button"
-                    className="close_btn"
-                    value="Clear"
-                    onClick={handleClearFilters} // Attach the handler here
-                  />
-                </div>
-
+                    <input
+                      type="button"
+                      className="close_btn"
+                      value="Clear"
+                      onClick={handleClearFilters} // Attach the handler here
+                    />
+                  </div>
                 </div>
               </form>
             </div>

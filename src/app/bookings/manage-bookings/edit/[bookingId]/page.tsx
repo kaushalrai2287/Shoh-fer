@@ -8,6 +8,7 @@ import Image from "next/image";
 import Header from "../../../../../../components/Header";
 import Sidemenu from "../../../../../../components/Sidemenu";
 import { useRouter, useParams } from "next/navigation";
+// import { useRouter } from "next/navigation";
 
 import { createClient } from "../../../../../../utils/supabase/client";
 import HeadingBredcrum from "../../../../../../components/HeadingBredcrum";
@@ -183,7 +184,7 @@ const EditBookings = () => {
     fetchModels(selectedBrand);
   }, [selectedBrand]);
   
-
+const router = useRouter();
   const onSubmit = async (data: FormValues) => {
     try {
       const supabase = createClient();
@@ -253,7 +254,10 @@ const EditBookings = () => {
     }
   };
   
-
+  const handleClose = (event: { preventDefault: () => void }) => {
+    event.preventDefault(); // Prevent default form behavior
+    router.push("/bookings/manage-bookings/list"); // Navigate to the desired page
+  };
   
   // const onSubmit = (data: FormValues) => {
   //   console.log("Form Data:", data);
@@ -495,7 +499,12 @@ const EditBookings = () => {
                 </div>
                 <div className="inner_form_group inner_form_group_submit">
                   <input type="submit" className="submite_btn" value="Submit" />
-                  <input type="submit" className="close_btn" value="Close" />
+                  <input
+                  type="button"
+                  className="close_btn"
+                  value="Close"
+                  onClick={handleClose}
+                />
                 </div>
               </form>
             )}

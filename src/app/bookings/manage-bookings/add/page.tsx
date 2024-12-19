@@ -9,6 +9,7 @@ import Header from '../../../../../components/Header';
 import Sidemenu from "../../../../../components/Sidemenu";
 import { createClient } from "../../../../../utils/supabase/client";
 import HeadingBredcrum from "../../../../../components/HeadingBredcrum";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
     b_type: z.string().min(1, "Brand is required"),
@@ -36,8 +37,10 @@ const formSchema = z.object({
 });
 
 type FormValues = z.infer<typeof formSchema>;
+const router = useRouter
 
 const AddBookings = () => {
+  
 
     const [isToggled, setIsToggled] = useState(false); // State for toggle
     const [brands, setBrands] = useState<{ id: string; name: string }[]>([]);
@@ -105,7 +108,7 @@ const AddBookings = () => {
         };
         fetchDrivers();
     }, []);
-
+const router = useRouter();
     const onSubmit = async (data: FormValues) => {
         console.log("Form data submitted:", data); // Debug log
         try {
@@ -156,6 +159,10 @@ const AddBookings = () => {
         }
     };
     
+    const handleClose = (event: { preventDefault: () => void }) => {
+        event.preventDefault(); // Prevent default form behavior
+        router.push("/bookings/manage-bookings/list"); // Navigate to the desired page
+      };
     
 
     return (
@@ -308,6 +315,12 @@ const AddBookings = () => {
                             </div>
                             <div className="inner_form_group inner_form_group_submit">
                                 <input type="submit" className='submite_btn' value="Submit" />
+                                <input
+                  type="button"
+                  className="close_btn"
+                  value="Close"
+                  onClick={handleClose}
+                />
                                 {/* <input type="submit" className='close_btn' value="Close" /> */}
                             </div>
                         </form>
