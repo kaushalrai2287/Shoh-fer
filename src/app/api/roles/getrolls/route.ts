@@ -43,11 +43,20 @@ const supabase = createClient();
 
 export async function GET(req: NextRequest) {
   try {
-    // Fetch all roles
-    const { data: roles, error: rolesError } = await supabase
-      .from('roles')
-      .select('role_id, role_name')
-      .order('role_name', { ascending: true });
+    // Extract the role_name filter from query parameters
+    const { searchParams } = new URL(req.url);
+    const roleNameFilter = searchParams.get('role_name');  // Get the role_name filter if provided
+
+    // Build the base query
+    let query = supabase.from('roles').select('role_id, role_name').order('role_name', { ascending: true });
+
+    // If a role_name filter is provided, add a where condition to filter by role_name
+    if (roleNameFilter) {
+      query = query.ilike('role_name', `%${roleNameFilter}%`); // Use ilike for case-insensitive matching
+    }
+
+    // Fetch the roles with the optional filter
+    const { data: roles, error: rolesError } = await query;
 
     // Handle roles fetching error
     if (rolesError) {

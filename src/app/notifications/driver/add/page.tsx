@@ -1,20 +1,21 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FieldError, useForm, Controller } from "react-hook-form";
 import Select from "react-select"; // Correct import
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Header from '../../../../../components/Header';
 import Sidemenu from "../../../../../components/Sidemenu";
+import { createClient } from "../../../../../utils/supabase/client";
 
 const formSchema = z.object({
-    role_name: z
+    message: z
         .string()
         .min(1, "Service Center Name is required")
         .regex(/^[a-zA-Z\s]+$/, "Name must only contain letters"),
-    service_centers: z
-        .array(z.object({ value: z.string(), label: z.string() }))
+    Driver: z
+        .array(z.object({ value:  z.union([z.string(), z.number()]), label: z.string() }))
         .min(1, "At least one service center must be selected"),
     name: z.string().min(1, "Title is required"),
     upload: z.any().optional(),
@@ -24,11 +25,15 @@ type FormValues = z.infer<typeof formSchema>;
 
 const NotificatioDriveradd = () => {
     const [isToggled, setIsToggled] = useState(false); // State for toggle
+ 
+        const [driver, setDriver] = useState<any[]>([]); // State to store all fetched service centers
+        const [loading, setLoading] = useState<boolean>(true); // Loading state
+        const [error, setError] = useState<string | null>(null); //
 
     const {
         register,
         handleSubmit,
-        control, // Controller from react-hook-form
+        control, 
         formState: { errors },
     } = useForm<FormValues>({
         resolver: zodResolver(formSchema),
@@ -37,19 +42,70 @@ const NotificatioDriveradd = () => {
     const toggleClass = () => {
         setIsToggled(!isToggled); // Toggle the state
     };
-
-    const onSubmit = (data: FormValues) => {
-        console.log("Form Data:", data);
+    const onSubmit = async (data: FormValues) => {
+        try {
+            const response = await fetch("/api/Notification/ToDriver", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    message: data.message,
+                    name: data.name,
+                    Driver: data.Driver,
+                    upload: data.upload, 
+                }),
+            });
+    
+            const result = await response.json();
+    
+            if (response.ok) {
+                alert(result.message);  // Success message
+            } else {
+                alert(result.error);    // Error message
+            }
+        } catch (err) {
+            console.error("Unexpected Error:", err);
+            alert("Something went wrong.");
+        }
     };
 
-    // Corrected MultiOptions with the correct key `label`
-    const MultiOptions = [
-        { value: "india", label: "india" },
-        { value: "pakistan", label: "pakistan" },
-        { value: "china", label: "china" },
-        { value: "srilanka", label: "srilanka" },
-        { value: "afganistan", label: "afganistan" },
-    ];
+    // const onSubmit = (data: FormValues) => {
+    //     console.log("Form Data:", data);
+    // };
+        useEffect(() => {
+            const fetchDriver = async () => {
+                setLoading(true);
+                try {
+                    const supabase = createClient();
+    
+                
+                    const { data, error } = await supabase
+                        .from("drivers")
+                        .select("*");
+    
+                    if (error) {
+                        setError(error.message);
+                    } else {
+                       
+                        const formattedDriver = data.map((center: any) => ({
+                            value: center.driver_id,
+                            label: center.driver_name,
+                        }));
+    
+                        setDriver(formattedDriver);
+                    }
+                } catch (err) {
+                    console.error("Error fetching service centers:", err);
+                    setError("Something went wrong while fetching the data.");
+                } finally {
+                    setLoading(false);
+                }
+            };
+    
+            fetchDriver();
+        }, []);
+
 
     return (
         <main className="add_notification_service_center_main">
@@ -66,21 +122,25 @@ const NotificatioDriveradd = () => {
                             </div>
                             <div className="inner_form_group">
                                 <label htmlFor="state">Select Driver <span>*</span></label>
-                                <Controller
-                                    control={control} // Use Controller to integrate react-select with react-hook-form
-                                    name="service_centers"
+                        
+                                  <Controller
+                                    control={control}
+                                    name="Driver" // Only name, no register
                                     render={({ field }) => (
                                         <Select
                                             {...field}
-                                            options={MultiOptions}
+                                            options={driver}
                                             isMulti
+                                            isLoading={loading}
+                                            placeholder="Select Driver"
                                             className="react-select-container"
                                             classNamePrefix="react-select"
                                         />
                                     )}
                                 />
-                                {errors.service_centers && (
-                                    <p className="erro_message">{errors.service_centers.message}</p>
+
+                                {errors.Driver && (
+                                    <p className="erro_message">{errors.Driver.message}</p>
                                 )}
                             </div>
                             <div className="inner_form_group">
@@ -92,7 +152,7 @@ const NotificatioDriveradd = () => {
                             </div>
                             <div className="inner_form_group">
                                 <label htmlFor="message">Message</label>
-                                <textarea className="form-control" name="message" id="message" rows={1}></textarea>
+                                <textarea className="form-control"   {...register("message")} id="message" rows={1}></textarea>
                             </div>
                             <div className="inner_form_group">
                                 <label htmlFor="upload">Upload Document <span>*</span></label>

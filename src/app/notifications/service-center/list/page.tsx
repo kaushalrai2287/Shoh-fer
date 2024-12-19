@@ -9,11 +9,11 @@ import { DataTable } from "../../../../../components/ui/datatable";
 import Link from "next/link";
 
 const NotificatioServicecenterlist = () => {
-    const [isToggled, setIsToggled] = useState(false); // State for toggle
+    const [isToggled, setIsToggled] = useState(false);
 
 
     const toggleClass = () => {
-        setIsToggled(!isToggled); // Toggle the state
+        setIsToggled(!isToggled); 
     };
 
     const columns = {
@@ -72,6 +72,14 @@ const NotificatioServicecenterlist = () => {
                                 <div className="inner_form_group inner_form_group_submit">
                                     <input type="submit" className='submite_btn' value="Search" />
                                     <input type="submit" className='close_btn' value="Export All" />
+                                    <div>
+                    <input
+                      type="button"
+                      className="close_btn"
+                      value="Clear"
+                    //   onClick={handleClearFilters} // Attach the handler here
+                    />
+                  </div>
                                 </div>
                             </form>
                         </div>

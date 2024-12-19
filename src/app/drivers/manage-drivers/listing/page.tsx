@@ -286,7 +286,17 @@ const ManageDriver = () => {
         editLink: '#',
         deleteLink: '#',
     }));
-
+    const handleClearFilters = () => {
+        // Reset all filter states to default values
+        setSearchQuery("");
+        setContactNoQuery("");
+        setStatusFilter("");
+        setRequestFilter("");
+    
+        // Reset the filtered list to the original driver list
+        setFilteredDriver(driver);
+    };
+    
 
     return (
         <main className="Service_center_list_main">
@@ -383,7 +393,16 @@ const ManageDriver = () => {
                         Export All
                       </CSVLink>
                     )}
+                  
                     </div>
+                    <div>
+                    <input
+                      type="button"
+                      className="close_btn"
+                      value="Clear"
+                      onClick={handleClearFilters} // Attach the handler here
+                    />
+                  </div>
                   </div>
                             </form>
                         </div>
