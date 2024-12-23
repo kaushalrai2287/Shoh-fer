@@ -8,6 +8,7 @@ import { createClient } from "../../../../utils/supabase/client"; // Ensure the 
 import Header from "../../../../components/Header";
 import Sidemenu from "../../../../components/Sidemenu";
 import { useRouter } from "next/navigation";
+import HeadingBredcrum from "../../../../components/HeadingBredcrum";
 
 // Validation Schema
 const formSchema = z.object({
@@ -106,6 +107,13 @@ const router = useRouter();
                     <Sidemenu onToggle={toggleClass} />
                 </div>
                 <div className="inner_right">
+                <HeadingBredcrum
+            heading="Add Role"
+            breadcrumbs={[
+              { label: "Home", link: "/", active: false },
+              { label: "Add Role", active: true },
+            ]}
+          />
                     <div className="add_service_formbox checkbox_formbox">
                         <form onSubmit={handleSubmit(onSubmit)}>
                             <div className="service_form_heading">Add Role</div>

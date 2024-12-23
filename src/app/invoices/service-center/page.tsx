@@ -8,6 +8,7 @@ import Sidemenu from "../../../../components/Sidemenu";
 import { DataTable } from "../../../../components/ui/datatable";
 import Link from "next/link";
 import { CSVLink } from "react-csv";
+import HeadingBredcrum from "../../../../components/HeadingBredcrum";
 
 const InvoceService = () => {
   const [isToggled, setIsToggled] = useState(false); // State for toggle
@@ -37,7 +38,7 @@ const InvoceService = () => {
   const fetchInvoices = async () => {
     try {
       const params = new URLSearchParams();
-  
+
       // Only append non-empty filters
       if (filters.service_center_name.trim()) {
         params.append("service_center_name", filters.service_center_name);
@@ -51,13 +52,13 @@ const InvoceService = () => {
       if (filters.status.trim()) {
         params.append("status", filters.status);
       }
-  
+
       const response = await fetch(
         `/api/invoices/ServiceCenterInvoices?${params.toString()}`
       );
-  
+
       const result = await response.json();
-  
+
       if (result.data) {
         const formattedData = result.data.map((item: any) => ({
           Service_Center_Name: item.service_center_name || "N/A",
@@ -67,7 +68,7 @@ const InvoceService = () => {
           Cost: item.total_amount,
           Status: item.is_paid ? "Paid" : "Pending",
         }));
-  
+
         setServiceCenterInvoices(formattedData);
       } else {
         console.error("Error fetching invoices data:", result.message);
@@ -76,45 +77,45 @@ const InvoceService = () => {
       console.error("Error calling API:", error);
     }
   };
-  
-//   const fetchInvoices = async () => {
-//     try {
-//       const params = new URLSearchParams();
 
-//       // Append filters to query string
-//       if (filters.service_center_name) {
-//         params.append("service_center_name", filters.service_center_name);
-//       }
-//       if (filters.start_date) {
-//         params.append("start_date", filters.start_date);
-//       }
-//       if (filters.end_date) {
-//         params.append("end_date", filters.end_date);
-//       }
+  //   const fetchInvoices = async () => {
+  //     try {
+  //       const params = new URLSearchParams();
 
-//       const response = await fetch(
-//         `/api/invoices/ServiceCenterInvoices?${params.toString()}`
-//       );
-//       const result = await response.json();
+  //       // Append filters to query string
+  //       if (filters.service_center_name) {
+  //         params.append("service_center_name", filters.service_center_name);
+  //       }
+  //       if (filters.start_date) {
+  //         params.append("start_date", filters.start_date);
+  //       }
+  //       if (filters.end_date) {
+  //         params.append("end_date", filters.end_date);
+  //       }
 
-//       if (result.data) {
-//         const formattedData = result.data.map((item: any) => ({
-//           Service_Center_Name: item.service_center_name || "N/A",
-//           Driver_Name: item.driver_name || "N/A",
-//           Trip_Id: item.booking_id || "N/A",
-//           Date: item.payment_date,
-//           Cost: item.total_amount,
-//           Status: item.is_paid ? "Paid" : "Pending",
-//         }));
+  //       const response = await fetch(
+  //         `/api/invoices/ServiceCenterInvoices?${params.toString()}`
+  //       );
+  //       const result = await response.json();
 
-//         setServiceCenterInvoices(formattedData);
-//       } else {
-//         console.error("Error fetching invoices data:", result.message);
-//       }
-//     } catch (error) {
-//       console.error("Error calling API:", error);
-//     }
-//   };
+  //       if (result.data) {
+  //         const formattedData = result.data.map((item: any) => ({
+  //           Service_Center_Name: item.service_center_name || "N/A",
+  //           Driver_Name: item.driver_name || "N/A",
+  //           Trip_Id: item.booking_id || "N/A",
+  //           Date: item.payment_date,
+  //           Cost: item.total_amount,
+  //           Status: item.is_paid ? "Paid" : "Pending",
+  //         }));
+
+  //         setServiceCenterInvoices(formattedData);
+  //       } else {
+  //         console.error("Error fetching invoices data:", result.message);
+  //       }
+  //     } catch (error) {
+  //       console.error("Error calling API:", error);
+  //     }
+  //   };
 
   useEffect(() => {
     fetchInvoices();
@@ -151,7 +152,7 @@ const InvoceService = () => {
       end_date: "",
       status: "",
     });
-    fetchInvoices(); 
+    fetchInvoices();
   };
 
   return (
@@ -162,6 +163,13 @@ const InvoceService = () => {
           <Sidemenu onToggle={toggleClass} />
         </div>
         <div className="inner_right">
+          <HeadingBredcrum
+            heading="Service Center Invoices"
+            breadcrumbs={[
+              { label: "Home", link: "/", active: false },
+              { label: "Service Center Invoices", active: true },
+            ]}
+          />
           <div className="filter_box">
             <div className="filter_heading_btnbox">
               <div className="service_form_heading">

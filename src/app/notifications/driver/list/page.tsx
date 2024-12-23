@@ -1,4 +1,3 @@
-// final code
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -7,6 +6,7 @@ import Header from "../../../../../components/Header";
 import Sidemenu from "../../../../../components/Sidemenu";
 import { DataTable } from "../../../../../components/ui/datatable";
 import Link from "next/link";
+import HeadingBredcrum from "../../../../../components/HeadingBredcrum";
 
 interface Notification {
   driver_name: string;
@@ -14,12 +14,15 @@ interface Notification {
   upload_document: string;
   message: string;
 }
+
 const NotificatioDriverlist = () => {
   const [isToggled, setIsToggled] = useState(false);
-
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [filteredNotifications, setFilteredNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [driverNameFilter, setDriverNameFilter] = useState("");
+  const [titleFilter, setTitleFilter] = useState("");
 
   const toggleClass = () => {
     setIsToggled(!isToggled);
@@ -37,9 +40,9 @@ const NotificatioDriverlist = () => {
       try {
         const response = await fetch("/api/Notification/DriverList");
         const result = await response.json();
-        console.log(result);
         if (response.ok) {
           setNotifications(result.data);
+          setFilteredNotifications(result.data); // Initially display all data
         } else {
           setError(result.error);
         }
@@ -52,10 +55,46 @@ const NotificatioDriverlist = () => {
 
     fetchNotifications();
   }, []);
-  const mappedData = notifications.map((notification) => ({
+
+  const handleFilterChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+    filterType: "driverName" | "title"
+  ) => {
+    const value = event.target.value;
+    if (filterType === "driverName") {
+      setDriverNameFilter(value);
+    } else if (filterType === "title") {
+      setTitleFilter(value);
+    }
+  };
+
+  const handleSearchSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+
+    const filtered = notifications.filter((notification) => {
+      const matchesDriverName = notification.driver_name
+        .toLowerCase()
+        .includes(driverNameFilter.toLowerCase());
+      const matchesTitle = notification.title
+        .toLowerCase()
+        .includes(titleFilter.toLowerCase());
+
+      return matchesDriverName && matchesTitle;
+    });
+
+    setFilteredNotifications(filtered);
+  };
+
+  const handleClearFilters = () => {
+    setDriverNameFilter("");
+    setTitleFilter("");
+    setFilteredNotifications(notifications); // Reset to show all data
+  };
+
+  const mappedData = filteredNotifications.map((notification) => ({
     Driver_Name: notification.driver_name,
     Title: notification.title,
-    Upload_Document: notification.upload_document, // This will be hidden
+    Upload_Document: notification.upload_document,
     Message: notification.message,
   }));
 
@@ -69,6 +108,13 @@ const NotificatioDriverlist = () => {
           <Sidemenu onToggle={toggleClass} />
         </div>
         <div className="inner_right">
+        <HeadingBredcrum
+            heading="Driver Notification List"
+            breadcrumbs={[
+              { label: "Home", link: "/", active: false },
+              { label: "Driver Notification List", active: true },
+            ]}
+            />
           <div className="filter_box">
             <div className="filter_heading_btnbox">
               <div className="service_form_heading">
@@ -88,12 +134,11 @@ const NotificatioDriverlist = () => {
               </div>
             </div>
 
-            {/* Loading indicator inside the form */}
             {loading ? (
               <div>Loading...</div>
             ) : (
               <div className="filter_formbox">
-                <form action="">
+                <form onSubmit={handleSearchSubmit}>
                   <div className="inner_form_group">
                     <label htmlFor="driver_name">Driver Name</label>
                     <input
@@ -101,15 +146,19 @@ const NotificatioDriverlist = () => {
                       type="text"
                       name="driver_name"
                       id="driver_name"
+                      value={driverNameFilter}
+                      onChange={(e) => handleFilterChange(e, "driverName")}
                     />
                   </div>
                   <div className="inner_form_group">
-                    <label htmlFor="search_service_area">Title</label>
+                    <label htmlFor="title">Title</label>
                     <input
                       className="form-control"
                       type="text"
-                      name="search_service_area"
-                      id="search_service_area"
+                      name="title"
+                      id="title"
+                      value={titleFilter}
+                      onChange={(e) => handleFilterChange(e, "title")}
                     />
                   </div>
                   <div className="inner_form_group inner_form_group_submit">
@@ -119,18 +168,11 @@ const NotificatioDriverlist = () => {
                       value="Search"
                     />
                     <input
-                      type="submit"
+                      type="button"
                       className="close_btn"
-                      value="Export All"
+                      value="Clear"
+                      onClick={handleClearFilters}
                     />
-                    <div>
-                      <input
-                        type="button"
-                        className="close_btn"
-                        value="Clear"
-                        //   onClick={handleClearFilters} // Attach the handler here
-                      />
-                    </div>
                   </div>
                 </form>
               </div>
@@ -158,4 +200,5 @@ const NotificatioDriverlist = () => {
     </main>
   );
 };
+
 export default NotificatioDriverlist;

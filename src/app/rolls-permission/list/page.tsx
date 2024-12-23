@@ -8,6 +8,7 @@ import { DataTable } from "../../../../components/ui/datatable";
 import Link from "next/link";
 import { createClient } from "../../../../utils/supabase/client";
 import { CSVLink } from "react-csv"; // Import CSVLink
+import HeadingBredcrum from "../../../../components/HeadingBredcrum";
 
 interface Role {
   role_id: string;
@@ -101,6 +102,13 @@ const RollsPermission = () => {
           <Sidemenu onToggle={toggleClass} />
         </div>
         <div className="inner_right">
+        <HeadingBredcrum
+            heading="Roles"
+            breadcrumbs={[
+              { label: "Home", link: "/", active: false },
+              { label: "Roles List", active: true },
+            ]}
+          />
           <div className="filter_box">
             <div className="filter_heading_btnbox">
               <div className="service_form_heading">

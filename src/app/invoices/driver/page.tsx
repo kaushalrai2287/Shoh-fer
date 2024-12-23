@@ -5,6 +5,7 @@ import Header from "../../../../components/Header";
 import Sidemenu from "../../../../components/Sidemenu";
 import { DataTable } from "../../../../components/ui/datatable";
 import { CSVLink } from "react-csv";
+import HeadingBredcrum from "../../../../components/HeadingBredcrum";
 
 const InvoceService = () => {
   const [isToggled, setIsToggled] = useState(false); // State for toggle
@@ -116,6 +117,13 @@ const InvoceService = () => {
           <Sidemenu onToggle={toggleClass} />
         </div>
         <div className="inner_right">
+        <HeadingBredcrum
+            heading="Driver Invoices"
+            breadcrumbs={[
+              { label: "Home", link: "/", active: false },
+              { label: "Driver Invoices", active: true },
+            ]}
+          />
           <div className="filter_box">
             <div className="filter_heading_btnbox">
               <div className="service_form_heading">

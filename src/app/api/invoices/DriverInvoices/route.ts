@@ -1,8 +1,11 @@
 import { createClient } from "../../../../../utils/supabase/client";
 import { NextResponse } from "next/server";
 
+
+
 export async function GET(request: any) {
   const supabase = createClient();
+  
 
   try {
     // Get the search parameters from the request URL
@@ -83,15 +86,7 @@ export async function GET(request: any) {
         ? new Date(invoice.payment_date).toISOString().split("T")[0]
         : "N/A";
 
-    // // Combine the data and apply necessary formatting
-    // const data = invoicesData.map((invoice) => {
-    //   const serviceCenter = serviceCenters.find(
-    //     (sc) => sc.service_center_id === invoice.service_center_id
-    //   );
-    //   const driver = drivers.find((d) => d.driver_id === invoice.driver_id);
-    //   const formattedDate = invoice.payment_date
-    //     ? new Date(invoice.payment_date).toISOString().split("T")[0]
-    //     : "N/A";
+    
 
       return {
         service_center_name: serviceCenter ? serviceCenter.name : "N/A",
