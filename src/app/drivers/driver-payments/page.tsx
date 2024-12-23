@@ -279,7 +279,7 @@ const DriverPay = () => {
                                         className="close_btn"
                                         onClick={handleReset}
                                     >
-                                        Reset
+                                        Clear
                                     </button>
                                 </div>
                             </form>
