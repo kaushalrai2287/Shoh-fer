@@ -106,24 +106,25 @@ const ListingPage = () => {
   const handleEdit = (id: number) => {
     router.push(`/add-service-center/edit/${id}`);
   };
-  const handleStatusToggle = async (id: number, currentStatus: boolean) => {
+
+  const handleStatusToggle = async (id: number, newStatus: boolean) => {
     const confirmToggle = window.confirm(
       "Are you sure you want to change the status?"
     );
     if (!confirmToggle) return;
-
+  
     try {
       const supabase = createClient();
-
+  
       // Show a loading indicator
       setIsToggled(true); // Optionally use a separate loading state
-
+  
       // Toggle the status
       const { error } = await supabase
         .from("service_centers")
-        .update({ is_active: !currentStatus }) // Toggle status
+        .update({ is_active: newStatus }) // Use the new status
         .eq("service_center_id", id);
-
+  
       if (error) {
         console.error("Error updating service center status:", error);
         alert("Failed to update the status.");
@@ -132,14 +133,14 @@ const ListingPage = () => {
         setServiceCenters((prev) =>
           prev.map((center) =>
             center.service_center_id === id
-              ? { ...center, is_active: !currentStatus }
+              ? { ...center, is_active: newStatus }
               : center
           )
         );
         setFilteredCenters((prev) =>
           prev.map((center) =>
             center.service_center_id === id
-              ? { ...center, is_active: !currentStatus }
+              ? { ...center, is_active: newStatus }
               : center
           )
         );
@@ -152,6 +153,53 @@ const ListingPage = () => {
       setIsToggled(false); // Hide loading indicator
     }
   };
+  
+  // const handleStatusToggle = async (id: number, currentStatus: boolean) => {
+  //   const confirmToggle = window.confirm(
+  //     "Are you sure you want to change the status?"
+  //   );
+  //   if (!confirmToggle) return;
+
+  //   try {
+  //     const supabase = createClient();
+
+  //     // Show a loading indicator
+  //     setIsToggled(true); // Optionally use a separate loading state
+
+  //     // Toggle the status
+  //     const { error } = await supabase
+  //       .from("service_centers")
+  //       .update({ is_active: !currentStatus }) // Toggle status
+  //       .eq("service_center_id", id);
+
+  //     if (error) {
+  //       console.error("Error updating service center status:", error);
+  //       alert("Failed to update the status.");
+  //       setIsToggled(false);
+  //     } else {
+  //       setServiceCenters((prev) =>
+  //         prev.map((center) =>
+  //           center.service_center_id === id
+  //             ? { ...center, is_active: !currentStatus }
+  //             : center
+  //         )
+  //       );
+  //       setFilteredCenters((prev) =>
+  //         prev.map((center) =>
+  //           center.service_center_id === id
+  //             ? { ...center, is_active: !currentStatus }
+  //             : center
+  //         )
+  //       );
+  //       alert("Status updated successfully.");
+  //       setIsToggled(false); // Hide loading indicator
+  //     }
+  //   } catch (err) {
+  //     console.error("Unexpected error updating status:", err);
+  //     alert("An unexpected error occurred.");
+  //     setIsToggled(false); // Hide loading indicator
+  //   }
+  // };
 
   const handleDelete = async (id: number) => {
     const confirmDelete = window.confirm(
@@ -229,20 +277,39 @@ const ListingPage = () => {
     state_id: center.state_name,
     pincode: center.pincode,
 
+    // Status: (
+    //   <span
+    //     onClick={() =>
+    //       handleStatusToggle(center.service_center_id, center.is_active)
+    //     }
+    //     style={{
+    //       cursor: "pointer",
+    //       color: center.is_active ? "green" : "red",
+    //       fontWeight: "bold",
+    //     }}
+    //   >
+    //     {center.is_active ? "Active" : "Inactive"}
+    //   </span>
+    // ),
     Status: (
-      <span
-        onClick={() =>
-          handleStatusToggle(center.service_center_id, center.is_active)
-        }
+      <select
+        value={center.is_active ? "Active" : "Inactive"}
+        onChange={async (e) => {
+          const newStatus = e.target.value === "Active"; // Convert value to boolean
+          await handleStatusToggle(center.service_center_id, newStatus); // Pass the new status
+        }}
         style={{
           cursor: "pointer",
-          color: center.is_active ? "green" : "red",
           fontWeight: "bold",
+          color: center.is_active ? "green" : "red",
         }}
       >
-        {center.is_active ? "Active" : "Inactive"}
-      </span>
+        <option value="Active">Active</option>
+        <option value="Inactive">Inactive</option>
+      </select>
     ),
+    
+    
 
     onEdit: () => handleEdit(center.service_center_id),
     //  deleteLink: '#',
