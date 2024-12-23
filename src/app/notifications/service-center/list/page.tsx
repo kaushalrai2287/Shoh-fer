@@ -11,7 +11,7 @@ import HeadingBredcrum from "../../../../../components/HeadingBredcrum";
 interface Notification {
   servicecenter_name: string;
   title: string;
-  upload_document: string;
+  doc_url: string;
   message: string;
 }
 
@@ -42,6 +42,7 @@ const NotificatioServicecenterlist = () => {
         const result = await response.json();
         if (response.ok) {
           setNotifications(result.data);
+          // console.log(result.data);
           setFilteredNotifications(result.data); 
         } else {
           setError(result.error);
@@ -55,6 +56,7 @@ const NotificatioServicecenterlist = () => {
 
     fetchNotifications();
   }, []);
+  
 
   const handleFilterChange = (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -106,7 +108,20 @@ const NotificatioServicecenterlist = () => {
   const mappedData = filteredNotifications.map((notification) => ({
     Service_Center_Name: notification.servicecenter_name,
     Title: notification.title,
-    Upload_Document: notification.upload_document,
+    // Upload_Document: notification.doc_url,
+    Upload_Document: (
+      <a
+        href={notification.doc_url}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          color: "#007bff",
+          textDecoration: "underline",
+        }}
+      >
+        View Document
+      </a>
+    ),
     Message: notification.message,
   }));
 

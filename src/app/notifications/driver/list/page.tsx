@@ -11,7 +11,7 @@ import HeadingBredcrum from "../../../../../components/HeadingBredcrum";
 interface Notification {
   driver_name: string;
   title: string;
-  upload_document: string;
+  doc_url: string;
   message: string;
 }
 
@@ -94,7 +94,20 @@ const NotificatioDriverlist = () => {
   const mappedData = filteredNotifications.map((notification) => ({
     Driver_Name: notification.driver_name,
     Title: notification.title,
-    Upload_Document: notification.upload_document,
+    // Upload_Document: notification.doc_url,
+    Upload_Document: (
+      <a
+        href={notification.doc_url}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          color: "#007bff",
+          textDecoration: "underline",
+        }}
+      >
+        View Document
+      </a>
+    ),
     Message: notification.message,
   }));
 

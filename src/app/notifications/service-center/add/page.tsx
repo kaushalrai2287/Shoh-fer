@@ -197,21 +197,20 @@ const NotificatioServicecenteradd = () => {
     const toggleClass = () => {
         setIsToggled(!isToggled); 
     };
-
-
     const onSubmit = async (data: FormValues) => {
         try {
+            const formData = new FormData();
+            formData.append('message', data.message);
+            formData.append('name', data.name);
+            formData.append('service_centers', JSON.stringify(data.service_centers));
+    
+            if (data.upload && data.upload.length > 0) {
+                formData.append('upload', data.upload[0]); // Add uploaded file
+            }
+    
             const response = await fetch("/api/Notification/ToServiceCenter", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    message: data.message,
-                    name: data.name,
-                    service_centers: data.service_centers,
-                    upload: data.upload, 
-                }),
+                body: formData,
             });
     
             const result = await response.json();
@@ -230,14 +229,33 @@ const NotificatioServicecenteradd = () => {
 
     // const onSubmit = async (data: FormValues) => {
     //     try {
-    //         console.log("Form Data:", data);
-    //         // console.log("Service Centers Options:", serviceCenters);
+    //         const response = await fetch("/api/Notification/ToServiceCenter", {
+    //             method: "POST",
+    //             headers: {
+    //                 "Content-Type": "application/json",
+    //             },
+    //             body: JSON.stringify({
+    //                 message: data.message,
+    //                 name: data.name,
+    //                 service_centers: data.service_centers,
+    //                 upload: data.upload, 
+    //             }),
+    //         });
     
-    //         // Your additional logic here...
+    //         const result = await response.json();
+    
+    //         if (response.ok) {
+    //             alert(result.message);  // Success message
+    //         } else {
+    //             alert(result.error);    // Error message
+    //         }
     //     } catch (err) {
     //         console.error("Unexpected Error:", err);
+    //         alert("Something went wrong.");
     //     }
     // };
+    
+
     
     // Add global Zod error logging
     const onError = (errors: any) => {
