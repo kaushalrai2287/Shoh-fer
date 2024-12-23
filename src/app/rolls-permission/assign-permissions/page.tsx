@@ -10,6 +10,7 @@ import Sidemenu from "../../../../components/Sidemenu";
 import { createClient } from "../../../../utils/supabase/client";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import HeadingBredcrum from "../../../../components/HeadingBredcrum";
 
 interface Role {
     role_id: string;
@@ -168,6 +169,13 @@ const SystemSetting = () => {
                     <Sidemenu onToggle={toggleClass} />
                 </div>
                 <div className="inner_right">
+                <HeadingBredcrum
+            heading="Assign Permission"
+            breadcrumbs={[
+              { label: "Home", link: "/", active: false },
+              { label: "Assign Permissione", active: true },
+            ]}
+          />
                     <div className="add_service_formbox checkbox_formbox">
                     <form onSubmit={handleSubmit(onSubmit)}>
                             <div className="service_form_heading">

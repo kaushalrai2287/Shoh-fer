@@ -1,19 +1,23 @@
 "use client";
-
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "../../../../components/Header";
 import Sidemenu from "../../../../components/Sidemenu";
 import { DataTable } from "../../../../components/ui/datatable";
+import { CSVLink } from "react-csv";
+import HeadingBredcrum from "../../../../components/HeadingBredcrum";
 
 const FeedbackComplaintsRating = () => {
   const [isToggled, setIsToggled] = useState(false);
   const [feedbackData, setFeedbackData] = useState<any[]>([]);
+  const [filteredData, setFilteredData] = useState<any[]>([]);
+  const [serviceCenterFilter, setServiceCenterFilter] = useState("");
+  const [driverNameFilter, setDriverNameFilter] = useState("");
+  const [tripIdFilter, setTripIdFilter] = useState("");
 
   const toggleClass = () => {
     setIsToggled(!isToggled);
   };
 
-  // Table column definitions
   const columns = {
     service_center_name: "Service Center Name",
     driver_name: "Driver Name",
@@ -22,7 +26,6 @@ const FeedbackComplaintsRating = () => {
     rating: "Rating",
   };
 
-  // Fetch data on component mount
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -30,7 +33,6 @@ const FeedbackComplaintsRating = () => {
         const result = await response.json();
 
         if (result.data) {
-        
           const formattedData = result.data.map((item: any) => ({
             service_center_name: item.service_center_name || "N/A",
             driver_name: item.driver_name || "N/A",
@@ -40,6 +42,7 @@ const FeedbackComplaintsRating = () => {
           }));
 
           setFeedbackData(formattedData);
+          setFilteredData(formattedData); // Initially display all data
         } else {
           console.error("Error fetching feedback data:", result.message);
         }
@@ -50,7 +53,6 @@ const FeedbackComplaintsRating = () => {
 
     fetchData();
   }, []);
-
 
   const renderRatingStars = (rating: number) => {
     const totalStars = 5;
@@ -73,6 +75,55 @@ const FeedbackComplaintsRating = () => {
     );
   };
 
+  const handleFilterChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+    filterType: "serviceCenter" | "driverName" | "tripId"
+  ) => {
+    const value = event.target.value;
+    if (filterType === "serviceCenter") {
+      setServiceCenterFilter(value);
+    } else if (filterType === "driverName") {
+      setDriverNameFilter(value);
+    } else if (filterType === "tripId") {
+      setTripIdFilter(value);
+    }
+  };
+
+  const handleClearFilters = () => {
+    setServiceCenterFilter("");
+    setDriverNameFilter("");
+    setTripIdFilter("");
+    setFilteredData(feedbackData); // Reset to show all data
+  };
+
+  const handleSearchSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+
+    const filtered = feedbackData.filter((item: any) => {
+      const matchesServiceCenter = item.service_center_name
+        .toLowerCase()
+        .includes(serviceCenterFilter.toLowerCase());
+      const matchesDriverName = item.driver_name
+        .toLowerCase()
+        .includes(driverNameFilter.toLowerCase());
+      const matchesTripId = String(item.trip_id) // Convert trip_id to a string
+        .toLowerCase()
+        .includes(tripIdFilter.toLowerCase());
+
+      return matchesServiceCenter && matchesDriverName && matchesTripId;
+    });
+
+    setFilteredData(filtered);
+  };
+
+  const csvHeaders = [
+    { label: "Service Center Name", key: "service_center_name" },
+    { label: "Driver Name", key: "driver_name" },
+    { label: "Trip ID", key: "trip_id" },
+    { label: "Feedback", key: "feedback" },
+    { label: "Rating", key: "rating" },
+  ];
+
   return (
     <main className="Service_center_list_main">
       <Header />
@@ -81,7 +132,13 @@ const FeedbackComplaintsRating = () => {
           <Sidemenu onToggle={toggleClass} />
         </div>
         <div className="inner_right">
-          {/* Filter Box */}
+        <HeadingBredcrum
+            heading="Rating Reviews Feedback"
+            breadcrumbs={[
+              { label: "Home", link: "/", active: false },
+              { label: "Rating Reviews Feedback List", active: true },
+            ]}
+          />
           <div className="filter_box">
             <div className="filter_heading_btnbox">
               <div className="service_form_heading">
@@ -96,14 +153,18 @@ const FeedbackComplaintsRating = () => {
               </div>
             </div>
             <div className="filter_formbox">
-              <form>
+              <form onSubmit={handleSearchSubmit}>
                 <div className="inner_form_group">
-                  <label htmlFor="service_center_name">Service Center Name</label>
+                  <label htmlFor="service_center_name">
+                    Service Center Name
+                  </label>
                   <input
                     className="form-control"
                     type="text"
                     name="service_center_name"
                     id="service_center_name"
+                    value={serviceCenterFilter}
+                    onChange={(e) => handleFilterChange(e, "serviceCenter")}
                   />
                 </div>
                 <div className="inner_form_group">
@@ -113,6 +174,8 @@ const FeedbackComplaintsRating = () => {
                     type="text"
                     name="driver_name"
                     id="driver_name"
+                    value={driverNameFilter}
+                    onChange={(e) => handleFilterChange(e, "driverName")}
                   />
                 </div>
                 <div className="inner_form_group">
@@ -122,17 +185,27 @@ const FeedbackComplaintsRating = () => {
                     type="text"
                     name="trip_id"
                     id="trip_id"
+                    value={tripIdFilter}
+                    onChange={(e) => handleFilterChange(e, "tripId")}
                   />
                 </div>
                 <div className="inner_form_group inner_form_group_submit">
                   <input type="submit" className="submite_btn" value="Search" />
-                  <input type="button" className="close_btn" value="Export All" />
+
+                  <CSVLink
+                    data={filteredData}
+                    headers={csvHeaders}
+                    filename={"feedback_complaints_rating.csv"}
+                    className="close_btn"
+                  >
+                    Export All
+                  </CSVLink>
                   <div>
                     <input
                       type="button"
                       className="close_btn"
                       value="Clear"
-                      // onClick={handleClearFilters} // Attach the handler here
+                      onClick={handleClearFilters}
                     />
                   </div>
                 </div>
@@ -140,7 +213,6 @@ const FeedbackComplaintsRating = () => {
             </div>
           </div>
 
-          {/* Data Listing */}
           <div className="data_listing_box mt-3">
             <div className="filter_heading_btnbox">
               <div className="service_form_heading">
@@ -155,7 +227,7 @@ const FeedbackComplaintsRating = () => {
               </div>
             </div>
             <div className="filter_data_table">
-              <DataTable columns={columns} data={feedbackData} />
+              <DataTable columns={columns} data={filteredData} />
             </div>
           </div>
         </div>

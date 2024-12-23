@@ -158,7 +158,7 @@ const supabase  = createClient()
               </div>
             </div>
           </Link>
-          {/* {hasPermission("Manage_Service_Centers") && ( */}
+          {hasPermission("Manage_Service_Centers") && (
            
          
 
@@ -208,9 +208,10 @@ const supabase  = createClient()
               </div>
             </div>
           </div>       
- {/* )} */}
+ )}
           
           {/* Drivers */}
+          {hasPermission("Manage_Drivers") && (
           <div className="accordion-item">
             <div className="accordion-header" id="flush-headingTwo">
               <button
@@ -257,7 +258,10 @@ const supabase  = createClient()
               </div>
             </div>
           </div>
+           )}
            {/* Bookings */}
+           
+           {hasPermission("Manage_Bookings") && (
            <div className="accordion-item">
             <div className="accordion-header" id="flush-headingThree">
               <button
@@ -306,6 +310,7 @@ const supabase  = createClient()
               </div>
             </div>
           </div>
+           )}
         {/* Roles & Permissions */}
         <div className="accordion-item">
             <div className="accordion-header" id="flush-headingFour">
@@ -356,6 +361,8 @@ const supabase  = createClient()
             </div>
           </div>
            {/* Notifications */}
+           
+           {hasPermission("View Notifications to Service Center") && (
            <div className="accordion-item">
             <div className="accordion-header" id="flush-headingSix">
               <button
@@ -404,6 +411,7 @@ const supabase  = createClient()
               </div>
             </div>
           </div>
+           )}
           {/* Feedback & Complaints */}
           <div className="accordion-item">
             <div className="accordion-header" id="flush-headingSeven">
@@ -454,6 +462,8 @@ const supabase  = createClient()
             </div>
           </div>
           {/* Invoices */}
+          
+          {hasPermission("Invoices") && (
           <div className="accordion-item">
             <div className="accordion-header" id="flush-headingEight">
               <button
@@ -500,6 +510,7 @@ const supabase  = createClient()
               </div>
             </div>
           </div>
+          )}
           {/* Documents */}
           <Link href="">
             <div className="sidemenu_listing">
@@ -512,6 +523,7 @@ const supabase  = createClient()
             </div>
           </Link>
           {/* Settings */}
+          {hasPermission("Settings") && (
           <div className="accordion-item">
             <div className="accordion-header" id="flush-headingFive">
               <button
@@ -561,6 +573,7 @@ const supabase  = createClient()
               </div>
             </div>
           </div>
+          )}
           {/* Miscellaneous / Category Management */}
           <div className="accordion-item">
             <div className="accordion-header" id="flush-headingNine">
@@ -609,6 +622,7 @@ const supabase  = createClient()
             </div>
           </div>
           {/* Reports */}
+          {hasPermission("Reports") && (
           <Link href="">
             <div className="sidemenu_listing">
               <div className="sidemenu_icon">
@@ -619,7 +633,9 @@ const supabase  = createClient()
               </div>
             </div>
           </Link>
+          )}
         </div>
+        
       </div>
       <div className="toggle-button" onClick={onToggle}>
         <img src="/images/angle-small-left.svg" alt="" className="img-fluid" />

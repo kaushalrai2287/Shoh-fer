@@ -155,6 +155,8 @@ import { z } from "zod";
 import Header from '../../../../../components/Header';
 import Sidemenu from "../../../../../components/Sidemenu";
 import { createClient } from "../../../../../utils/supabase/client";
+import HeadingBredcrum from "../../../../../components/HeadingBredcrum";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
     message: z
@@ -165,9 +167,6 @@ const formSchema = z.object({
     .array(z.object({ value: z.union([z.string(), z.number()]), label: z.string() }))
     .min(1, "At least one service center must be selected"),
 
-    // service_centers: z
-    //     .array(z.object({ value: z.string(), label: z.string() }))
-    //     .min(1, "At least one service center must be selected"),
     name: z.string().min(1, "Title is required"),
     upload: z.any().optional(),
 });
@@ -179,15 +178,10 @@ const NotificatioServicecenteradd = () => {
     const [serviceCenters, setServiceCenters] = useState<any[]>([]); // State to store all fetched service centers
     const [loading, setLoading] = useState<boolean>(true); // Loading state
     const [error, setError] = useState<string | null>(null); // Error state
+    const router = useRouter();
 
-    // const {
-    //     register,
-    //     handleSubmit,
-    //     control, // Controller from react-hook-form
-    //     formState: { errors, isValid },
-    // } = useForm<FormValues>({
-    //     resolver: zodResolver(formSchema),
-    // });
+
+
 
     const { register, handleSubmit, control, formState: { errors, isValid } } = useForm<FormValues>({
         resolver: zodResolver(formSchema),
@@ -250,6 +244,11 @@ const NotificatioServicecenteradd = () => {
         console.log("Zod Validation Errors:", errors);
         // You can further process the error object for detailed logs
     };
+    const handleClose = (event: { preventDefault: () => void }) => {
+        
+        event.preventDefault(); // Prevent default form behavior
+        router.push("/notifications/driver/list"); // Navigate to the desired page
+      };
 
     useEffect(() => {
         const fetchServiceCenters = async () => {
@@ -292,6 +291,13 @@ const NotificatioServicecenteradd = () => {
                     <Sidemenu onToggle={toggleClass} />
                 </div>
                 <div className="inner_right">
+                     <HeadingBredcrum
+            heading="Service Center Notification Add"
+            breadcrumbs={[
+              { label: "Home", link: "/", active: false },
+              { label: "Service Center Notification Add", active: true },
+            ]}
+            />
                     <div className="add_service_formbox checkbox_formbox">
                         {/* <form onSubmit={handleSubmit(onSubmit)}> */}
                         <form onSubmit={handleSubmit(onSubmit, onError)}>
@@ -344,7 +350,7 @@ const NotificatioServicecenteradd = () => {
                             </div>
                             <div className="inner_form_group inner_form_group_submit">
                                 <input type="submit" className="submite_btn" value="Submit" />
-                                <input type="submit" className="close_btn" value="Close" />
+                                <input type="button" className="close_btn" value="Close" onClick={handleClose} />
                             </div>
                         </form>
                     </div>
