@@ -200,8 +200,8 @@ const supabase  = createClient()
                     <li className={isActiveLink("/add-service-center/list") ? "heighlight" : ""}>
                       <Link href="/add-service-center/list">Manage Service Centers</Link>
                     </li>
-                    <li className={isActiveLink("/add-service-center/billing-payments") ? "heighlight" : ""}>
-                      <Link href="/add-service-center/billing-payments">Billing & Payments</Link>
+                    <li className={isActiveLink("#") ? "heighlight" : ""}>
+                      <Link href="#">Billing & Payments</Link>
                     </li> 
                   </ul>
                 </div>
