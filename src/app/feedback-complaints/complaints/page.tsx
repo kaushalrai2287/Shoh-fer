@@ -198,15 +198,12 @@ const FeedbackComplaints = () => {
   };
 
   // Function to handle status (Request) update
-  const handleRequestUpdate = async (tripId: string, currentStatus: string) => {
-    const newStatus = currentStatus === "Pending" ? "Resolved" : "Pending"; // Toggle between Pending and Resolved
-    
-    // Show confirmation prompt before proceeding
+  const handleRequestUpdate = async (tripId: string, newStatus: string) => {
     const isConfirmed = window.confirm(
       `Are you sure you want to change the status to ${newStatus}?`
     );
   
-    if (!isConfirmed) return; // If the user cancels, do not proceed
+    if (!isConfirmed) return;
   
     const { error } = await supabase
       .from("feedback_complaints")
@@ -249,19 +246,20 @@ const FeedbackComplaints = () => {
     Trip_id: item.trip_id.toString(), // Convert trip_id to string for safe usage
     Complaint_Box: item.complaint_box,
     Request: (
-      <span
-        onClick={() => handleRequestUpdate(item.trip_id, item.request)} // Handle status update
+      <select
+        value={item.request}
+        onChange={(e) => handleRequestUpdate(item.trip_id, e.target.value)} // Handle status update via dropdown
         style={{
           cursor: "pointer",
           color: getStatusColor(item.request), // Apply color based on status
           fontWeight: "bold",
         }}
       >
-        {item.request}
-      </span>
+        <option value="Pending">Pending</option>
+        <option value="Resolved">Resolved</option>
+      </select>
     ),
   }));
-
   // Handle filter changes
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFilters({

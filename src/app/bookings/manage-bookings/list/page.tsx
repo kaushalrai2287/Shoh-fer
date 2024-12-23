@@ -174,10 +174,10 @@ const ListBooking = () => {
 
     // Map current status to the next status
     const statusCycle: Record<StatusType, StatusType> = {
-      pending: "accepted",
-      accepted: "completed",
-      completed: "canceled",
-      canceled: "pending",
+      pending: "pending",
+      accepted: "accepted",
+      completed: "completed",
+      canceled: "canceled",
     };
 
     // Ensure the status value is a valid StatusType
@@ -202,6 +202,46 @@ const ListBooking = () => {
       );
     }
   };
+
+  //  const handleStatusToggle = async (id: number,  newStatus: boolean) => {
+  //         const confirmToggle = window.confirm("Are you sure you want to change the status?");
+  //         if (!confirmToggle) return;
+      
+  //         try {
+  //             const supabase = createClient();
+      
+  //             // Show a loading indicator
+  //             setIsToggled(true);
+      
+  //             // Toggle the status
+  //             const { error } = await supabase
+  //                 .from("drivers")
+  //                 .update({is_active: newStatus }) // Toggle status
+  //                 .eq("driver_id", id);
+      
+  //             if (error) {
+  //                 console.error("Error updating service center status:", error);
+  //                 alert("Failed to update the status.");
+  //                 setIsToggled(false); // Hide loading indicator
+  //             } else {
+              
+  //                 const updatedDriver = driver.map((center) =>
+  //                     center.driver_id === id
+  //                         ? { ...center, is_active: newStatus }
+  //                         : center
+  //                 );
+  //                 setDriver(updatedDriver);
+  //                 setFilteredDriver(updatedDriver);  
+      
+  //                 alert("Status updated successfully.");
+  //                 setIsToggled(false); 
+  //             }
+  //         } catch (err) {
+  //             console.error("Unexpected error updating status:", err);
+  //             alert("An unexpected error occurred.");
+  //             setIsToggled(false); // Hide loading indicator
+  //         }
+  //     };
   const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setDateFilter(event.target.value);
   };
@@ -259,19 +299,26 @@ const ListBooking = () => {
     Drop_Location: booking.dropoff_address,
     Previous_Experince: "3 years",
     Driver_Rating: booking.driver_rating || "N/A",
-
     Status: (
-      <span
-        onClick={() => handleStatusUpdate(booking.booking_id, booking.status)} // Pass current status
+      <select
+        value={booking.status}
+        onChange={async (e) => {
+          const newStatus = e.target.value; // Get selected status
+          await handleStatusUpdate(booking.booking_id, newStatus); // Pass booking ID and new status
+        }}
         style={{
           cursor: "pointer",
           color: getStatusColor(booking.status),
           fontWeight: "bold",
         }}
       >
-        {booking.status}
-      </span>
+        <option value="pending">Pending</option>
+        <option value="accepted">Accepted</option>
+        <option value="completed">Completed</option>
+        <option value="canceled">Canceled</option>
+      </select>
     ),
+
     Booking: "Cancel Booking",
     onEdit: () => handleEdit(booking.booking_id),
     // deleteLink: '#',

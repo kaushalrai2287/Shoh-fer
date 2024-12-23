@@ -127,7 +127,7 @@ const ManageDriver = () => {
     
     
 
-    const handleStatusToggle = async (id: number, currentStatus: boolean) => {
+    const handleStatusToggle = async (id: number,  newStatus: boolean) => {
         const confirmToggle = window.confirm("Are you sure you want to change the status?");
         if (!confirmToggle) return;
     
@@ -140,7 +140,7 @@ const ManageDriver = () => {
             // Toggle the status
             const { error } = await supabase
                 .from("drivers")
-                .update({ is_active: !currentStatus }) // Toggle status
+                .update({is_active: newStatus }) // Toggle status
                 .eq("driver_id", id);
     
             if (error) {
@@ -151,7 +151,7 @@ const ManageDriver = () => {
             
                 const updatedDriver = driver.map((center) =>
                     center.driver_id === id
-                        ? { ...center, is_active: !currentStatus }
+                        ? { ...center, is_active: newStatus }
                         : center
                 );
                 setDriver(updatedDriver);
@@ -166,6 +166,53 @@ const ManageDriver = () => {
             setIsToggled(false); // Hide loading indicator
         }
     };
+
+    //   const handleStatusToggle = async (id: number, newStatus: boolean) => {
+    //     const confirmToggle = window.confirm(
+    //       "Are you sure you want to change the status?"
+    //     );
+    //     if (!confirmToggle) return;
+      
+    //     try {
+    //       const supabase = createClient();
+      
+    //       // Show a loading indicator
+    //       setIsToggled(true); // Optionally use a separate loading state
+      
+    //       // Toggle the status
+    //       const { error } = await supabase
+    //         .from("service_centers")
+    //         .update({ is_active: newStatus }) // Use the new status
+    //         .eq("service_center_id", id);
+      
+    //       if (error) {
+    //         console.error("Error updating service center status:", error);
+    //         alert("Failed to update the status.");
+    //         setIsToggled(false);
+    //       } else {
+    //         setServiceCenters((prev) =>
+    //           prev.map((center) =>
+    //             center.service_center_id === id
+    //               ? { ...center, is_active: newStatus }
+    //               : center
+    //           )
+    //         );
+    //         setFilteredCenters((prev) =>
+    //           prev.map((center) =>
+    //             center.service_center_id === id
+    //               ? { ...center, is_active: newStatus }
+    //               : center
+    //           )
+    //         );
+    //         alert("Status updated successfully.");
+    //         setIsToggled(false); // Hide loading indicator
+    //       }
+    //     } catch (err) {
+    //       console.error("Unexpected error updating status:", err);
+    //       alert("An unexpected error occurred.");
+    //       setIsToggled(false); // Hide loading indicator
+    //     }
+    //   };
     
     const handleRequestToggle = async (id: number, currentStatus: boolean) => {
         const confirmToggle = window.confirm("Are you sure you want to change the status?");
@@ -180,7 +227,7 @@ const ManageDriver = () => {
          
           const { error } = await supabase
             .from("drivers")
-            .update({ is_approved : !currentStatus }) 
+            .update({ is_approved : currentStatus }) 
             .eq("driver_id", id);
       
           if (error) {
@@ -191,7 +238,7 @@ const ManageDriver = () => {
             
             const updatedDriver = driver.map((center) =>
                 center.driver_id === id
-                    ? { ...center, is_approved: !currentStatus }
+                    ? { ...center, is_approved: currentStatus }
                     : center
             );
             setDriver(updatedDriver);
@@ -257,29 +304,62 @@ const ManageDriver = () => {
         address:center.address,
         License_Category: center.license_category,
         Language_Spoken: center.language_spoken,
+        // Status: (
+        //     <span
+        //         onClick={() => handleStatusToggle(center.driver_id, center.is_active)}
+        //         style={{
+        //             cursor: "pointer", 
+        //             color: center.is_active ? "green" : "red", 
+        //             fontWeight: "bold"
+        //         }}
+        //     >
+        //         {center.is_active ? "Active" : "Inactive"}
+        //     </span>
+        // ),
         Status: (
-            <span
-                onClick={() => handleStatusToggle(center.driver_id, center.is_active)}
-                style={{
-                    cursor: "pointer", 
-                    color: center.is_active ? "green" : "red", 
-                    fontWeight: "bold"
-                }}
+            <select
+              value={center.is_active ? "Active" : "Inactive"}
+              onChange={async (e) => {
+                const newStatus = e.target.value === "Active"; // Convert value to boolean
+                await handleStatusToggle(center.driver_id, newStatus); // Pass the new status
+              }}
+              style={{
+                cursor: "pointer",
+                fontWeight: "bold",
+                color: center.is_active ? "green" : "red",
+              }}
             >
-                {center.is_active ? "Active" : "Inactive"}
-            </span>
-        ),
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          ),
         Request: (
-            <span
-                onClick={() => handleRequestToggle(center.driver_id, center.is_approved )}
-                style={{
-                    cursor: "pointer", 
-                    color: center.is_approved  ? "green" : "red", 
-                    fontWeight: "bold"
-                }}
-            >
-                {center.is_approved ? "Approved" : "Pending"}
-            </span>
+
+            <select
+            value={center.is_approved ? "Approved" : "Pending"}
+            onChange={async (e) => {
+              const currentStatus = e.target.value === "Approved"; // Convert value to boolean
+              await handleRequestToggle(center.driver_id, currentStatus); // Pass the new status
+            }}
+            style={{
+              cursor: "pointer",
+              fontWeight: "bold",
+              color: center.is_approved ? "green" : "red",
+            }}
+          >
+            <option value="Approved">Approved</option>
+            <option value="Pending">Pending</option>
+          </select>
+            // <span
+            //     onClick={() => handleRequestToggle(center.driver_id, center.is_approved )}
+            //     style={{
+            //         cursor: "pointer", 
+            //         color: center.is_approved  ? "green" : "red", 
+            //         fontWeight: "bold"
+            //     }}
+            // >
+            //     {center.is_approved ? "Approved" : "Pending"}
+            // </span>
         ),
 
         // Reqeeuest: 'Approved',
