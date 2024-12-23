@@ -187,6 +187,8 @@ const DriverPay = () => {
         fetchData();
     };
 
+
+
     useEffect(() => {
         fetchData();
     }, []);
@@ -199,7 +201,7 @@ const DriverPay = () => {
         pickup_location: "Pickup Location",
         drop_location: "Drop Location",
         amount: "Amount",
-        // billing: "Billing",
+        billing: "Billing",
     };
 
     const hiddenColumns = ["pickup_location", "drop_location"];
@@ -303,7 +305,7 @@ const DriverPay = () => {
                                 columns={columns}
                                 data={data}
                                 hiddenColumns={hiddenColumns}
-                                showBillingButton={true}
+                                showBillingButton={false}
                             />
                         </div>
                     </div>
