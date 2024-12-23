@@ -13,7 +13,8 @@ export async function GET() {
         notification_id, 
         title, 
         message, 
-        recipient_id
+        recipient_id,
+        doc_url
       `)
       .eq("recipient_type", "Driver");
     //   console.log(notifications);

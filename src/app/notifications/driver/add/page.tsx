@@ -53,23 +53,25 @@ const NotificatioDriveradd = () => {
     router.push("/notifications/driver/list"); // Navigate to the desired page
   };
 
+
   const onSubmit = async (data: FormValues) => {
     try {
+      const formData = new FormData();
+      formData.append('message', data.message);
+      formData.append('name', data.name);
+      formData.append('Driver', JSON.stringify(data.Driver));
+  
+      if (data.upload && data.upload.length > 0) {
+        formData.append('upload', data.upload[0]); // Ensure the first file is sent
+      }
+  
       const response = await fetch("/api/Notification/ToDriver", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          message: data.message,
-          name: data.name,
-          Driver: data.Driver,
-          upload: data.upload,
-        }),
+        body: formData,
       });
-
+  
       const result = await response.json();
-
+  
       if (response.ok) {
         alert(result.message); // Success message
       } else {
@@ -80,6 +82,35 @@ const NotificatioDriveradd = () => {
       alert("Something went wrong.");
     }
   };
+  
+
+//   const onSubmit = async (data: FormValues) => {
+//     try {
+//       const response = await fetch("/api/Notification/ToDriver", {
+//         method: "POST",
+//         headers: {
+//           "Content-Type": "application/json",
+//         },
+//         body: JSON.stringify({
+//           message: data.message,
+//           name: data.name,
+//           Driver: data.Driver,
+//           upload: data.upload,
+//         }),
+//       });
+
+//       const result = await response.json();
+
+//       if (response.ok) {
+//         alert(result.message); // Success message
+//       } else {
+//         alert(result.error); // Error message
+//       }
+//     } catch (err) {
+//       console.error("Unexpected Error:", err);
+//       alert("Something went wrong.");
+//     }
+//   };
 
   // const onSubmit = (data: FormValues) => {
   //     console.log("Form Data:", data);
