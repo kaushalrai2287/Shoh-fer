@@ -2,13 +2,13 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import Header from "../../../../../components/Header";
-import Sidemenu from "../../../../../components/Sidemenu";
-import { DataTable } from "../../../../../components/ui/datatable";
+import Header from "../../../../components/Header";
+import Sidemenu from "../../../../components/Sidemenu";
+import { DataTable } from "../../../../components/ui/datatable";
 import Link from "next/link";
-import { createClient } from "../../../../../utils/supabase/client";
+import { createClient } from "../../../../utils/supabase/client";
 import router, { useRouter } from "next/navigation";
-import HeadingBredcrum from "../../../../../components/HeadingBredcrum";
+import HeadingBredcrum from "../../../../components/HeadingBredcrum";
 import { CSVLink } from "react-csv";
 
 // Supabase client initialization
@@ -52,19 +52,19 @@ const ListBooking = () => {
    
     Trip_Id:"Trip Id",
   
-    Brand: "Brand",
-    Model: "Model",
-    Customer_Name: "Customer Name",
+    // Brand: "Brand",
+    // Model: "Model",
+    // Customer_Name: "Customer Name",
     Tracking_link: "Tracking",
-    Customer_Phone_Number: "Customer Phone Number",
-    Vehicle_Number: "Vehicle Number",
-    Vehicle_Condition: "Vehicle Condition",
-    Pick_Up_Location: "Pick Up Location",
-    Drop_Location: "Drop Location",
-    Previous_Experince: "Previous Experience",
-    Invoice:"Invoice",
+    // Customer_Phone_Number: "Customer Phone Number",
+    // Vehicle_Number: "Vehicle Number",
+    // Vehicle_Condition: "Vehicle Condition",
+    // Pick_Up_Location: "Pick Up Location",
+    // Drop_Location: "Drop Location",
+    // Previous_Experince: "Previous Experience",
+    // Invoice:"Invoice",
     // Driver_Rating: "Driver Rating",
-    Status: "Status",
+    // Status: "Status",
     // Booking: "Booking",
   };
 
@@ -72,18 +72,18 @@ const ListBooking = () => {
    
     "Trip_Id",
    
-    "Brand",
-    "Model",
-    "Customer_Name",
+    // "Brand",
+    // "Model",
+    // "Customer_Name",
    
-    "Customer_Phone_Number",
+    // "Customer_Phone_Number",
     "Tracking_link",
-    "Vehicle_Number",
-    "Vehicle_Condition",
-    "Pick_Up_Location",
-    "Drop_Location",
-    "Previous_Experince",
-    "Invoice",
+    // "Vehicle_Number",
+    // "Vehicle_Condition",
+    // "Pick_Up_Location",
+    // "Drop_Location",
+    // "Previous_Experince",
+    // "Invoice",
     // "Driver_Rating",
   ];
 
@@ -165,9 +165,9 @@ const ListBooking = () => {
   };
   const router = useRouter();
 
-  const handleEdit = (bookingId: string) => {
-    router.push(`/bookings/manage-bookings/edit/${bookingId}`);
-  };
+//   const handleEdit = (bookingId: string) => {
+//     router.push(`/bookings/manage-bookings/edit/${bookingId}`);
+//   };
 
   const handleStatusUpdate = async (
     bookingId: string,
@@ -182,7 +182,7 @@ const ListBooking = () => {
       return; // Exit if user cancels
     }
 
-   
+    // Map current status to the next status
     const statusCycle: Record<StatusType, StatusType> = {
       pending: "pending",
       accepted: "accepted",
@@ -190,7 +190,7 @@ const ListBooking = () => {
       canceled: "canceled",
     };
 
-
+    // Ensure the status value is a valid StatusType
     const lowerCaseStatus = currentStatus.toLowerCase() as StatusType;
     const newStatus = statusCycle[lowerCaseStatus] || "pending";
 
@@ -213,45 +213,6 @@ const ListBooking = () => {
     }
   };
 
-  //  const handleStatusToggle = async (id: number,  newStatus: boolean) => {
-  //         const confirmToggle = window.confirm("Are you sure you want to change the status?");
-  //         if (!confirmToggle) return;
-      
-  //         try {
-  //             const supabase = createClient();
-      
-  //             // Show a loading indicator
-  //             setIsToggled(true);
-      
-  //             // Toggle the status
-  //             const { error } = await supabase
-  //                 .from("drivers")
-  //                 .update({is_active: newStatus }) // Toggle status
-  //                 .eq("driver_id", id);
-      
-  //             if (error) {
-  //                 console.error("Error updating service center status:", error);
-  //                 alert("Failed to update the status.");
-  //                 setIsToggled(false); // Hide loading indicator
-  //             } else {
-              
-  //                 const updatedDriver = driver.map((center) =>
-  //                     center.driver_id === id
-  //                         ? { ...center, is_active: newStatus }
-  //                         : center
-  //                 );
-  //                 setDriver(updatedDriver);
-  //                 setFilteredDriver(updatedDriver);  
-      
-  //                 alert("Status updated successfully.");
-  //                 setIsToggled(false); 
-  //             }
-  //         } catch (err) {
-  //             console.error("Unexpected error updating status:", err);
-  //             alert("An unexpected error occurred.");
-  //             setIsToggled(false); // Hide loading indicator
-  //         }
-  //     };
   const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setDateFilter(event.target.value);
   };
@@ -297,32 +258,31 @@ const ListBooking = () => {
     Service_Center_Name: booking.service_centers?.name || "Unknown",
     Driver_Name: booking.drivers?.driver_name,
     Tracking_link: (
-      <button
-        onClick={() => {
-          window.open(
-            "https://www.google.com/maps", // Replace with your tracking URL dynamically
-            "TrackingWindow",
-            "width=600,height=400,left=100,top=100"
-          );
-        }}
-        style={{
-          display: "inline-block",
-          backgroundColor: "#007bff",
-          color: "#fff",
-          padding: "4px 9px",
-          fontSize: "11px",
-          fontWeight: "bold",
-          borderRadius: "4px",
-          textDecoration: "none",
-          textAlign: "center",
-          cursor: "pointer",
-        }}
-      >
-        Track Status
-      </button>
-    ),
-    
-    
+        <button
+          onClick={() => {
+            window.open(
+              "https://www.google.com/maps", // Replace with your tracking URL dynamically
+              "TrackingWindow",
+              "width=600,height=400,left=100,top=100"
+            );
+          }}
+          style={{
+            display: "inline-block",
+            backgroundColor: "#007bff",
+            color: "#fff",
+            padding: "4px 9px",
+            fontSize: "11px",
+            fontWeight: "bold",
+            borderRadius: "4px",
+            textDecoration: "none",
+            textAlign: "center",
+            cursor: "pointer",
+          }}
+        >
+          Track Status
+        </button>
+      ),
+      
     Brand: booking.vehicles.brands?.name || "Unknown",
     Model: booking.vehicles.models?.name || "Unknown",
     Customer_Name: booking.customer_name,
@@ -375,9 +335,12 @@ const ListBooking = () => {
       </select>
     ),
     Booking: "Cancel Booking",
-    onEdit: () => handleEdit(booking.booking_id),
-    onDelete: () => handleDelete(booking.booking_id),
+    // onEdit: () => handleEdit(booking.booking_id),
+    // onDelete: () => handleDelete(booking.booking_id),
 }));
+
+  
+  // console.log(mappedData);
 
   return (
     <main className="Service_center_list_main">
@@ -388,10 +351,10 @@ const ListBooking = () => {
         </div>
         <div className="inner_right">
           <HeadingBredcrum
-            heading="Booking List"
+            heading="Tracking"
             breadcrumbs={[
               { label: "Home", link: "/", active: false },
-              { label: "Booking List", active: true },
+              { label: "Tracking List", active: true },
             ]}
           />
           <div className="filter_box">
@@ -407,9 +370,9 @@ const ListBooking = () => {
                 Filter By
               </div>
               <div className="filter_btn">
-                <Link href="/bookings/manage-bookings/add">
+                {/* <Link href="/bookings/manage-bookings/add">
                   <button className="submite_btn">Add</button>
-                </Link>
+                </Link> */}
               </div>
             </div>
             <div className="filter_formbox">
@@ -483,7 +446,7 @@ const ListBooking = () => {
                     className="img-fluid"
                   />
                 </span>
-                Booking List
+            Tracking
               </div>
             </div>
             <div className="filter_data_table">
