@@ -140,6 +140,7 @@ import HeadingBredcrum from "../../../../components/HeadingBredcrum";
 const supabase = createClient();
 
 interface FeedbackComplaint {
+  Type_of_complaints:string;
   raised_by: string;
   raised_for: string;
   trip_id: string;
@@ -161,6 +162,7 @@ const FeedbackComplaints = () => {
   };
 
   const columns = {
+    Type_Of_Complaints:"Complaints For",
     Raised_by: "Raised By",
     Raised_For: "Raised For",
     Trip_id: "Trip ID",
@@ -241,6 +243,7 @@ const FeedbackComplaints = () => {
 
   // Mapping data to match columns and render the Request status
   const mappedData = filteredData.map((item) => ({
+    Type_Of_Complaints:item.Type_of_complaints,
     Raised_by: item.raised_by,
     Raised_For: item.raised_for,
     Trip_id: item.trip_id.toString(), // Convert trip_id to string for safe usage
