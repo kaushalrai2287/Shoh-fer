@@ -173,7 +173,7 @@ const SystemSetting = () => {
             heading="Assign Permission"
             breadcrumbs={[
               { label: "Home", link: "/", active: false },
-              { label: "Assign Permissione", active: true },
+              { label: "Assign Permission", active: true },
             ]}
           />
                     <div className="add_service_formbox checkbox_formbox">

@@ -296,7 +296,24 @@ const ManageDriver = () => {
         Email:center.email,
         Emergency_Number: center.emergency_contact_no,
         Driving_Licence: center.driving_license_no,
-        Photo: 'image path',
+        // Photo: 'image path',
+        Photo: (
+          <a 
+              href={center.profile_photo_url || '#'} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              style={{
+                  textDecoration: 'none',
+                  color: 'white',
+                  backgroundColor: '#007bff',
+                  padding: '5px 10px',
+                  borderRadius: '5px',
+                  display: 'inline-block'
+              }}
+          >
+              View Photo
+          </a>
+      ),
         National_Id: center.driver_document,
         Yrs_of_exp: center.experience_years,
         Type_of_Vehicle_driven: center.vehicle_type_experience,
@@ -304,18 +321,7 @@ const ManageDriver = () => {
         address:center.address,
         License_Category: center.license_category,
         Language_Spoken: center.language_spoken,
-        // Status: (
-        //     <span
-        //         onClick={() => handleStatusToggle(center.driver_id, center.is_active)}
-        //         style={{
-        //             cursor: "pointer", 
-        //             color: center.is_active ? "green" : "red", 
-        //             fontWeight: "bold"
-        //         }}
-        //     >
-        //         {center.is_active ? "Active" : "Inactive"}
-        //     </span>
-        // ),
+    
         Status: (
             <select
               value={center.is_active ? "Active" : "Inactive"}

@@ -221,7 +221,17 @@ const ListingPage = () => {
     business_registration_no: center.business_registration_no,
     services_id: center.services_offerd,
     service_area: center.service_area,
-    document_upload: center.document_upload,
+    // document_upload: center.document_upload,
+    document_upload: (
+      <a
+        href={center.document_upload}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{ color: 'blue', textDecoration: 'underline' }}
+      >
+        View Document
+      </a>
+    ),
     primary_contact_person: center.primary_contact_person,
     contact_number: center.contact_number,
     email: center.email,
