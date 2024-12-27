@@ -31,7 +31,7 @@ const formSchema = z.object({
         .min(1, "Role Name is required"), // 
     password: z
     .string()
-    .min(6, "Password must be at least 6 characters long") // Password minimum length
+    .min(8, "Password must be at least 8 characters long") // Password minimum length
     .min(1, "Password is required"), // Ensure password is not empty
 });
 
