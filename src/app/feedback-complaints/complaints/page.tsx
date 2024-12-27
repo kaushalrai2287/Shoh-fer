@@ -162,7 +162,7 @@ const FeedbackComplaints = () => {
   };
 
   const columns = {
-    Type_Of_Complaints:"Complaints For",
+    Type_Of_Complaints :"Complaints For (Service Center/Driver)",
     Raised_by: "Raised By",
     Raised_For: "Raised For",
     Trip_id: "Trip ID",
