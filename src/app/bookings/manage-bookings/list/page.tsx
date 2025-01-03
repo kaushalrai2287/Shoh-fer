@@ -213,45 +213,7 @@ const ListBooking = () => {
     }
   };
 
-  //  const handleStatusToggle = async (id: number,  newStatus: boolean) => {
-  //         const confirmToggle = window.confirm("Are you sure you want to change the status?");
-  //         if (!confirmToggle) return;
-      
-  //         try {
-  //             const supabase = createClient();
-      
-  //             // Show a loading indicator
-  //             setIsToggled(true);
-      
-  //             // Toggle the status
-  //             const { error } = await supabase
-  //                 .from("drivers")
-  //                 .update({is_active: newStatus }) // Toggle status
-  //                 .eq("driver_id", id);
-      
-  //             if (error) {
-  //                 console.error("Error updating service center status:", error);
-  //                 alert("Failed to update the status.");
-  //                 setIsToggled(false); // Hide loading indicator
-  //             } else {
-              
-  //                 const updatedDriver = driver.map((center) =>
-  //                     center.driver_id === id
-  //                         ? { ...center, is_active: newStatus }
-  //                         : center
-  //                 );
-  //                 setDriver(updatedDriver);
-  //                 setFilteredDriver(updatedDriver);  
-      
-  //                 alert("Status updated successfully.");
-  //                 setIsToggled(false); 
-  //             }
-  //         } catch (err) {
-  //             console.error("Unexpected error updating status:", err);
-  //             alert("An unexpected error occurred.");
-  //             setIsToggled(false); // Hide loading indicator
-  //         }
-  //     };
+
   const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setDateFilter(event.target.value);
   };
