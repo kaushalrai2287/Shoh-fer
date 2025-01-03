@@ -114,34 +114,7 @@ export function DataTable({
                           <span>{row[col]}</span>
                         </div>
                       ))}
-                      {/* {showStatusButton && (
-                        <div>
-                          <strong>Status: </strong>
-                          <button
-                            className={`btn btn-sm ${row.Status === 'Active' ? 'btn-success' : 'btn-secondary'}`}
-                            onClick={() => {
-                              row.Status = row.Status === 'Active' ? 'Inactive' : 'Active';
-                              handleStatusChange(row); // Call handler to update status
-                            }}
-                          >
-                            {row.Status === 'Active' ? 'Active' : 'Inactive'}
-                          </button>
-                        </div>
-                      )} */}
-                      {/* {showRequestButton && (
-                        <div>
-                          <strong>Request: </strong>
-                          <button
-                            className={`btn btn-sm ${row.Request === 'Approved' ? 'btn-success' : 'btn-secondary'}`}
-                            onClick={() => {
-                              row.Request = row.Request === 'Approved' ? 'Reject' : 'Approved';
-                              handleRequestChange(row); 
-                            }}
-                          >
-                            {row.Request === 'Approved' ? 'Approved' : 'Reject'}
-                          </button>
-                        </div>
-                      )} */}
+                    
                       {showBillingButton && (
                         <div>
                           <strong>Billing: </strong>
