@@ -108,8 +108,8 @@ export default function HomePage() {
 
   return (
     <main>
-      <h1>Push Notification Demo</h1>
-      <button onClick={() => requestPushNotification()}>Enable Notifications</button>
+    
+    
     </main>
   );
 }
