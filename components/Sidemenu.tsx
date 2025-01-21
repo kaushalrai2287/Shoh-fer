@@ -3,90 +3,41 @@
 import Link from "next/link";
 import { redirect, usePathname } from "next/navigation";
 import React, { useEffect, useState, useCallback } from "react";
-import { createClient } from "../utils/supabase/client";
+// import { createClient } from "../utils/supabase/client";
+import { usePermissions } from "../utils/services/PermissionsContext";
 
-const supabase  = createClient()
+// const supabase  = createClient()
 
 
- const Sidemenu = ({ onToggle }: { onToggle: () => void }) => {
-  const [permissions, setPermissions] = useState<string[]>([]);
+//  const Sidemenu = ({ onToggle }: { onToggle: () => void }) => {
+//   const [permissions, setPermissions] = useState<string[]>([]);
 
-  const pathname = usePathname(); // Get the current path
-  
-  useEffect(() => {
-    const fetchPermissions = async () => {
-      try {
-        const { data: sessionData, error } = await supabase.auth.getSession();
-        console.log(sessionData);
-
-        if (error || !sessionData?.session) {
-          redirect("/login");
-          return; // Prevent further execution if no session
-        }
-
-        // Use the token from Supabase session for authentication
-        const token = sessionData.session.access_token;
-        
-        // Check if user exists and error is null
-        // if (error || !user?.user) {
-        //   redirect("/login");
-        //   return; // Prevent further execution if no user
-        // }
-        
-        // // Use the token from Supabase for authentication
-        // const token = user?.user?.access_token; // Token from Supabase session
-        
-        const response = await fetch("/api/users/permission", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
-          },
-        });
-  
-        // if (!response.ok) {
-        //   throw new Error("Network response was not ok " + response.statusText);
-        // }
-  
-        const contentType = response.headers.get("Content-Type");
-        if (!contentType || !contentType.includes("application/json")) {
-          throw new Error("Expected JSON response, but received: " + contentType);
-        }
-  
-        const data = await response.json();
-        setPermissions(data.permissions || []);
-      } catch (error) {
-        console.error("Error fetching permissions:", error);
-      }
-    };
-  
-    fetchPermissions();
-  }, []);
+//   const pathname = usePathname(); // Get the current path
   
   // useEffect(() => {
   //   const fetchPermissions = async () => {
   //     try {
-  //       // const token = "your_bearer_token_here";
-  //       const { data:user, error } = await supabase.auth.getUser();
-  //       console.log(user);
-        
-  //       if (error || !user?.user) {
+  //       const { data: sessionData, error } = await supabase.auth.getSession();
+  //       console.log(sessionData);
+
+  //       if (error || !sessionData?.session) {
   //         redirect("/login");
+  //         return; // Prevent further execution if no session
   //       }
-  //         // Retrieve your token from wherever it's stored (e.g., localStorage, cookies)
-  
+
+  //       // Use the token from Supabase session for authentication
+  //       const token = sessionData.session.access_token;
+        
+       
+        
   //       const response = await fetch("/api/users/permission", {
   //         method: "GET",
   //         headers: {
   //           "Content-Type": "application/json",
-  //           "Authorization": `Bearer ${}`,
+  //           "Authorization": `Bearer ${token}`,
   //         },
   //       });
-  //       console.log(response);
   
-  //       if (!response.ok) {
-  //         throw new Error("Network response was not ok " + response.statusText);
-  //       }
   
   //       const contentType = response.headers.get("Content-Type");
   //       if (!contentType || !contentType.includes("application/json")) {
@@ -103,47 +54,37 @@ const supabase  = createClient()
   //   fetchPermissions();
   // }, []);
   
-  
-  // useEffect(() => {
-  //   const fetchPermissions = async () => {
-  //     try {
-  //       const response = await fetch("api/users/permissions");
-  
-  //       if (!response.ok) {
-  //         throw new Error("Network response was not ok " + response.statusText);
-  //       }
-  
-  //       const contentType = response.headers.get("Content-Type");
-  //       if (!contentType || !contentType.includes("application/json")) {
-  //         throw new Error("Expected JSON response, but received: " + contentType);
-  //       }
-  
-  //       const data = await response.json();
-  //       setPermissions(data.permissions || []); 
-  //     } catch (error) {
-  //       console.error("Error fetching permissions:", error);
-  //     }
-  //   };
-  
-  //   fetchPermissions();
-  // }, []);
-  
 
-  const hasPermission = useCallback(
-    (permission: string) => permissions.includes(permission),
-    [permissions]
-  );
+  // const hasPermission = useCallback(
+  //   (permission: string) => permissions.includes(permission),
+  //   [permissions]
+  // );
   // console.log(Permissions)
 
 
   // Function to check if a section should be open
-  const isSectionOpen = (sectionPaths: string[]) => {
-    return sectionPaths.some((path) => pathname.startsWith(path));
-  };
+  // const isSectionOpen = (sectionPaths: string[]) => {
+  //   return sectionPaths.some((path) => pathname.startsWith(path));
+  // };
 
-  const isActiveLink = (link: string) => {
-    return pathname === link || pathname.startsWith(link);
-  };
+  // const isActiveLink = (link: string) => {
+  //   return pathname === link || pathname.startsWith(link);
+  // };
+
+  const Sidemenu = ({ onToggle }: { onToggle: () => void }) => {
+    const { permissions } = usePermissions();
+    const pathname = usePathname();
+  
+    const hasPermission = useCallback(
+      (permission: string) => permissions.includes(permission),
+      [permissions]
+    );
+  
+    const isSectionOpen = (sectionPaths: string[]) =>
+      sectionPaths.some((path) => pathname.startsWith(path));
+  
+    const isActiveLink = (link: string) =>
+      pathname === link || pathname.startsWith(link);
   return (
     <main className="sidemenu_main">
       <div className="sidemenu_mainbox">
@@ -200,8 +141,8 @@ const supabase  = createClient()
                     <li className={isActiveLink("/add-service-center/list") ? "heighlight" : ""}>
                       <Link href="/add-service-center/list">Manage Service Centers</Link>
                     </li>
-                    <li className={isActiveLink("#") ? "heighlight" : ""}>
-                      <Link href="#">Billing & Payments</Link>
+                    <li className={isActiveLink("/add-service-center/ServiceCenter-payments") ? "heighlight" : ""}>
+                      <Link href="/add-service-center/ServiceCenter-payments">Billing & Payments</Link>
                     </li> 
                   </ul>
                 </div>
@@ -353,6 +294,11 @@ const supabase  = createClient()
                     <li className={isActiveLink("/rolls-permission/assign-permissions") ? "heighlight" : ""}>
                       <Link href="/rolls-permission/assign-permissions">
                         Assign Permissions
+                      </Link>
+                    </li>
+                    <li className={isActiveLink("/rolls-permission/user-roles") ? "heighlight" : ""}>
+                      <Link href="/rolls-permission/user-roles">
+                        User Roles
                       </Link>
                     </li>
                   </ul>
@@ -615,6 +561,9 @@ const supabase  = createClient()
                     </li>
                     <li className={isActiveLink("/miscellaneous/model/list") ? "heighlight" : ""}>
                       <Link href="/miscellaneous/model/list">Model</Link>
+                    </li>
+                    <li className={isActiveLink("/miscellaneous/complaintTemplates") ? "heighlight" : ""}>
+                      <Link href="/miscellaneous/complaintTemplates">Complaints Templates</Link>
                     </li>
                   </ul>
                 </div>

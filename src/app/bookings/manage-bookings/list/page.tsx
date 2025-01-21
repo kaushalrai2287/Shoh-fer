@@ -146,23 +146,23 @@ const ListBooking = () => {
 
   type StatusType = "pending" | "accepted" | "completed" | "canceled";
 
-  const handleDelete = async (bookingId: string) => {
-    if (window.confirm("Are you sure you want to delete this booking?")) {
-      const { error } = await supabase
-        .from("bookings")
-        .delete()
-        .eq("booking_id", bookingId);
+  // const handleDelete = async (bookingId: string) => {
+  //   if (window.confirm("Are you sure you want to delete this booking?")) {
+  //     const { error } = await supabase
+  //       .from("bookings")
+  //       .delete()
+  //       .eq("booking_id", bookingId);
 
-      if (error) {
-        console.error("Error deleting booking:", error.message);
-      } else {
-        // Remove the deleted booking from local state
-        setBookings((prevBookings) =>
-          prevBookings.filter((booking) => booking.booking_id !== bookingId)
-        );
-      }
-    }
-  };
+  //     if (error) {
+  //       console.error("Error deleting booking:", error.message);
+  //     } else {
+  //       // Remove the deleted booking from local state
+  //       setBookings((prevBookings) =>
+  //         prevBookings.filter((booking) => booking.booking_id !== bookingId)
+  //       );
+  //     }
+  //   }
+  // };
   const router = useRouter();
 
   const handleEdit = (bookingId: string) => {
@@ -338,7 +338,7 @@ const ListBooking = () => {
     ),
     Booking: "Cancel Booking",
     onEdit: () => handleEdit(booking.booking_id),
-    onDelete: () => handleDelete(booking.booking_id),
+    // onDelete: () => handleDelete(booking.booking_id),
 }));
 
   return (

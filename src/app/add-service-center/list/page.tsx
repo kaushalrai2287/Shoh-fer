@@ -39,6 +39,7 @@ const ListingPage = () => {
   const [serviceAreaQuery, setServiceAreaQuery] = useState(""); // New state for Service Area
   const [cityAreaQuery, setCityAreaQuery] = useState("");
   const [contactNoQuery, setContactNoQuery] = useState("");
+  const [pincodeQuery, setPincodeQuery] = useState(""); // New state for Pincode
   const [isToggled, setIsToggled] = useState(false);
   const router = useRouter();
 
@@ -96,8 +97,10 @@ const ListingPage = () => {
         center.contact_number
           ?.toLowerCase()
           .includes(contactNoQuery.toLocaleLowerCase()) || false;
+          const matchesPincode =
+      center.pincode?.toLowerCase().includes(pincodeQuery.toLowerCase()) || false;
 
-      return matchesName && matchesArea && matchesCity && contactNo;
+      return matchesName && matchesArea && matchesCity && contactNo && matchesPincode;
     });
 
     setFilteredCenters(filtered);
@@ -266,13 +269,14 @@ const ListingPage = () => {
     onDelete: () => handleDelete(center.service_center_id),
   }));
   const handleClearFilters = () => {
-    // Reset all input fields to empty strings
+   
     setSearchQuery("");
     setServiceAreaQuery("");
     setCityAreaQuery("");
     setContactNoQuery("");
+    setPincodeQuery(""); 
 
-    // Reset the filtered list to show all service centers
+
     setFilteredCenters(serviceCenters);
   };
 
@@ -363,6 +367,18 @@ const ListingPage = () => {
                     onChange={(e) => setContactNoQuery(e.target.value)}
                   />
                 </div>
+                <div className="inner_form_group">
+  <label htmlFor="search_service_pincode">Pincode</label>
+  <input
+    className="form-control"
+    type="text"
+    name="search_service_pincode"
+    id="search_service_pincode"
+    value={pincodeQuery}
+    onChange={(e) => setPincodeQuery(e.target.value)} // Update state on change
+  />
+</div>
+
 
                 <div className="inner_form_group inner_form_group_submit">
                   <div>
@@ -436,431 +452,3 @@ const ListingPage = () => {
 };
 
 export default ListingPage;
-// "use client";
-// import React, { useEffect, useState } from "react";
-
-// import Sidemenu from "../../../../components/Sidemenu";
-// import { DataTable } from "../../../../components/ui/datatable";
-// import Header from "../../../../components/Header";
-// import { useRouter } from "next/navigation";
-// import { createClient } from "../../../../utils/supabase/client";
-// import { CSVLink } from "react-csv";
-// import Link from "next/link";
-// import HeadingBredcrum from "../../../../components/HeadingBredcrum";
-
-// type ServiceCenter = {
-//   service_center_id: number;
-//   name: string;
-//   business_registration_no: string;
-//   document_upload: string;
-//   address: string;
-//   primary_contact_person: string;
-//   contact_number: string;
-//   email: string;
-//   alternate_contact: string;
-//   city: string;
-//   pincode: string;
-//   state_id: number;
-//   state_name: string;
-//   services_id: number;
-//   services_offerd: string;
-//   service_area: string;
-//   password: string;
-//   is_active: boolean;
-// };
-
-// const ListingPage = () => {
-//   const [searchQuery, setSearchQuery] = useState("");
-//   const [serviceCenters, setServiceCenters] = useState<ServiceCenter[]>([]);
-//   const [filteredCenters, setFilteredCenters] = useState<ServiceCenter[]>([]);
-//   const [serviceAreaQuery, setServiceAreaQuery] = useState("");
-//   const [cityAreaQuery, setCityAreaQuery] = useState("");
-//   const [contactNoQuery, setContactNoQuery] = useState("");
-//   const [isToggled, setIsToggled] = useState(false);
-//   const [currentPage, setCurrentPage] = useState(1);
-//   const [itemsPerPage, setItemsPerPage] = useState(10); // Default items per page
-//   const router = useRouter();
-
-//   const toggleClass = () => {
-//     setIsToggled(!isToggled);
-//   };
-
-//   useEffect(() => {
-//     const fetchServiceCenters = async () => {
-//       try {
-//         const supabase = createClient();
-//         const { data, error } = await supabase
-//           .from("service_centers")
-//           .select(
-//             "*, states(name),service_centers_services_offerd(name),is_active"
-//           )
-//           .order("created_at", { ascending: false });
-
-//         const updatedData = data?.map((center: any) => ({
-//           ...center,
-//           state_name: center.states?.name || "",
-//           services_offerd: center.service_centers_services_offerd?.name || "",
-//         }));
-
-//         if (error) throw error;
-
-//         setServiceCenters(updatedData || []);
-//         setFilteredCenters(updatedData || []);
-//       } catch (err) {
-//         console.error("Error fetching service centers:", err);
-//       }
-//     };
-
-//     fetchServiceCenters();
-//   }, []);
-
-//   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-//     setSearchQuery(event.target.value);
-//   };
-
-//   const handleSearchSubmit = (event: React.FormEvent) => {
-//     event.preventDefault();
-
-//     const filtered = serviceCenters.filter((center) => {
-//       const matchesName =
-//         center.name?.toLowerCase().includes(searchQuery.toLowerCase()) || false;
-//       const matchesArea =
-//         center.service_area
-//           ?.toLowerCase()
-//           .includes(serviceAreaQuery.toLowerCase()) || false;
-//       const matchesCity =
-//         center.city?.toLowerCase().includes(cityAreaQuery.toLowerCase()) ||
-//         false;
-//       const contactNo =
-//         center.contact_number
-//           ?.toLowerCase()
-//           .includes(contactNoQuery.toLocaleLowerCase()) || false;
-
-//       return matchesName && matchesArea && matchesCity && contactNo;
-//     });
-
-//     setFilteredCenters(filtered);
-//     setCurrentPage(1); // Reset to first page on new search
-//   };
-
-//   const handleEdit = (id: number) => {
-//     router.push(`/add-service-center/edit/${id}`);
-//   };
-
-//   const handleStatusToggle = async (id: number, newStatus: boolean) => {
-//     const confirmToggle = window.confirm(
-//       "Are you sure you want to change the status?"
-//     );
-//     if (!confirmToggle) return;
-
-//     try {
-//       const supabase = createClient();
-
-//       setIsToggled(true);
-
-//       const { error } = await supabase
-//         .from("service_centers")
-//         .update({ is_active: newStatus })
-//         .eq("service_center_id", id);
-
-//       if (error) {
-//         console.error("Error updating service center status:", error);
-//         alert("Failed to update the status.");
-//         setIsToggled(false);
-//       } else {
-//         setServiceCenters((prev) =>
-//           prev.map((center) =>
-//             center.service_center_id === id
-//               ? { ...center, is_active: newStatus }
-//               : center
-//           )
-//         );
-//         setFilteredCenters((prev) =>
-//           prev.map((center) =>
-//             center.service_center_id === id
-//               ? { ...center, is_active: newStatus }
-//               : center
-//           )
-//         );
-//         alert("Status updated successfully.");
-//         setIsToggled(false);
-//       }
-//     } catch (err) {
-//       console.error("Unexpected error updating status:", err);
-//       alert("An unexpected error occurred.");
-//       setIsToggled(false);
-//     }
-//   };
-
-//   const handleDelete = async (id: number) => {
-//     const confirmDelete = window.confirm(
-//       "Are you sure you want to delete this service center?"
-//     );
-//     if (!confirmDelete) return;
-
-//     try {
-//       const supabase = createClient();
-//       const { error } = await supabase
-//         .from("service_centers")
-//         .delete()
-//         .eq("service_center_id", id);
-
-//       if (error) {
-//         console.error("Error deleting service center:", error);
-//         alert("Failed to delete the service center.");
-//       } else {
-//         alert("Service center deleted successfully.");
-//         setServiceCenters((prev) =>
-//           prev.filter((center) => center.service_center_id !== id)
-//         );
-//         setFilteredCenters((prev) =>
-//           prev.filter((center) => center.service_center_id !== id)
-//         );
-//       }
-//     } catch (err) {
-//       console.error("Unexpected error deleting service center:", err);
-//       alert("An unexpected error occurred.");
-//     }
-//   };
-
-//   const columns = {
-//     name: "Service Center Name",
-//     business_registration_no: "Registration Number",
-//     services_id: "Services Offered",
-//     service_area: "Area",
-//     document_upload: "Document",
-//     primary_contact_person: "Contact Person",
-//     contact_number: "Contact No.",
-//     email: "Email",
-//     alternate_contact: "Alt Contact",
-//     address: "Address",
-//     city: "City",
-//     state_id: "State",
-//     pincode: "Pincode",
-//     Status: "Status",
-//   };
-
-//   const hiddenColumns = [
-//     "business_registration_no",
-//     "services_id",
-//     "document_upload",
-//     "primary_contact_person",
-//     "alternate_contact",
-//     "address",
-//     "state_id",
-//     "pincode",
-//   ];
-
-//   const handleClearFilters = () => {
-//     setSearchQuery("");
-//     setServiceAreaQuery("");
-//     setCityAreaQuery("");
-//     setContactNoQuery("");
-//     setFilteredCenters(serviceCenters);
-//     setCurrentPage(1);
-//   };
-
-//   // Pagination logic
-//   const indexOfLastItem = currentPage * itemsPerPage;
-//   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-//   const currentItems = filteredCenters.slice(indexOfFirstItem, indexOfLastItem);
-
-//   const totalPages = Math.ceil(filteredCenters.length / itemsPerPage);
-
-//   const handlePageChange = (pageNumber: number) => {
-//     setCurrentPage(pageNumber);
-//   };
-
-//   const handleItemsPerPageChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-//     setItemsPerPage(Number(event.target.value));
-//     setCurrentPage(1); // Reset to first page when items per page changes
-//   };
-
-//   return (
-//     <main className="Service_center_list_main">
-//       <Header />
-//       <div className={`inner_mainbox ${isToggled ? "toggled-class" : ""}`}>
-//         <div className="inner_left">
-//           <Sidemenu onToggle={toggleClass} />
-//         </div>
-//         <div className="inner_right">
-//           <HeadingBredcrum
-//             heading="Service Center List"
-//             breadcrumbs={[
-//               { label: "Home", link: "/", active: false },
-//               { label: "Service Center List", active: true },
-//             ]}
-//           />
-//           <div className="filter_box">
-//             <div className="filter_heading_btnbox">
-//               <div className="service_form_heading">
-//                 <span>
-//                   <img
-//                     src="/images/settings-sliders.svg"
-//                     alt=""
-//                     className="img-fluid"
-//                   />
-//                 </span>
-//                 Filter By
-//               </div>
-//               <div className="filter_btn">
-//                 <button className="submite_btn">
-//                   <Link
-//                     className="text-white"
-//                     href="/add-service-center/create"
-//                   >
-//                     Add
-//                   </Link>
-//                 </button>
-//               </div>
-//             </div>
-//             <div className="filter_formbox">
-//               <form onSubmit={handleSearchSubmit}>
-//                 <div className="inner_form_group">
-//                   <label htmlFor="search_service_name">
-//                     Service Center Name
-//                   </label>
-//                   <input
-//                     className="form-control"
-//                     type="text"
-//                     name="search_service_name"
-//                     id="search_service_name"
-//                     value={searchQuery}
-//                     onChange={handleSearchChange}
-//                   />
-//                 </div>
-//                 <div className="inner_form_group">
-//                   <label htmlFor="search_service_area">Service Area</label>
-
-//                   <input
-//                     className="form-control"
-//                     type="text"
-//                     name="search_service_area"
-//                     id="search_service_area"
-//                     value={serviceAreaQuery}
-//                     onChange={(e) => setServiceAreaQuery(e.target.value)}
-//                   />
-//                 </div>
-//                 <div className="inner_form_group">
-//                   <label htmlFor="search_service_city">City</label>
-//                   <input
-//                     className="form-control"
-//                     type="text"
-//                     name="search_service_city"
-//                     id="search_service_city"
-//                     value={cityAreaQuery}
-//                     onChange={(e) => setCityAreaQuery(e.target.value)}
-//                   />
-//                 </div>
-//                 <div className="inner_form_group">
-//                   <label htmlFor="search_service_number">Contact Number</label>
-//                   <input
-//                     className="form-control"
-//                     type="text"
-//                     name="search_service_number"
-//                     id="search_service_number"
-//                     value={contactNoQuery}
-//                     onChange={(e) => setContactNoQuery(e.target.value)}
-//                   />
-//                 </div>
-
-//                 <div className="inner_form_group inner_form_group_submit">
-//                   <div>
-//                     <input
-//                       type="submit"
-//                       className="submite_btn"
-//                       value="Search"
-//                     />
-//                   </div>
-//                   <div>
-//                     {filteredCenters.length > 0 && (
-//                       <CSVLink
-//                         data={filteredCenters}
-//                         headers={[
-//                           { label: "Service Center Name", key: "name" },
-//                           {
-//                             label: "Registration Number",
-//                             key: "business_registration_no",
-//                           },
-//                           { label: "Services Offered", key: "services_offerd" },
-//                           { label: "Area", key: "service_area" },
-//                           { label: "City", key: "city" },
-//                           { label: "Contact No.", key: "contact_number" },
-//                           { label: "Email", key: "email" },
-//                         ]}
-//                         filename="service_centers.csv"
-//                         className="close_btn"
-//                       >
-//                         Export All
-//                       </CSVLink>
-//                     )}
-//                   </div>
-//                   <div>
-//                     <input
-//                       type="button"
-//                       className="close_btn"
-//                       value="Clear"
-//                       onClick={handleClearFilters}
-//                     />
-//                   </div>
-//                 </div>
-//               </form>
-//             </div>
-//           </div>
-//           <div className="data_listing_box mt-3">
-//             <div className="filter_heading_btnbox">
-//               <div className="service_form_heading">
-//                 <span>
-//                   <img
-//                     src="/images/bars-sort.svg"
-//                     alt=""
-//                     className="img-fluid"
-//                   />
-//                 </span>
-//                 Service Center List
-//               </div>
-//             </div>
-//             <div className="filter_data_table">
-//               <DataTable
-//                 columns={columns}
-//                 data={currentItems} // Use currentItems for pagination
-//                 hiddenColumns={hiddenColumns}
-//                 showStatusButton={true}
-//               />
-//             </div>
-//             <div className="pagination">
-//               <button
-//                 onClick={() => handlePageChange(currentPage - 1)}
-//                 disabled={currentPage === 1}
-//               >
-//                 Previous
-//               </button>
-//               {Array.from({ length: totalPages }, (_, index) => (
-//                 <button
-//                   key={index + 1}
-//                   onClick={() => handlePageChange(index + 1)}
-//                   className={currentPage === index + 1 ? "active" : ""}
-//                 >
-//                   {index + 1}
-//                 </button>
-//               ))}
-//               <button
-//                 onClick={() => handlePageChange(currentPage + 1)}
-//                 disabled={currentPage === totalPages}
-//               >
-//                 Next
-//               </button>
-//               <select value={itemsPerPage} onChange={handleItemsPerPageChange}>
-//                 <option value={5}>5</option>
-//                 <option value={10}>10</option>
-//                 <option value={20}>20</option>
-//               </select>
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//     </main>
-//   );
-// };
-
-// export default ListingPage;

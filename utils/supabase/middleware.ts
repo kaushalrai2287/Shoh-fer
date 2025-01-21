@@ -13,7 +13,7 @@ export async function updateSession(request: NextRequest) {
     {
       cookies: {
         getAll() {
-          console.log("Cookies:", request.cookies.getAll()); // Log the cookies for debugging
+          // console.log("Cookies:", request.cookies.getAll()); // Log the cookies for debugging
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
@@ -32,14 +32,14 @@ export async function updateSession(request: NextRequest) {
   );
 
   const { data: { user } } = await supabase.auth.getUser();
-  console.log("User:", user); 
+  // console.log("User:", user); 
   
   if (
     !user &&
     !request.nextUrl.pathname.startsWith("/login") 
     
   ) {
-    console.log("Redirecting to login...");
+    // console.log("Redirecting to login...");
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);

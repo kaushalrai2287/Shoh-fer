@@ -29,7 +29,7 @@ const formSchema = z.object({
     .max(10, "Contact Number must be at most 10 digits"),
   email: z
     .string()
-    .nonempty("Email is required") // This checks if email is empty
+    .nonempty("Email is required") 
     .email("Please enter a valid email address"),
   alternate_contact: z
     .string()
@@ -49,27 +49,18 @@ const formSchema = z.object({
     .min(1, "City is required")
     .regex(/^[a-zA-Z\s]+$/, "City must only contain letters"),
   state: z
-    .union([z.string(), z.number()]) // Accepts both string and number
+    .union([z.string(), z.number()]) 
     .refine((value) => /^\d+$/.test(String(value)), "State must be provided"),
   pincode: z
     .string()
     .min(6, "Pincode must be 6 digits")
     .max(6, "Pincode must be 6 digits")
     .regex(/^\d+$/, "Pincode must contain only digits"),
-  // servicesoffered: z.string().min(1, "Services Offered is required"),
-  // servicesoffered: z
-  // .union([z.string(), z.number()]) // Accepts both string and number
-  // .optional()
-  // .refine((value) => !value || (typeof value === 'string' && value.trim() !== ""), {
-  //   message: "Services Offered is required when provided",
-  // })
-  // .refine((value) => !value || (typeof value === 'string' && value.length > 0), {
-  //   message: "Services Offered cannot be empty",
-  // }),
+
   servicesoffered: z
-    .union([z.string(), z.number()]) // Accepts string or number
-    .nullable() // Allows null
-    .optional(), // Makes it optional
+    .union([z.string(), z.number()]) 
+    .nullable() 
+    .optional(),
 
   document_upload: z
     .any()
@@ -128,17 +119,20 @@ const Page = () => {
   };
   const maxFileSize = 2 * 1024 * 1024;
   const router = useRouter();
+
+
   const onSubmit = async (data: FormValues) => {
     try {
       const supabase = createClient();
-
+  
+      // Check for existing registration number
       if (data.business_registration_no) {
         const { data: existingServiceCenters, error: checkError } =
           await supabase
             .from("service_centers")
             .select("business_registration_no")
             .eq("business_registration_no", data.business_registration_no);
-
+  
         if (checkError) {
           console.error(
             "Error checking business registration number:",
@@ -147,90 +141,207 @@ const Page = () => {
           alert("Error checking registration number. Please try again.");
           return;
         }
-
+  
         if (existingServiceCenters && existingServiceCenters.length > 0) {
           alert("This business registration number already exists.");
           return;
         }
       }
-
+  
+      // File upload logic
       const file = data.document_upload?.[0];
-      if (file && file.size > maxFileSize) {
-        alert("File size exceeds the 2MB limit.");
-        return;
+      if (file) {
+        if (file.size > maxFileSize) {
+          alert("File size exceeds the 2MB limit.");
+          return;
+        }
+  
+        const sanitizedFileName = file.name
+          .replace(/[^a-z0-9.]/gi, "_")
+          .toLowerCase();
+        const filePath = `documents/${Date.now()}_${sanitizedFileName}`;
+        const { error: uploadError } = await supabase.storage
+          .from("ServiceCenterDocs")
+          .upload(filePath, file);
+  
+        if (uploadError) {
+          console.error("Upload error details:", uploadError);
+          alert(`Error uploading document: ${uploadError.message}`);
+          return;
+        }
+  
+        const { data: fileData } = supabase.storage
+          .from("ServiceCenterDocs")
+          .getPublicUrl(filePath);
+  
+        if (!fileData || !fileData.publicUrl) {
+          alert("Unexpected error occurred while processing the document.");
+          return;
+        }
+  
+        data.document_upload = fileData.publicUrl;
       }
-      if (!file) {
-        console.error("No file found in document_upload.");
-        alert("Please upload a document before submitting.");
-        return;
-      }
-
-      const sanitizedFileName = file.name
-        .replace(/[^a-z0-9.]/gi, "_")
-        .toLowerCase();
-      const filePath = `documents/${Date.now()}_${sanitizedFileName}`;
-      console.log("Uploading file to path:", filePath);
-
-      // Upload the file
-      const { error: uploadError } = await supabase.storage
-        .from("ServiceCenterDocs")
-        .upload(filePath, file);
-
-      if (uploadError) {
-        console.error("Upload error details:", uploadError);
-        alert(`Error uploading document: ${uploadError.message}`);
-        return;
-      }
-
-      const { data: fileData } = supabase.storage
-        .from("ServiceCenterDocs")
-        .getPublicUrl(filePath);
-
-      if (!fileData || !fileData.publicUrl) {
-        console.error("Error generating public URL: No file data returned.");
-        alert("Unexpected error occurred while processing the document.");
-        return;
-      }
-
-      console.log(
-        "File uploaded successfully. Public URL:",
-        fileData.publicUrl
-      );
-
+  
+      // Generate a random password
       const generatedPassword = generateRandomPassword();
-      const saltRounds = 10;
-      const hashedPassword = await bcrypt.hash(generatedPassword, saltRounds);
-
+  
+      // Create a new user in the Supabase auth table
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: data.email,
+        password: generatedPassword,
+      });
+  
+      if (authError) {
+        console.error("Error creating user:", authError.message);
+        alert("Error creating user account. Please try again.");
+        return;
+      }
+  
+      const userId = authData.user?.id;
+  
+      if (!userId) {
+        console.error("Failed to retrieve user ID after signup.");
+        alert("Unexpected error occurred. Please try again.");
+        return;
+      }
+  
+     
       const { state, servicesoffered, ...rest } = data;
       const payload = {
         ...rest,
         state_id: Number(state),
         services_id: servicesoffered ? Number(servicesoffered) : null,
-        // services_id: Number(servicesoffered),
-        password: hashedPassword,
-        document_upload: fileData.publicUrl, // Store the file's public URL
+        auth_id: userId,
+        document_upload: data.document_upload, // File URL
       };
-
-      // Insert the payload into the database
+  
+      
       const { data: insertedData, error } = await supabase
         .from("service_centers")
         .insert(payload)
         .select("service_center_id");
-
+  
       if (error) {
         console.error("Error inserting data:", error.message);
         alert("Error submitting the form. Please try again.");
       } else {
-        alert("Form submitted successfully!");
-        // const serviceCenterId = insertedData[0].service_center_id; // Extract the ID
-        // router.push(`/add-service-center/edit/${serviceCenterId}`); // Redirect
-        router.push("/add-service-center/index");
+        alert("Service Center added successfully!");
+        router.push("/add-service-center/list");
       }
     } catch (err) {
       console.error("Unexpected error:", err);
       alert("Unexpected error occurred.");
     }
   };
+  
+  // Utility function to generate a random password
+  const generateRandomPassword = () => {
+    return Math.random().toString(36).slice(-8); // Generates an 8-character random string
+  };
+  
+  // const onSubmit = async (data: FormValues) => {
+  //   try {
+  //     const supabase = createClient();
+
+  //     if (data.business_registration_no) {
+  //       const { data: existingServiceCenters, error: checkError } =
+  //         await supabase
+  //           .from("service_centers")
+  //           .select("business_registration_no")
+  //           .eq("business_registration_no", data.business_registration_no);
+
+  //       if (checkError) {
+  //         console.error(
+  //           "Error checking business registration number:",
+  //           checkError.message
+  //         );
+  //         alert("Error checking registration number. Please try again.");
+  //         return;
+  //       }
+
+  //       if (existingServiceCenters && existingServiceCenters.length > 0) {
+  //         alert("This business registration number already exists.");
+  //         return;
+  //       }
+  //     }
+
+  //     const file = data.document_upload?.[0];
+  //     if (file && file.size > maxFileSize) {
+  //       alert("File size exceeds the 2MB limit.");
+  //       return;
+  //     }
+  //     if (!file) {
+  //       console.error("No file found in document_upload.");
+  //       alert("Please upload a document before submitting.");
+  //       return;
+  //     }
+
+  //     const sanitizedFileName = file.name
+  //       .replace(/[^a-z0-9.]/gi, "_")
+  //       .toLowerCase();
+  //     const filePath = `documents/${Date.now()}_${sanitizedFileName}`;
+  //     console.log("Uploading file to path:", filePath);
+
+  //     // Upload the file
+  //     const { error: uploadError } = await supabase.storage
+  //       .from("ServiceCenterDocs")
+  //       .upload(filePath, file);
+
+  //     if (uploadError) {
+  //       console.error("Upload error details:", uploadError);
+  //       alert(`Error uploading document: ${uploadError.message}`);
+  //       return;
+  //     }
+
+  //     const { data: fileData } = supabase.storage
+  //       .from("ServiceCenterDocs")
+  //       .getPublicUrl(filePath);
+
+  //     if (!fileData || !fileData.publicUrl) {
+  //       console.error("Error generating public URL: No file data returned.");
+  //       alert("Unexpected error occurred while processing the document.");
+  //       return;
+  //     }
+
+  //     console.log(
+  //       "File uploaded successfully. Public URL:",
+  //       fileData.publicUrl
+  //     );
+
+  //     const generatedPassword = generateRandomPassword();
+  //     const saltRounds = 10;
+  //     const hashedPassword = await bcrypt.hash(generatedPassword, saltRounds);
+
+  //     const { state, servicesoffered, ...rest } = data;
+  //     const payload = {
+  //       ...rest,
+  //       state_id: Number(state),
+  //       services_id: servicesoffered ? Number(servicesoffered) : null,
+      
+  //       password: hashedPassword,
+  //       document_upload: fileData.publicUrl, 
+  //     };
+
+  //     // Insert the payload into the database
+  //     const { data: insertedData, error } = await supabase
+  //       .from("service_centers")
+  //       .insert(payload)
+  //       .select("service_center_id");
+
+  //     if (error) {
+  //       console.error("Error inserting data:", error.message);
+  //       alert("Error submitting the form. Please try again.");
+  //     } else {
+  //       alert("Form submitted successfully!");
+  //       // const serviceCenterId = insertedData[0].service_center_id; // Extract the ID
+  //       // router.push(`/add-service-center/edit/${serviceCenterId}`); // Redirect
+  //       router.push("/add-service-center/index");
+  //     }
+  //   } catch (err) {
+  //     console.error("Unexpected error:", err);
+  //     alert("Unexpected error occurred.");
+  //   }
+  // };
   const handleClose = (event: { preventDefault: () => void }) => {
     event.preventDefault(); // Prevent default form behavior
     router.push("/add-service-center/list"); // Navigate to the desired page

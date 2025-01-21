@@ -14,8 +14,8 @@ import { useRouter } from "next/navigation";
 const formSchema = z.object({
   message: z
     .string()
-    .min(1, "Service Center Name is required")
-    .regex(/^[a-zA-Z\s]+$/, "Name must only contain letters"),
+    .min(1, "Service Center Name is required"),
+    // .regex(/^[a-zA-Z\s]+$/, "Name must only contain letters"),
   Driver: z
     .array(
       z.object({ value: z.union([z.string(), z.number()]), label: z.string() })
@@ -23,6 +23,7 @@ const formSchema = z.object({
     .min(1, "At least one service center must be selected"),
   name: z.string().min(1, "Title is required"),
   upload: z.any().optional(),
+  template: z.object({ value: z.string(), label: z.string() }).optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -33,10 +34,12 @@ const NotificatioDriveradd = () => {
   const [driver, setDriver] = useState<any[]>([]); // State to store all fetched service centers
   const [loading, setLoading] = useState<boolean>(true); // Loading state
   const [error, setError] = useState<string | null>(null); //
+    const [templates, setTemplates] = useState<any[]>([]);
   const router = useRouter();
   const {
     register,
     handleSubmit,
+    setValue,
     control,
     formState: { errors },
   } = useForm<FormValues>({
@@ -46,6 +49,26 @@ const NotificatioDriveradd = () => {
   const toggleClass = () => {
     setIsToggled(!isToggled); // Toggle the state
   };
+   useEffect(() => {
+      const fetchTemplates = async () => {
+        try {
+          const supabase = createClient();
+          const { data, error } = await supabase
+            .from("driver_notification_templates")
+            .select("*");
+  
+          if (error) {
+            console.error("Error fetching templates:", error.message);
+          } else {
+            setTemplates(data);
+          }
+        } catch (err) {
+          console.error("Unexpected Error:", err);
+        }
+      };
+  
+      fetchTemplates();
+    }, []);
   
  const handleClose = (event: { preventDefault: () => void }) => {
         
@@ -204,6 +227,29 @@ const NotificatioDriveradd = () => {
                 )}
               </div>
               <div className="inner_form_group">
+                <label htmlFor="template">Choose a Template</label>
+                <Controller
+                  control={control}
+                  name="template"
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      options={templates.map((template) => ({
+                        value: template.message,
+                        label: template.title,
+                      }))}
+                      placeholder="Select a predefined template"
+                      className="react-select-container"
+                      classNamePrefix="react-select"
+                      onChange={(selected) => {
+                        field.onChange(selected);
+                        setValue("message", selected?.value || ""); // Auto-fill message field
+                      }}
+                    />
+                  )}
+                />
+              </div>
+              <div className="inner_form_group">
                 <label htmlFor="message">Message</label>
                 <textarea
                   className="form-control"
@@ -214,7 +260,7 @@ const NotificatioDriveradd = () => {
               </div>
               <div className="inner_form_group">
                 <label htmlFor="upload">
-                  Upload Document <span>*</span>
+                  Upload Document 
                 </label>
                 <input
                   className="form-control"
