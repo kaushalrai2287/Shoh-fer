@@ -29,7 +29,7 @@ const formSchema = z.object({
     .max(10, "Contact Number must be at most 10 digits"),
   email: z
     .string()
-    .nonempty("Email is required") 
+    .nonempty("Email is required")
     .email("Please enter a valid email address"),
   alternate_contact: z
     .string()
@@ -49,7 +49,7 @@ const formSchema = z.object({
     .min(1, "City is required")
     .regex(/^[a-zA-Z\s]+$/, "City must only contain letters"),
   state: z
-    .union([z.string(), z.number()]) 
+    .union([z.string(), z.number()])
     .refine((value) => /^\d+$/.test(String(value)), "State must be provided"),
   pincode: z
     .string()
@@ -57,10 +57,18 @@ const formSchema = z.object({
     .max(6, "Pincode must be 6 digits")
     .regex(/^\d+$/, "Pincode must contain only digits"),
 
-  servicesoffered: z
-    .union([z.string(), z.number()]) 
-    .nullable() 
-    .optional(),
+  servicesoffered: z.union([z.string(), z.number()]).nullable().optional(),
+  max_users: z
+      .union([z.string(), z.number()]) // Accepts both string and number
+      .refine(
+        (value) =>
+          value !== "" &&
+          value !== null &&
+          value !== undefined &&
+          /^\d+$/.test(String(value)),
+        "State must be provided"
+      ),
+  
 
   document_upload: z
     .any()
@@ -120,11 +128,10 @@ const Page = () => {
   const maxFileSize = 2 * 1024 * 1024;
   const router = useRouter();
 
-
   const onSubmit = async (data: FormValues) => {
     try {
       const supabase = createClient();
-  
+
       // Check for existing registration number
       if (data.business_registration_no) {
         const { data: existingServiceCenters, error: checkError } =
@@ -132,7 +139,7 @@ const Page = () => {
             .from("service_centers")
             .select("business_registration_no")
             .eq("business_registration_no", data.business_registration_no);
-  
+
         if (checkError) {
           console.error(
             "Error checking business registration number:",
@@ -141,13 +148,13 @@ const Page = () => {
           alert("Error checking registration number. Please try again.");
           return;
         }
-  
+
         if (existingServiceCenters && existingServiceCenters.length > 0) {
           alert("This business registration number already exists.");
           return;
         }
       }
-  
+
       // File upload logic
       const file = data.document_upload?.[0];
       if (file) {
@@ -155,7 +162,7 @@ const Page = () => {
           alert("File size exceeds the 2MB limit.");
           return;
         }
-  
+
         const sanitizedFileName = file.name
           .replace(/[^a-z0-9.]/gi, "_")
           .toLowerCase();
@@ -163,49 +170,66 @@ const Page = () => {
         const { error: uploadError } = await supabase.storage
           .from("ServiceCenterDocs")
           .upload(filePath, file);
-  
+
         if (uploadError) {
           console.error("Upload error details:", uploadError);
           alert(`Error uploading document: ${uploadError.message}`);
           return;
         }
-  
+
         const { data: fileData } = supabase.storage
           .from("ServiceCenterDocs")
           .getPublicUrl(filePath);
-  
+
         if (!fileData || !fileData.publicUrl) {
           alert("Unexpected error occurred while processing the document.");
           return;
         }
-  
+
         data.document_upload = fileData.publicUrl;
       }
-  
+
       // Generate a random password
       const generatedPassword = generateRandomPassword();
-  
+
       // Create a new user in the Supabase auth table
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: data.email,
         password: generatedPassword,
       });
-  
+
       if (authError) {
         console.error("Error creating user:", authError.message);
         alert("Error creating user account. Please try again.");
         return;
       }
-  
+
       const userId = authData.user?.id;
-  
+
       if (!userId) {
         console.error("Failed to retrieve user ID after signup.");
         alert("Unexpected error occurred. Please try again.");
         return;
       }
-  
-     
+      const { error: userInsertError } = await supabase
+      .from("users")
+      .insert([
+        {
+          auth_id: userId,
+          name: data.name,
+          email: data.email,
+          phone_number: data.contact_number,
+          user_type: "0",
+          user_type_name:"ServiceCenter",
+        },
+      ]);
+
+    if (userInsertError) {
+      console.error("Error inserting user into public.users:", userInsertError.message);
+      alert("Error adding user details. Please try again.");
+      return;
+    }
+
       const { state, servicesoffered, ...rest } = data;
       const payload = {
         ...rest,
@@ -213,14 +237,14 @@ const Page = () => {
         services_id: servicesoffered ? Number(servicesoffered) : null,
         auth_id: userId,
         document_upload: data.document_upload, // File URL
+        max_users:data.max_users,
       };
-  
-      
+
       const { data: insertedData, error } = await supabase
         .from("service_centers")
         .insert(payload)
         .select("service_center_id");
-  
+
       if (error) {
         console.error("Error inserting data:", error.message);
         alert("Error submitting the form. Please try again.");
@@ -233,12 +257,12 @@ const Page = () => {
       alert("Unexpected error occurred.");
     }
   };
-  
+
   // Utility function to generate a random password
   const generateRandomPassword = () => {
     return Math.random().toString(36).slice(-8); // Generates an 8-character random string
   };
-  
+
   // const onSubmit = async (data: FormValues) => {
   //   try {
   //     const supabase = createClient();
@@ -317,9 +341,9 @@ const Page = () => {
   //       ...rest,
   //       state_id: Number(state),
   //       services_id: servicesoffered ? Number(servicesoffered) : null,
-      
+
   //       password: hashedPassword,
-  //       document_upload: fileData.publicUrl, 
+  //       document_upload: fileData.publicUrl,
   //     };
 
   //     // Insert the payload into the database
@@ -392,13 +416,13 @@ const Page = () => {
           <Sidemenu onToggle={toggleClass} />
         </div>
         <div className="inner_right">
-        <HeadingBredcrum
-                        heading="Add Service Center"
-                        breadcrumbs={[
-                            { label: 'Home', link: '/', active: false },
-                            { label: 'Add Service Center', active: true },
-                        ]}
-                    />
+          <HeadingBredcrum
+            heading="Add Service Center"
+            breadcrumbs={[
+              { label: "Home", link: "/", active: false },
+              { label: "Add Service Center", active: true },
+            ]}
+          />
           <div className="add_service_formbox">
             <form action="" onSubmit={handleSubmit(onSubmit)}>
               <div className="service_form_heading">Basic Information</div>
@@ -556,6 +580,20 @@ const Page = () => {
                   </p>
                 )}
               </div>
+              <div className="inner_form_group">
+                <label htmlFor="max_users">
+                  Max Users <span>*</span>
+                </label>
+                <input
+                  className="form-control"
+                  type="text"
+                  {...register("max_users")}
+                  id="max_users"
+                />
+                {errors.max_users && (
+                  <p className="erro_message">{errors.max_users.message}</p>
+                )}
+              </div>
               <div className="service_form_heading service_form_heading_second">
                 Address
               </div>
@@ -623,6 +661,7 @@ const Page = () => {
                   <p className="erro_message">{errors.pincode.message}</p>
                 )}
               </div>
+            
               <div className="inner_form_group inner_form_group_submit">
                 <input type="submit" className="submite_btn" value="Submit" />
                 <input
@@ -641,14 +680,4 @@ const Page = () => {
 };
 
 export default Page;
-const generateRandomPassword = () => {
-  const chars =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
-  const passwordLength = 8;
-  let password = "";
-  for (let i = 0; i < passwordLength; i++) {
-    const randomIndex = Math.floor(Math.random() * chars.length);
-    password += chars[randomIndex];
-  }
-  return password;
-};
+

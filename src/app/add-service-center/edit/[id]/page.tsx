@@ -58,16 +58,21 @@ const formSchema = z.object({
     .min(6, "Pincode must be 6 digits")
     .max(6, "Pincode must be 6 digits")
     .regex(/^\d+$/, "Pincode must contain only digits"),
-  // servicesoffered: z
-  // .string()
-  // .optional()
-  // .refine((value) => !value || value.trim() !== "", {
-  //   message: "Services Offered is required when provided",
-  // }),
+  
   servicesoffered: z
     .union([z.string(), z.number()]) // Accepts string or number
     .nullable() // Allows null
     .optional(), // Makes it optional
+    max_users: z
+    .union([z.string(), z.number()]) // Accepts both string and number
+    .refine(
+      (value) =>
+        value !== "" &&
+        value !== null &&
+        value !== undefined &&
+        /^\d+$/.test(String(value)),
+      "State must be provided"
+    ),
 
   document_upload: z
     .any()
@@ -86,24 +91,29 @@ const formSchema = z.object({
       );
     }, "Only PDF, JPG, and PNG files are allowed."),
 
-  password: z
+    password: z
     .string()
-    .min(8, "Password must be at least 8 characters long")
-    .regex(
-      /[!@#$%^&*(),.?":{}|<>]/,
-      "Password must include at least one special character"
-    )
-    .optional() // This makes the field optional
+    .optional() // Allows password to be undefined
     .nullable() // Allows null values
     .refine(
       (value) => {
-        // Check if value is either an empty string or meets the minimum length
-        return value === "" || (typeof value === "string" && value.length >= 8);
+        if (!value) return true; // If empty, null, or undefined, it's valid
+        return typeof value === "string" && value.length >= 8;
       },
       {
         message: "Password must be at least 8 characters long if provided.",
       }
+    )
+    .refine(
+      (value) => {
+        if (!value) return true; // Skip validation if password is not provided
+        return /[!@#$%^&*(),.?":{}|<>]/.test(value);
+      },
+      {
+        message: "Password must include at least one special character if provided.",
+      }
     ),
+  
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -280,6 +290,7 @@ const EditPage = () => {
           pincode: data.pincode,
           services_id: data.servicesoffered,
           document_upload: fileData.publicUrl || [],
+          max_users:data.max_users,
 
           ...(encryptedPassword && { password: encryptedPassword }),
         })
@@ -395,6 +406,7 @@ const EditPage = () => {
                   </p>
                 )}
               </div>
+             
 
               <div className="inner_form_group">
                 <label htmlFor="service_area">
@@ -509,6 +521,20 @@ const EditPage = () => {
                 )}
               </div>
               <div className="inner_form_group">
+                <label htmlFor="max_users">
+                  Max Users <span>*</span>
+                </label>
+                <input
+                  className="form-control"
+                  type="text"
+                  {...register("max_users")}
+                  id="max_users"
+                />
+                {errors.max_users && (
+                  <p className="erro_message">{errors.max_users.message}</p>
+                )}
+              </div>
+              <div className="inner_form_group">
                 <label htmlFor="password">Change Password </label>
                 <input
                   className="form-control"
@@ -584,6 +610,7 @@ const EditPage = () => {
                   <p className="erro_message">{errors.pincode.message}</p>
                 )}
               </div>
+      
 
               <div className="inner_form_group inner_form_group_submit">
                 <input type="submit" className="submite_btn" value="Submit" />

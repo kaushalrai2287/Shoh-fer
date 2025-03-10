@@ -1,3 +1,5 @@
+
+
 import { initializeApp } from "firebase/app";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
 
@@ -15,3 +17,17 @@ const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
 
 export { messaging, getToken, onMessage };
+
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+// firebaseConfig.ts
+// import dynamic from 'next/dynamic';
+// // import firbaseClientConfig from '.firebaseClientConfig';
+// // import { firebaseClientConfig } from "./firebaseConfig";
+
+
+// const firebaseClientConfig = dynamic(() => import('./firebaseClientConfig'), {
+//   ssr: false,  // Disable SSR for this import
+// });
+
+// export { firebaseClientConfig };
