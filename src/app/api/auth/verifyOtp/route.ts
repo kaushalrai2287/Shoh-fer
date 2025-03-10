@@ -48,10 +48,10 @@ export async function POST(req: Request) {
             console.log(data);
         if (error || !data || data.otp !== otp) {
             
-            return NextResponse.json({ error: "Invalid OTP" }, { status: 400 });
+            return NextResponse.json({ status:0, message:"Invalid OTP" }, { status: 400 });
         }
 
-        return NextResponse.json({ message: "OTP verified successfully!" }, { status: 200 });
+        return NextResponse.json({ status:1, message: "OTP verified successfully!" }, { status: 200 });
     } catch (error) {
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
