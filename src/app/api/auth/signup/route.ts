@@ -83,7 +83,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Mobile number required" }, { status: 400 });
         }
 
-        const otp = "1234"; // Default OTP for now
+        const otp = "1234";     
 
  
         const { data: existingDriver, error: fetchError } = await supabase

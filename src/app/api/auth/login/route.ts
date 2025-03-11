@@ -214,7 +214,7 @@ export async function POST(req: Request) {
     try {
         const supabase = await createClient();
         const body = await req.json();
-        const { phone_number, device_id } = body;
+        const { phone_number, device_id ,platform,dialcode,countrycode} = body;
 
         if (!phone_number) {
             return NextResponse.json({ message: "Mobile number required" }, { status: 200 });
@@ -226,7 +226,7 @@ export async function POST(req: Request) {
 
         const otp = "1234"; // For testing only
 
-        // Check if the phone number already exists
+        // Ch eck if the phone number already exists
         const { data: existingDriver, error: fetchError } = await supabase
             .from("drivers")
             .select("driver_id")
@@ -242,14 +242,14 @@ export async function POST(req: Request) {
             // Update existing driver with OTP and device_id
             const { error: updateError } = await supabase
                 .from("drivers")
-                .update({ otp, device_id })
+                .update({ otp, device_id ,platform,dialcode,countrycode})
                 .eq("phone_number", phone_number);
 
             if (updateError) {
                 return NextResponse.json({ error: updateError.message }, { status: 400 });
             }
         } else {
-            return NextResponse.json({ status: 0, message: "Phone not registered!" }, { status: 200 });
+            return NextResponse.json({ status: 0, message: "Phone not registered! GO to registration Page" }, { status: 200 });
         }
 
         return NextResponse.json({ status: 1, message: "OTP sent successfully!", otp }, { status: 200 });
