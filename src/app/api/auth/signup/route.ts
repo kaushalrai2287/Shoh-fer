@@ -445,6 +445,11 @@ export async function POST(req: Request) {
       platform,
       transmission_type,
       license_expiry_dates,
+      aadhar_card,        
+  pan_card,
+  type   ,
+  refrel_code, 
+  refrence_no,
     } = Object.fromEntries(
       Object.entries(fields).map(([key, value]) => [key, value[0]])
     );
@@ -467,6 +472,11 @@ export async function POST(req: Request) {
       platform,
       transmission_type,
       license_expiry_dates,
+      aadhar_card,        
+      pan_card  ,
+  type,  
+  // refrel_code,   
+  
     };
 
     const missingFields = Object.entries(requiredFields)
@@ -552,6 +562,12 @@ export async function POST(req: Request) {
         platform,
         transmission_type,
         license_expiry_dates,
+        aadhar_card,         
+    pan_card ,
+  type,  
+  refrel_code ,
+  refrence_no, 
+
       },
     ]);
 
