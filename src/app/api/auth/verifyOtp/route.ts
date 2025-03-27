@@ -30,7 +30,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "../../../../../utils/supabase/server";
 
-export async function POST(req:Request) {
+export async function POST(req: Request) {
     try {
         const supabase = await createClient();
         const body = await req.json();
@@ -61,7 +61,22 @@ export async function POST(req:Request) {
             return NextResponse.json({ error: updateError.message }, { status: 400 });
         }
 
-        return NextResponse.json({ status: 1, message: "OTP verified successfully!" }, { status: 200 });
+        // ✅ Fetch user details after verification
+        const { data: userData, error: userError } = await supabase
+            .from("drivers")
+            .select("*") // Fetch all user details
+            .eq("phone_number", phone_number)
+            .single();
+
+        if (userError) {
+            return NextResponse.json({ status: 0, message: "Failed to fetch user details" }, { status: 400 });
+        }
+
+        return NextResponse.json({
+            status: 1,
+            message: "OTP verified successfully!",
+            user: userData // Return user details
+        }, { status: 200 });
     } catch (error) {
         console.error("Error:", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
