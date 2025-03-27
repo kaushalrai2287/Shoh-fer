@@ -177,25 +177,25 @@ export async function POST(req: Request) {
     const supabase = await createClient();
 
     // ✅ Check if reference phone number exists in the drivers table and verify the name
-    const { data, error } = await supabase
-      .from("drivers")
-      .select("driver_id, driver_name")
-      .eq("phone_number", reference_phone_number)
-      .single();
+    // const { data, error } = await supabase
+    //   .from("drivers")
+    //   .select("driver_id, driver_name")
+    //   .eq("phone_number", reference_phone_number)
+    //   .single();
 
-    if (error || !data) {
-      return NextResponse.json(
-        { status: 0, message: "Reference phone number not found" },
-        { status: 200 }
-      );
-    }
+    // if (error || !data) {
+    //   return NextResponse.json(
+    //     { status: 0, message: "Reference phone number not found" },
+    //     { status: 200 }
+    //   );
+    // }
 
-    if (data.driver_name !== name) {
-      return NextResponse.json(
-        { status: 0, message: "Name does not match the reference phone number" },
-        { status: 200 }
-      );
-    }
+    // if (data.driver_name !== name) {
+    //   return NextResponse.json(
+    //     { status: 0, message: "Name does not match the reference phone number" },
+    //     { status: 200 }
+    //   );
+    // }
 
   
     const otp = Math.floor(1000 + Math.random() * 9000); // Random 4-digit OTP
