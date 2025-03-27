@@ -590,10 +590,20 @@ export async function POST(req: Request) {
       { status: 200 }
     
     );
-  } catch (error) {
+  } 
+  // catch (error) {
+  //   console.error("Error:", error);
+  //   return NextResponse.json(
+  //     { status: 0, error: "Internal Server Error" },
+  //     { status: 500 }
+  //   );
+  // }
+  catch (error) {
     console.error("Error:", error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    
     return NextResponse.json(
-      { status: 0, error: "Internal Server Error" },
+      { status: 0, error: errorMessage },
       { status: 500 }
     );
   }
