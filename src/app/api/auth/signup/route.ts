@@ -1,7 +1,6 @@
 // // import { NextResponse } from "next/server";
 // // import { createClient } from "../../../../../utils/supabase/server";
 
-
 // // export async function POST(req:Request) {
 // //     try {
 // //         const supabase = await createClient();
@@ -9,7 +8,7 @@
 
 // //         const body = await req.json();
 // //         // console.log("Parsed body:", body);
-        
+
 // //         const { email, password } = body;
 
 // //         if (!email || !password) {
@@ -37,7 +36,6 @@
 // import { NextResponse } from "next/server";
 // import { createClient } from "../../../../../utils/supabase/server";
 
-
 // export async function POST(req:Request) {
 //     try {
 //         const supabase = await createClient();
@@ -45,7 +43,7 @@
 
 //         const body = await req.json();
 //         // console.log("Parsed body:", body);
-        
+
 //         const { email, password } = body;
 
 //         if (!email || !password) {
@@ -92,7 +90,7 @@
 //             Brand,
 //             emergency_contact_no,
 //             device_id ,
-//             
+//
 //             countrycode,
 //             dialcode,
 //             platform,
@@ -103,22 +101,21 @@
 //             return NextResponse.json({ error: "Mobile number required" }, { status: 400 });
 //         }
 
-//         const otp = "1234";     
+//         const otp = "1234";
 
- 
 //         const { data: existingDriver, error: fetchError } = await supabase
 //             .from("drivers")
 //             .select("driver_id")
 //             .eq("phone_number", phone_number)
 //             .single();
 
-//         if (fetchError && fetchError.code !== "PGRST116") { 
+//         if (fetchError && fetchError.code !== "PGRST116") {
 //             // Ignore "PGRST116: no rows found" error
 //             return NextResponse.json({ error: fetchError.message }, { status: 400 });
 //         }
 
 //         if (existingDriver) {
-         
+
 //             const { error: updateError } = await supabase
 //                 .from("drivers")
 //                 .update({ otp })
@@ -128,7 +125,7 @@
 //                 return NextResponse.json({ error: updateError.message }, { status: 400 });
 //             }
 //         } else {
-            
+
 //             const { error: insertError } = await supabase
 //                 .from("drivers")
 //                 .insert([{ phone_number, otp,driver_name,
@@ -146,7 +143,7 @@
 //                     Brand,
 //                     emergency_contact_no,
 //                     device_id ,
-//                     
+//
 //                     countrycode,
 //                     dialcode,
 //                     platform,
@@ -307,7 +304,7 @@
 //         }
 
 //         // ✅ Generate a random 4-digit OTP (for testing)
-//         const otp = "1234"; 
+//         const otp = "1234";
 
 //         // ✅ Check if phone number already exists
 //         const { data: existingDriverByPhone, error: phoneCheckError } = await supabase
@@ -426,7 +423,6 @@ export async function POST(req: Request) {
 
     const { fields, files } = await parseForm();
 
-    
     const {
       phone_number,
       driver_name,
@@ -445,11 +441,11 @@ export async function POST(req: Request) {
       platform,
       transmission_type,
       license_expiry_dates,
-      aadhar_card,        
-  pan_card,
-  type   ,
-  refrel_code, 
-  refrence_no,
+      aadhar_card,
+      pan_card,
+      type,
+      refrel_code,
+      refrence_no,
     } = Object.fromEntries(
       Object.entries(fields).map(([key, value]) => [key, value[0]])
     );
@@ -472,11 +468,10 @@ export async function POST(req: Request) {
       platform,
       transmission_type,
       license_expiry_dates,
-      aadhar_card,        
-      pan_card  ,
-  type,  
-  // refrel_code,   
-  
+      aadhar_card,
+      pan_card,
+      type,
+      // refrel_code,
     };
 
     const missingFields = Object.entries(requiredFields)
@@ -485,7 +480,10 @@ export async function POST(req: Request) {
 
     if (missingFields.length > 0) {
       return NextResponse.json(
-        { status: 0, message: `Missing required fields: ${missingFields.join(", ")}` },
+        {
+          status: 0,
+          message: `Missing required fields: ${missingFields.join(", ")}`,
+        },
         { status: 400 }
       );
     }
@@ -551,23 +549,22 @@ export async function POST(req: Request) {
         vehicle_type_experience,
         language_spoken,
         // profile_photo_url: profilePhotoUrl,
-        driver_national_id_image: driverNationalIdImage, 
+        driver_national_id_image: driverNationalIdImage,
         driving_license_image: drivingLicenseImage,
         Brand,
         emergency_contact_no,
         device_id,
-        countrycode, 
+        countrycode,
         otp,
         dialcode,
         platform,
         transmission_type,
         license_expiry_dates,
-        aadhar_card,         
-    pan_card ,
-  type,  
-  refrel_code ,
-  refrence_no, 
-
+        aadhar_card,
+        pan_card,
+        type,
+        refrel_code,
+        refrence_no,
       },
     ]);
 
@@ -588,20 +585,18 @@ export async function POST(req: Request) {
         otp,
       },
       { status: 200 }
-    
     );
-  } 
-  // catch (error) {
-  //   console.error("Error:", error);
-  //   return NextResponse.json(
-  //     { status: 0, error: "Internal Server Error" },
-  //     { status: 500 }
-  //   );
-  // }
-  catch (error) {
+  } catch (error) {
+    // catch (error) {
+    //   console.error("Error:", error);
+    //   return NextResponse.json(
+    //     { status: 0, error: "Internal Server Error" },
+    //     { status: 500 }
+    //   );
+    // }
     console.error("Error:", error);
     const errorMessage = error instanceof Error ? error.message : String(error);
-    
+
     return NextResponse.json(
       { status: 0, error: errorMessage },
       { status: 500 }

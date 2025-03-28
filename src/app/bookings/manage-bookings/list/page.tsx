@@ -144,7 +144,7 @@ const ListBooking = () => {
     setLoading(false);
   };
 
-  type StatusType = "pending" | "accepted" | "completed" | "canceled";
+  type StatusType = "pending" |"active" |"accepted" | "completed" | "canceled"|"rejected";
 
   // const handleDelete = async (bookingId: string) => {
   //   if (window.confirm("Are you sure you want to delete this booking?")) {
@@ -185,9 +185,11 @@ const ListBooking = () => {
    
     const statusCycle: Record<StatusType, StatusType> = {
       pending: "pending",
+      active: "active",
       accepted: "accepted",
       completed: "completed",
       canceled: "canceled",
+      rejected: "rejected",
     };
 
 
@@ -223,6 +225,10 @@ const ListBooking = () => {
     switch (normalizedStatus) {
       case "pending":
         return "orange";
+      case "rejected":
+        return "red";
+      case "active":
+        return "green";
       case "completed":
         return "green";
       case "accepted":
@@ -331,6 +337,8 @@ const ListBooking = () => {
         }}
       >
         <option value="pending">Pending</option>
+        <option value="rejected">Rejected</option>
+        <option value="active">Active</option>
         <option value="accepted">Accepted</option>
         <option value="completed">Completed</option>
         <option value="canceled">Canceled</option>
