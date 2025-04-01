@@ -15,16 +15,11 @@ export async function POST(req:Request) {
             .eq('driver_id', driver_id); 
        
 
-        // Fetch spoken languages
-   
-
-        // Return formatted response
         return NextResponse.json({
             status: '1',
             message: 'Data fetched successfully',
             data: {
                 drivers
-           
               
             }
         });

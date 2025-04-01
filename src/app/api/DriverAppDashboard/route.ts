@@ -92,7 +92,7 @@ export async function POST(req: Request) {
     // Fetch driver details from the database
     const { data: driverData, error: driverError } = await supabase
       .from('drivers')
-      .select('isadminverified, kyc_status, police_verification_status')
+      .select('isadminverified, kyc_status, police_verification_status,is_online')
       .eq('driver_id', driver_id)
       .single();
 
@@ -143,6 +143,7 @@ export async function POST(req: Request) {
           message: 'Driver details fetched successfully',
           status: '1',
           data: {
+           
             isAdminVerified: formatStatus(driverData.isadminverified, 'Admin verification'),
             kyc: formatStatus(driverData.kyc_status, 'KYC'),
             policeverification: formatStatus(driverData.police_verification_status, 'Police verification'),
@@ -171,6 +172,7 @@ export async function POST(req: Request) {
       message: 'Driver details and bookings fetched successfully',
       status: '1',
       data: {
+        DriverOnlineStatus: driverData.is_online,
         isAdminVerified: formatStatus(driverData.isadminverified, 'Admin verification'),
         kyc: formatStatus(driverData.kyc_status, 'KYC'),
         policeverification: formatStatus(driverData.police_verification_status, 'Police verification'),
