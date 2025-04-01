@@ -110,9 +110,18 @@ export async function POST(req: Request) {
       switch (status) {
         case 'approved':
           message = `${type} approved`;
+          if (type === 'KYC') {
+            message = 'KYC verification is successfully completed, and the admin has approved the physical documentation.';
+          }
           break;
         case 'pending':
           message = `${type} pending`;
+          if (type === 'KYC') {
+            message = 'KYC document verification must be completed within 3 days, and the physical documentation is awaiting admin approval.';
+          }
+          if (type === 'Police verification' && driverData.police_verification_status === 'pending') {
+            message = 'Police verification is still pending, even after seven days of visiting the Chofor office.';
+          }
           break;
         case 'rejected':
           message = `${type} rejected`;
@@ -123,14 +132,12 @@ export async function POST(req: Request) {
       return { message, status };
     };
 
-   
     const isPending =
       driverData.isadminverified === 'pending' ||
       driverData.kyc_status === 'pending' ||
       driverData.police_verification_status === 'pending';
 
     if (isPending) {
-      
       return NextResponse.json(
         {
           message: 'Driver details fetched successfully',
@@ -139,14 +146,14 @@ export async function POST(req: Request) {
             isAdminVerified: formatStatus(driverData.isadminverified, 'Admin verification'),
             kyc: formatStatus(driverData.kyc_status, 'KYC'),
             policeverification: formatStatus(driverData.police_verification_status, 'Police verification'),
-            bookings: [] 
+            bookings: []
           },
         },
         { status: 200 }
       );
     }
 
-
+    // Fetch booking details
     const { data: bookings, error: bookingError } = await supabase
       .from('bookings')
       .select('*')
@@ -160,7 +167,6 @@ export async function POST(req: Request) {
       );
     }
 
-   
     const response = {
       message: 'Driver details and bookings fetched successfully',
       status: '1',
@@ -168,7 +174,7 @@ export async function POST(req: Request) {
         isAdminVerified: formatStatus(driverData.isadminverified, 'Admin verification'),
         kyc: formatStatus(driverData.kyc_status, 'KYC'),
         policeverification: formatStatus(driverData.police_verification_status, 'Police verification'),
-        bookings, 
+        bookings,
       },
     };
 
