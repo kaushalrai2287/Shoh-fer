@@ -8,7 +8,7 @@ export async function POST(req:Request) {
         const body = await req.json();
         const { driver_id } = body;
         const supabase = await createClient();
-        // Fetch years of experience
+       
         const { data: drivers, error: driversError } = await supabase
             .from('drivers')
             .select('*')

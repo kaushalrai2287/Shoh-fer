@@ -155,10 +155,19 @@ export async function POST(req: Request) {
     }
 
     // Fetch booking details
-    const { data: bookings, error: bookingError } = await supabase
-      .from('bookings')
-      .select('*')
-      .eq('driver_id', driver_id);
+    // const { data: bookings, error: bookingError } = await supabase
+    //   .from('bookings')
+    //   .select('*')
+    //   .eq('driver_id', driver_id);
+    const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+
+const { data: bookings, error: bookingError } = await supabase
+  .from('bookings')
+  .select('*')
+  .eq('driver_id', driver_id)
+  .gte('created_at', `${today}T00:00:00.000Z`) // Start of today
+  .lt('created_at', `${today}T23:59:59.999Z`); // End of today
+
 
     if (bookingError) {
       console.error('Error fetching booking details:', bookingError);
