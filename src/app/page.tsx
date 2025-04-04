@@ -62,7 +62,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation"; // Use router for redirection
-// import { requestPushNotification } from "../../utils/pushNotification";
+import { requestPushNotification } from "../../utils/pushNotification";
 import { createClient } from "../../utils/supabase/client";
 
 export default function HomePage() {
@@ -88,11 +88,11 @@ export default function HomePage() {
       setUserId(data.user.id);
 
       // Request push notification token
-      // const t = await requestPushNotification();
-      // if (t) {
-      //   setToken(t);
-      //   saveTokenToDatabase(t, data.user.id); // Save token with user_id
-      // }
+      const t = await requestPushNotification();
+      if (t) {
+        setToken(t);
+        saveTokenToDatabase(t, data.user.id); // Save token with user_id
+      }
     };
 
     checkUserAndRequestNotification();
