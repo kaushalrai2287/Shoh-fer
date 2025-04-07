@@ -104,7 +104,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // Format status messages
+   
     const formatStatus = (status: string, type: string) => {
       let message = '';
       switch (status) {
@@ -163,10 +163,10 @@ export async function POST(req: Request) {
 
 const { data: bookings, error: bookingError } = await supabase
   .from('bookings')
-  .select('*')
+  .select('*',)
   .eq('driver_id', driver_id)
-  .gte('created_at', `${today}T00:00:00.000Z`) // Start of today
-  .lt('created_at', `${today}T23:59:59.999Z`); // End of today
+  .gte('created_at', `${today}T00:00:00.000Z`) 
+  .lt('created_at', `${today}T23:59:59.999Z`); 
 
 
     if (bookingError) {

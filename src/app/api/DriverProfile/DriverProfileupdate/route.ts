@@ -38,16 +38,26 @@ import { NextResponse } from 'next/server';
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { driver_id, new_phone_number, new_email,emergency_contact_no,address } = body;
+        const { driver_id, new_phone_number, new_email } = body;
 
-        if (!driver_id || !new_phone_number || !new_email) {
-            return NextResponse.json({ status: '0', message: 'Missing required fields' });
+        if (!driver_id) {
+            return NextResponse.json({ status: '0', message: 'Missing driver_id' });
+        }
+
+        const isEmailProvided = !!new_email;
+        const isPhoneProvided = !!new_phone_number;
+
+        // Enforce one change at a time
+        if ((isEmailProvided && isPhoneProvided) || (!isEmailProvided && !isPhoneProvided)) {
+            return NextResponse.json({
+                status: '0',
+                message: 'Provide either new_email or new_phone_number, not both',
+            });
         }
 
         const supabase = await createClient();
         const otp = generateOTP();
 
-        
         const { data: driverData, error: driverError } = await supabase
             .from('drivers')
             .select('phone_number, email')
@@ -58,23 +68,48 @@ export async function POST(req: Request) {
             return NextResponse.json({ status: '0', message: 'Driver not found' });
         }
 
-       
-        const { data, error } = await supabase
-            .from('driver_profile_updates')
-            .insert([
-                {
-                    driver_id,
-                    previous_phone_number: driverData.phone_number,
-                    new_phone_number,
-                    previous_email: driverData.email,
-                    new_email,
-                    otp,
-                    created_at: new Date(),
-                },
-            ]);
+        let insertPayload;
 
-        if (error) {
-            throw error;
+        if (isPhoneProvided) {
+            if (new_phone_number === driverData.phone_number) {
+                return NextResponse.json({
+                    status: '0',
+                    message: 'Phone number is the same as current',
+                });
+            }
+
+            insertPayload = {
+                driver_id,
+                type: 'phone',
+                previous_value: driverData.phone_number,
+                new_value: new_phone_number,
+                otp,
+                created_at: new Date(),
+            };
+        } else {
+            if (new_email === driverData.email) {
+                return NextResponse.json({
+                    status: '0',
+                    message: 'Email is the same as current',
+                });
+            }
+
+            insertPayload = {
+                driver_id,
+                type: 'email',
+                previous_value: driverData.email,
+                new_value: new_email,
+                otp,
+                created_at: new Date(),
+            };
+        }
+
+        const { error: insertError } = await supabase
+            .from('driver_profile_updates')
+            .insert([insertPayload]);
+
+        if (insertError) {
+            throw insertError;
         }
 
         return NextResponse.json({ status: '1', message: 'OTP sent successfully', otp });
@@ -84,7 +119,6 @@ export async function POST(req: Request) {
     }
 }
 
-
 function generateOTP(): string {
-    return Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
+    return Math.floor(100000 + Math.random() * 900000).toString(); 
 }
