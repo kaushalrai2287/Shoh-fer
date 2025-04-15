@@ -12,7 +12,7 @@ export async function POST(req: Request) {
 
         const supabase = await createClient();
 
-        // Step 1: Fetch OTP record
+        
         const { data: updateRecord, error } = await supabase
             .from('driver_profile_updates')
             .select('*')
@@ -28,7 +28,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ status: '0', message: 'Invalid OTP or already verified' });
         }
 
-        // Step 2: Mark OTP as verified
+      
         const { error: updateOtpError } = await supabase
             .from('driver_profile_updates')
             .update({ is_verified: true })
@@ -38,7 +38,7 @@ export async function POST(req: Request) {
             throw updateOtpError;
         }
 
-        // Step 3: Update driver's phone or email
+       
         const updateField =
             type === 'phone' ? { phone_number: updateRecord.new_value } :
             type === 'email' ? { email: updateRecord.new_value } : null;

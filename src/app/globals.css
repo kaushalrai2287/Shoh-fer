@@ -697,3 +697,6 @@ input[type="checkbox"] {
   max-width: 50%;
 }
 /* Brand ends */
+.react-datepicker-popper {
+  z-index: 9999 !important;
+}

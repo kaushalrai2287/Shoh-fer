@@ -47,7 +47,7 @@ export async function POST(req: Request) {
         const isEmailProvided = !!new_email;
         const isPhoneProvided = !!new_phone_number;
 
-        // Enforce one change at a time
+        
         if ((isEmailProvided && isPhoneProvided) || (!isEmailProvided && !isPhoneProvided)) {
             return NextResponse.json({
                 status: '0',
@@ -119,6 +119,6 @@ export async function POST(req: Request) {
     }
 }
 
-function generateOTP(): string {
-    return Math.floor(100000 + Math.random() * 900000).toString(); 
+function generateOTP(): number {
+    return Math.floor(1000 + Math.random() * 9000);; 
 }

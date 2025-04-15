@@ -37,6 +37,8 @@ import HeadingBredcrum from "../../components/HeadingBredcrum";
 import { Toaster } from "react-hot-toast";
 // import { PermissionsProvider } from "..../../utils/context/PermissionsContext";  // Path to your context file
 import { PermissionsProvider } from "../../utils/services/PermissionsContext";
+import 'leaflet/dist/leaflet.css';
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if ("serviceWorker" in navigator) {

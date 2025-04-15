@@ -1,79 +1,7 @@
-// import { NextResponse } from 'next/server';
-// import { createClient } from '../../../../utils/supabase/client';
 
-// export async function POST(req: Request) {
-//   try {
-//     const body = await req.json(); // Read body from request
-//     const { driver_id } = body;
-
-//     if (!driver_id) {
-//       return NextResponse.json(
-//         { message: 'Driver ID is required', status: 'error' },
-//         { status: 400 }
-//       );
-//     }
-
-//     const supabase = createClient();
-
-//     // Fetch driver details from the database
-//     const { data, error } = await supabase
-//       .from('drivers')
-//       .select('isadminverified, kyc_status, police_verification_status')
-//       .eq('driver_id', driver_id)
-//       .single();
-
-//     if (error || !data) {
-//         console.error('Error fetching driver details:', error);
-//       return NextResponse.json(
-//         { message: 'Driver not found', status: 'error' },
-//         { status: 404 }
-//       );
-//     }
-
-//     // Format status messages
-//     const formatStatus = (status: string, type: string) => {
-//       let message = '';
-//       switch (status) {
-//         case 'approved':
-//           message = `${type} approved`;
-//           break;
-//         case 'pending':
-//           message = `${type} pending`;
-//           break;
-//         case 'rejected':
-//           message = `${type} rejected`;
-//           break;
-//         default:
-//           message = `${type} status unknown`;
-//       }
-//       return { message, status };
-//     };
-
-//     // Response object
-//     const response = {
-//       message: 'Driver details fetched successfully',
-//       status: '1',
-//       data: {
-//         isAdminVerified: formatStatus(data.isadminverified, 'Admin verification'),
-//         kyc: formatStatus(data.kyc_status, 'KYC'),
-//         policeverification: formatStatus(
-//           data.police_verification_status,
-//           'Police verification'
-//         ),
-//       },
-//     };
-
-//     return NextResponse.json(response, { status: 200 });
-//   } catch (error) {
-//     console.error('Error fetching driver details:', error);
-//     return NextResponse.json(
-//       { message: 'Internal Server Error', status: 'error' },
-//       { status: 500 }
-//     );
-//   }
-// }
 import { NextResponse } from 'next/server';
 import { createClient } from '../../../../utils/supabase/client';
+import { haversineDistance } from '../../../../utils/distance';
 
 export async function POST(req: Request) {
   try {
@@ -153,43 +81,145 @@ export async function POST(req: Request) {
         { status: 200 }
       );
     }
-
     // Fetch booking details
     // const { data: bookings, error: bookingError } = await supabase
     //   .from('bookings')
     //   .select('*')
     //   .eq('driver_id', driver_id);
-    const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+//     const today = new Date().toISOString().split('T')[0]; 
+
+// const { data: bookings, error: bookingError } = await supabase
+//   .from('bookings')
+//   .select('*',)
+//   .eq('driver_id', driver_id)
+//   .gte('created_at', `${today}T00:00:00.000Z`) 
+//   .lt('created_at', `${today}T23:59:59.999Z`); 
+
+
+//     if (bookingError) {
+//       console.error('Error fetching booking details:', bookingError);
+//       return NextResponse.json(
+//         { message: 'Error fetching booking details', status: 'error' },
+//         { status: 500 }
+//       );
+//     }
+const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
 
 const { data: bookings, error: bookingError } = await supabase
   .from('bookings')
-  .select('*',)
+  .select('*, vehicles(license_plate_no, brand_id, model_id)')
   .eq('driver_id', driver_id)
-  .gte('created_at', `${today}T00:00:00.000Z`) 
-  .lt('created_at', `${today}T23:59:59.999Z`); 
+  .gte('created_at', `${today}T00:00:00.000Z`)
+  .lt('created_at', `${today}T23:59:59.999Z`);
+
+if (bookingError) {
+  console.error('Error fetching booking details:', bookingError);
+  return NextResponse.json(
+    { message: 'Error fetching booking details', status: 'error' },
+    { status: 500 }
+  );
+}
+const bookingIds = bookings.map(booking => booking.booking_id);
+
+const { data: bookingLocation, error: bookingLocationError } = await supabase
+.from('booking_locations')
+.select('customer_latitude,booking_id, customer_longitude,dropoff_lat,dropoff_lng')
+.in('booking_id', bookingIds);
 
 
-    if (bookingError) {
-      console.error('Error fetching booking details:', bookingError);
-      return NextResponse.json(
-        { message: 'Error fetching booking details', status: 'error' },
-        { status: 500 }
-      );
+if (bookingLocationError) {
+  console.error('Error fetching booking Location:', bookingLocationError);
+  return NextResponse.json(
+    { message: 'Error fetching booking Location', status: 'error' },
+    { status: 500 }
+  );
+}
+
+// Enrich bookings with brand and model names
+const enrichedBookings = await Promise.all(
+  bookings.map(async (booking) => {
+    const vehicle = booking.vehicles;
+
+    let brandName = null;
+    let modelName = null;
+
+    if (vehicle?.brand_id) {
+      const { data: brandData } = await supabase
+        .from('brands')
+        .select('name')
+        .eq('id', vehicle.brand_id)
+        .single();
+
+      brandName = brandData?.name || null;
+      
     }
 
-    const response = {
-      message: 'Driver details and bookings fetched successfully',
-      status: '1',
-      data: {
-        DriverOnlineStatus: driverData.is_online,
-        isAdminVerified: formatStatus(driverData.isadminverified, 'Admin verification'),
-        kyc: formatStatus(driverData.kyc_status, 'KYC'),
-        policeverification: formatStatus(driverData.police_verification_status, 'Police verification'),
-        bookings,
-      },
-    };
+    if (vehicle?.model_id) {
+      const { data: modelData } = await supabase
+        .from('models')
+        .select('name')
+        .eq('id', vehicle.model_id)
+        .eq('brand_id', vehicle.brand_id) 
+        .single();
 
-    return NextResponse.json(response, { status: 200 });
+      modelName = modelData?.name || null;
+    }
+
+
+const location = bookingLocation.find(loc => loc.booking_id === booking.booking_id);
+let distance_km = null;
+if (
+  location?.customer_latitude &&
+  location?.customer_longitude &&
+  location?.dropoff_lat &&
+  location?.dropoff_lng
+) {
+  distance_km = haversineDistance(
+    location.customer_latitude,
+    location.customer_longitude,
+    location.dropoff_lat,
+    location.dropoff_lng
+  );
+}
+
+return {
+  ...booking,
+  customer_location: {
+    pickup: {
+      lat: location?.customer_latitude || null,
+      lng: location?.customer_longitude || null,
+    },
+    dropoff: {
+      lat: location?.dropoff_lat || null,
+      lng: location?.dropoff_lng || null,
+    },
+    distance_km: distance_km ? parseFloat(distance_km.toFixed(2)) : null
+  },
+  vehicles: {
+    ...vehicle,
+    brand_name: brandName,
+    model_name: modelName,
+  }
+};
+
+  })
+);
+
+return NextResponse.json(
+  {
+    message: 'Driver details and bookings fetched successfully',
+    status: '1',
+    data: {
+      DriverOnlineStatus: driverData.is_online,
+      isAdminVerified: formatStatus(driverData.isadminverified, 'Admin verification'),
+      kyc: formatStatus(driverData.kyc_status, 'KYC'),
+      policeverification: formatStatus(driverData.police_verification_status, 'Police verification'),
+      bookings: enrichedBookings,
+    },
+  },
+  { status: 200 }
+);
+
   } catch (error) {
     console.error('Error:', error);
     return NextResponse.json(
