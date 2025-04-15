@@ -117,22 +117,36 @@ export async function POST(req: Request) {
       );
     }
 
-    return NextResponse.json(
-      {
-        message: 'Bookings fetched successfully',
-        status: '1',
-        data: {
-          bookings,
-          pagination: {
-            total: count || 0,
-            page,
-            limit,
-            total_pages: Math.ceil((count || 0) / limit),
-          },
-        },
+    // Transform vehicles to flatten brand/model names
+const transformedBookings = bookings.map((booking: any) => {
+  const vehicle = booking.vehicles || {};
+  return {
+    ...booking,
+    vehicles: {
+      license_plate_no: vehicle.license_plate_no || '',
+      brand_name: vehicle.brand?.name || '',
+      model_name: vehicle.model?.name || '',
+    },
+  };
+});
+
+return NextResponse.json(
+  {
+    message: 'Bookings fetched successfully',
+    status: '1',
+    data: {
+      bookings: transformedBookings,
+      pagination: {
+        total: count || 0,
+        page,
+        limit,
+        total_pages: Math.ceil((count || 0) / limit),
       },
-      { status: 200 }
-    );
+    },
+  },
+  { status: 200 }
+);
+
   } catch (error) {
     console.error('Error:', error);
     return NextResponse.json(

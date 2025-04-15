@@ -21,7 +21,7 @@ export async function POST(req: Request) {
       .single();
       
 
-    // ✅ Handle invalid or missing referral code
+    
     if (error || !data) {
       return NextResponse.json(
         { status: 0, message: "Invalid referral code" },
