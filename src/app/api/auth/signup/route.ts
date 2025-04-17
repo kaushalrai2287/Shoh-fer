@@ -488,29 +488,66 @@ export async function POST(req: Request) {
       );
     }
 
-    // ✅ Check if phone_number or email already exists
+   
     const supabase = await createClient();
-    const { data: existingDrivers, error: checkError } = await supabase
+        // Check if email or phone already exists and is VERIFIED
+        const { data: existingVerified, error: checkError } = await supabase
+        .from("drivers")
+        .select("driver_id")
+        .or(`phone_number.eq.${phone_number},email.eq.${email}`)
+        .eq("is_verified", true);
+  
+      if (checkError) {
+        return NextResponse.json(
+          { status: 0, error: checkError.message },
+          { status: 400 }
+        );
+      }
+  
+      if (existingVerified && existingVerified.length > 0) {
+        return NextResponse.json(
+          { status: 0, message: "Phone number or email already exists" },
+          { status: 200 }
+        );
+      }
+
+
+
+       // Check for unverified user to update
+    const { data: existingUnverified, error: unverifiedCheckError } =
+    await supabase
       .from("drivers")
       .select("driver_id")
-      .or(`phone_number.eq.${phone_number},email.eq.${email}`);
+      .or(`phone_number.eq.${phone_number},email.eq.${email}`)
+      .eq("is_verified", false)
+      .maybeSingle();
 
-    if (checkError) {
-      return NextResponse.json(
-        { status: 0, error: checkError.message },
-        { status: 400 }
-      );
-    }
+  if (unverifiedCheckError) {
+    return NextResponse.json(
+      { status: 0, error: unverifiedCheckError.message },
+      { status: 400 }
+    );
+  }
+    // const { data: existingDrivers, error: checkError } = await supabase
+    //   .from("drivers")
+    //   .select("driver_id")
+    //   .or(`phone_number.eq.${phone_number},email.eq.${email}`)
+      
 
-    if (existingDrivers && existingDrivers.length > 0) {
-      return NextResponse.json(
-        { status: 0, message: "Phone number or email already exists" },
-        { status: 200 }
-      );
-    }
+    // if (checkError) {
+    //   return NextResponse.json(
+    //     { status: 0, error: checkError.message },
+    //     { status: 400 }
+    //   );
+    // }
 
-    // ✅ Handle file uploads
-    // let profilePhotoUrl = "";
+    // if (existingDrivers && existingDrivers.length > 0) {
+    //   return NextResponse.json(
+    //     { status: 0, message: "Phone number or email already exists" },
+    //     { status: 200 }
+    //   );
+    // }
+
     let driverNationalIdImage = "";
     let drivingLicenseImage = "";
 
@@ -537,69 +574,136 @@ export async function POST(req: Request) {
 
     // ✅ Insert into the database
     const otp = "1234"; // Example OTP
-    const { error: insertError } = await supabase.from("drivers").insert([
-      {
-        phone_number,
-        driver_name,
-        email,
-        address,
-        driving_license_no,
-        license_category,
-        experience_years,
-        vehicle_type_experience,
-        language_spoken,
-        // profile_photo_url: profilePhotoUrl,
-        driver_national_id_image: driverNationalIdImage,
-        driving_license_image: drivingLicenseImage,
-        Brand,
-        emergency_contact_no,
-        device_id,
-        countrycode,
-        otp,
-        dialcode,
-        platform,
-        transmission_type,
-        license_expiry_dates,
-        aadhar_card,
-        pan_card,
-        type,
-        refrel_code,
-        refrence_no,
-      },
-    ]);
 
-    if (insertError) {
-      return NextResponse.json(
-        { status: 0, error: insertError.message },
-        { status: 400 }
-      );
-    }
 
+    
+//     const { error: insertError } = await supabase.from("drivers").insert([
+//       {
+//         phone_number,
+//         driver_name,
+//         email,
+//         address,
+//         driving_license_no,
+//         license_category,
+//         experience_years,
+//         vehicle_type_experience,
+//         language_spoken,
+//         // profile_photo_url: profilePhotoUrl,
+//         driver_national_id_image: driverNationalIdImage,
+//         driving_license_image: drivingLicenseImage,
+//         Brand,
+//         emergency_contact_no,
+//         device_id,
+//         countrycode,
+//         otp,
+//         dialcode,
+//         platform,
+//         transmission_type,
+//         license_expiry_dates,
+//         aadhar_card,
+//         pan_card,
+//         type,
+//         refrel_code,
+//         refrence_no,
+//       },
+//     ]);
+
+//     if (insertError) {
+//       return NextResponse.json(
+//         { status: 0, error: insertError.message },
+//         { status: 400 }
+//       );
+//     }
+
+//     return NextResponse.json(
+//       {
+//         status: 1,
+//         message: "OTP sent successfully!",
+//         // profilePhotoUrl,
+//         // driverNationalIdImage,
+//         // drivingLicenseImage,
+//         otp,
+//       },
+//       { status: 200 }
+//     );
+//   } catch (error) {
+
+//     console.error("Error:", error);
+//     const errorMessage = error instanceof Error ? error.message : String(error);
+
+//     return NextResponse.json(
+//       { status: 0, error: errorMessage },
+//       { status: 500 }
+//     );
+//   }
+// }
+const driverData = {
+  phone_number,
+  driver_name,
+  email,
+  address,
+  driving_license_no,
+  license_category,
+  experience_years,
+  vehicle_type_experience,
+  language_spoken,
+  driver_national_id_image: driverNationalIdImage,
+  driving_license_image: drivingLicenseImage,
+  Brand,
+  emergency_contact_no,
+  device_id,
+  countrycode,
+  otp,
+  dialcode,
+  platform,
+  transmission_type,
+  license_expiry_dates,
+  aadhar_card,
+  pan_card,
+  type,
+  refrel_code,
+  refrence_no,
+};
+
+if (existingUnverified) {
+  // Update unverified record
+  const { error: updateError } = await supabase
+    .from("drivers")
+    .update(driverData)
+    .eq("driver_id", existingUnverified.driver_id);
+
+  if (updateError) {
     return NextResponse.json(
-      {
-        status: 1,
-        message: "OTP sent successfully!",
-        // profilePhotoUrl,
-        // driverNationalIdImage,
-        // drivingLicenseImage,
-        otp,
-      },
-      { status: 200 }
-    );
-  } catch (error) {
-    // catch (error) {
-    //   console.error("Error:", error);
-    //   return NextResponse.json(
-    //     { status: 0, error: "Internal Server Error" },
-    //     { status: 500 }
-    //   );
-    // }
-    console.error("Error:", error);
-    const errorMessage = error instanceof Error ? error.message : String(error);
-
-    return NextResponse.json(
-      { status: 0, error: errorMessage },
-      { status: 500 }
+      { status: 0, error: updateError.message },
+      { status: 400 }
     );
   }
+} else {
+  // Insert new record
+  const { error: insertError } = await supabase
+    .from("drivers")
+    .insert([driverData]);
+
+  if (insertError) {
+    return NextResponse.json(
+      { status: 0, error: insertError.message },
+      { status: 400 }
+    );
+  }
+}
+
+return NextResponse.json(
+  {
+    status: 1,
+    message: "OTP sent successfully!",
+    otp,
+  },
+  { status: 200 }
+);
+} catch (error) {
+console.error("Error:", error);
+const errorMessage = error instanceof Error ? error.message : String(error);
+
+return NextResponse.json({ status: 0, error: errorMessage }, { status: 500 });
+}
 }
