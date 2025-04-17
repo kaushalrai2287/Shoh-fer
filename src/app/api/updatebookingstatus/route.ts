@@ -63,7 +63,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Booking ID, status, and driver ID are required' }, { status: 400 });
     }
 
-    // Update booking status
     const { error: updateStatusError } = await supabase
       .from('bookings')
       .update({ status })
@@ -73,12 +72,55 @@ export async function POST(req: NextRequest) {
 
     if (status.toLowerCase() === 'rejected') {
       
-      await supabase
-        .from('booking_rejected_drivers')
-        .insert([{ booking_id, driver_id }]);
+      const { error: updateDriverStatusError } = await supabase
+        .from('booking_assigned_drivers')
+        .update({ status: 'rejected', rejected_at: new Date() })
+        .eq('booking_id', booking_id)
+        .eq('driver_id', driver_id);
+
+      if (updateDriverStatusError) throw updateDriverStatusError;
+    }
+    
+    if (status.toLowerCase() === 'active') {
+      
+      const { error: updateDriverStatusError } = await supabase
+        .from('booking_assigned_drivers')
+        .update({ status: 'active', active_at: new Date() })
+        .eq('booking_id', booking_id)
+        .eq('driver_id', driver_id);
+
+      if (updateDriverStatusError) throw updateDriverStatusError;
+    }
+    if (status.toLowerCase() === 'completed') {
+      
+      const { error: updateDriverStatusError } = await supabase
+        .from('booking_assigned_drivers')
+        .update({ status: 'completed', completed_at: new Date() })
+        .eq('booking_id', booking_id)
+        .eq('driver_id', driver_id);
+
+      if (updateDriverStatusError) throw updateDriverStatusError;
+    }
+    if (status.toLowerCase() === 'cancelled') {
+      
+      const { error: updateDriverStatusError } = await supabase
+        .from('booking_assigned_drivers')
+        .update({ status: 'cancelled', cancelled_at: new Date() })
+        .eq('booking_id', booking_id)
+        .eq('driver_id', driver_id);
+
+      if (updateDriverStatusError) throw updateDriverStatusError;
     }
 
     if (status.toLowerCase() === 'accepted') {
+
+      const { error: updateDriverStatusError } = await supabase
+      .from('booking_assigned_drivers')
+      .update({ status: 'accepted', accepted_at: new Date() })
+      .eq('booking_id', booking_id)
+      .eq('driver_id', driver_id);
+
+      if (updateDriverStatusError) throw updateDriverStatusError;
       
       const { error: assignDriverError } = await supabase
         .from('bookings')

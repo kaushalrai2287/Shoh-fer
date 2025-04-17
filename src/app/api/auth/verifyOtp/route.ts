@@ -60,7 +60,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // ✅ If OTP matches, update `is_verified` to true
+   
     const { error: updateError } = await supabase
       .from("drivers")
       .update({ is_verified: true })
@@ -70,7 +70,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: updateError.message }, { status: 400 });
     }
 
-    // ✅ Fetch user details after verification
+ 
     const { data: userData, error: userError } = await supabase
       .from("drivers")
       .select("*")

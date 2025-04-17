@@ -49,6 +49,15 @@ const formSchema = z.object({
   p_experience: z.string().min(1, "exp required"),
   driver_select: z.string(),
   vehicle_condition: z.string(),
+
+  //new field
+  Customer_Email: z.string().email("customer email address").optional(),
+  Secondary_Contact_Number: z
+  .string()
+  .regex(/^\d+$/, "Phone must contain only digits")
+  .min(10, "Phone number must be 10 digits")
+  .max(10, "Phone number must be 10 digits").optional(),
+  special_instructions: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -187,11 +196,14 @@ const AddBookings = () => {
           {
             vehicle_id,
             customer_name: data.cperson,
+            customer_email: data.Customer_Email,
             customer_phone: data.cnumber,
             pickup_date_time:data.pickup_date_time,
             pickup_address: data.p_location,
             dropoff_address: data.d_location,
+            special_instructions: data.special_instructions,
             driver_id: data.driver_select,
+            Alternate_contact_no: data.Secondary_Contact_Number,
             service_center_id: data.s_list,
           },
         ])
@@ -444,6 +456,36 @@ const AddBookings = () => {
                 )}
               </div>
               <div className="inner_form_group">
+                    <label htmlFor="Customer_Email">Customer Email</label>
+                    <input
+                      className="form-control"
+                      id="Customer_Email"
+                      type="text"
+                      {...register("Customer_Email")}
+                    />
+                    {errors.Customer_Email && (
+                      <p className="erro_message">
+                        {errors.Customer_Email.message}
+                      </p>
+                    )}
+                  </div>
+                  <div className="inner_form_group">
+                    <label htmlFor="Secondary_Contact_Number">
+                      Secondary Contact Number
+                    </label>
+                    <input
+                      className="form-control"
+                      id="Secondary_Contact_Number"
+                      type="text"
+                      {...register("Secondary_Contact_Number")}
+                    />
+                    {errors.Secondary_Contact_Number && (
+                      <p className="erro_message">
+                        {errors.Secondary_Contact_Number.message}
+                      </p>
+                    )}
+                  </div>
+              <div className="inner_form_group">
                 <label htmlFor="name">
                   Vehicle Number <span>*</span>
                 </label>
@@ -607,6 +649,18 @@ const AddBookings = () => {
                   <p className="erro_message">{errors.d_lng.message}</p>
                 )}
               </div>
+              <div className="inner_form_group">
+                    <label htmlFor="special_instructions">
+                      Special Instructions
+                    </label>
+                    <input
+                      className="form-control"
+                      id="special_instructions"
+                      type="text"
+                      placeholder="Entry Code, Parking details etc"
+                      {...register("special_instructions")}
+                    />
+                  </div>
 
               <div className="inner_form_group">
                 <label htmlFor="driver_select">Driver Select</label>

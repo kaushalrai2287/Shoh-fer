@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Driver ID and status are required' }, { status: 400 });
     }
 
-    // Update is_online status
+    
     const { error: updateError } = await supabase
       .from('drivers')
       .update({ is_online })
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
       throw updateError;
     }
 
-    // Fetch updated driver latitude and longitude
+   
     const { data: driverData, error: fetchError } = await supabase
       .from('drivers')
       .select('latitude, longitude')
