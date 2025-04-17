@@ -207,54 +207,119 @@
 //         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
 //     }
 // }
+// import { NextResponse } from "next/server";
+// import { createClient } from "../../../../../utils/supabase/server";
+
+// export async function POST(req: Request) {
+//     try {
+//         const supabase = await createClient();
+//         const body = await req.json();
+//         const { phone_number, device_id ,platform,dialcode,countrycode} = body;
+
+//         if (!phone_number) {
+//             return NextResponse.json({ message: "Mobile number required" }, { status: 200 });
+//         }
+
+//         if (!device_id) {
+//             return NextResponse.json({ message: "Device ID required" }, { status: 200 });
+//         }
+
+//         const otp = "1234"; // For testing only
+
+//         // Ch eck if the phone number already exists
+//         const { data: existingDriver, error: fetchError } = await supabase
+//             .from("drivers")
+//             .select("driver_id")
+//             .eq("phone_number", phone_number)
+//             .single();
+
+//         if (fetchError && fetchError.code !== "PGRST116") { 
+//             // Ignore "PGRST116: no rows found" error
+//             return NextResponse.json({ error: fetchError.message }, { status: 400 });
+//         }
+
+//         if (existingDriver) {
+//             // Update existing driver with OTP and device_id
+//             const { error: updateError } = await supabase
+//                 .from("drivers")
+//                 .update({ otp, device_id ,platform,dialcode,countrycode})
+//                 .eq("phone_number", phone_number);
+
+//             if (updateError) {
+//                 return NextResponse.json({ error: updateError.message }, { status: 400 });
+//             }
+//         } else {
+//             return NextResponse.json({ status: 0, message: "Phone not registered! GO to registration Page" }, { status: 200 });
+//         }
+
+//         return NextResponse.json({ status: 1, message: "OTP sent successfully!", otp }, { status: 200 });
+//     } catch (error) {
+//         // console.error("Error:", error);
+//         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+//     }
+// }
 import { NextResponse } from "next/server";
 import { createClient } from "../../../../../utils/supabase/server";
 
 export async function POST(req: Request) {
-    try {
-        const supabase = await createClient();
-        const body = await req.json();
-        const { phone_number, device_id ,platform,dialcode,countrycode} = body;
+  try {
+    const supabase = await createClient();
+    const body = await req.json();
+    const { phone_number, device_id, platform, dialcode, countrycode } = body;
 
-        if (!phone_number) {
-            return NextResponse.json({ message: "Mobile number required" }, { status: 200 });
-        }
-
-        if (!device_id) {
-            return NextResponse.json({ message: "Device ID required" }, { status: 200 });
-        }
-
-        const otp = "1234"; // For testing only
-
-        // Ch eck if the phone number already exists
-        const { data: existingDriver, error: fetchError } = await supabase
-            .from("drivers")
-            .select("driver_id")
-            .eq("phone_number", phone_number)
-            .single();
-
-        if (fetchError && fetchError.code !== "PGRST116") { 
-            // Ignore "PGRST116: no rows found" error
-            return NextResponse.json({ error: fetchError.message }, { status: 400 });
-        }
-
-        if (existingDriver) {
-            // Update existing driver with OTP and device_id
-            const { error: updateError } = await supabase
-                .from("drivers")
-                .update({ otp, device_id ,platform,dialcode,countrycode})
-                .eq("phone_number", phone_number);
-
-            if (updateError) {
-                return NextResponse.json({ error: updateError.message }, { status: 400 });
-            }
-        } else {
-            return NextResponse.json({ status: 0, message: "Phone not registered! GO to registration Page" }, { status: 200 });
-        }
-
-        return NextResponse.json({ status: 1, message: "OTP sent successfully!", otp }, { status: 200 });
-    } catch (error) {
-        // console.error("Error:", error);
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    if (!phone_number) {
+      return NextResponse.json({ message: "Mobile number required" }, { status: 200 });
     }
+
+    if (!device_id) {
+      return NextResponse.json({ message: "Device ID required" }, { status: 200 });
+    }
+
+    // Fetch driver by phone number
+    const { data: driver, error: fetchError } = await supabase
+      .from("drivers")
+      .select("driver_id, is_verified")
+      .eq("phone_number", phone_number)
+      .maybeSingle();
+
+    if (fetchError) {
+      return NextResponse.json({ error: fetchError.message }, { status: 400 });
+    }
+
+    if (!driver) {
+      // Phone not registered at all
+      return NextResponse.json({
+        status: 0,
+        message: "Phone not registered! Go to registration page",
+      }, { status: 200 });
+    }
+
+    if (!driver.is_verified) {
+      // Account exists but not verified — do NOT send OTP
+      return NextResponse.json({
+        status: 0,
+        message: "Account does not exist. Please sign up.",
+      }, { status: 200 });
+    }
+
+    // At this point, verified account — proceed to send OTP
+    const otp = "1234"; // For testing only
+
+    const { error: updateError } = await supabase
+      .from("drivers")
+      .update({ otp, device_id, platform, dialcode, countrycode })
+      .eq("driver_id", driver.driver_id);
+
+    if (updateError) {
+      return NextResponse.json({ error: updateError.message }, { status: 400 });
+    }
+
+    return NextResponse.json(
+      { status: 1, message: "OTP sent successfully!", otp },
+      { status: 200 }
+    );
+
+  } catch (error) {
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
 }

@@ -375,6 +375,241 @@
 //         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
 //     }
 // }
+
+//working
+
+// import { NextResponse } from "next/server";
+// import { Readable } from "stream";
+// import fs from "fs";
+// import path from "path";
+// import multiparty from "multiparty";
+// import { createClient } from "../../../../../utils/supabase/client";
+// import { IncomingMessage } from "http";
+
+// export const config = {
+//   api: {
+//     bodyParser: false,
+//   },
+// };
+
+// export async function POST(req: Request) {
+//   try {
+//     // ✅ Convert Next.js req to a readable stream with headers
+//     const reqStream = new Readable();
+//     const arrayBuffer = await req.arrayBuffer();
+//     reqStream.push(Buffer.from(arrayBuffer));
+//     reqStream.push(null);
+
+//     // ✅ Add headers to the Readable stream
+//     const headers = Object.fromEntries(req.headers.entries());
+//     const incomingReq = Object.assign(reqStream, {
+//       headers,
+//       method: req.method,
+//       url: req.url,
+//     }) as unknown as IncomingMessage;
+
+//     // ✅ Use multiparty to parse the form
+//     const form = new multiparty.Form({
+//       uploadDir: path.join(process.cwd(), "public/uploads/DriverDocs"),
+//       autoFiles: true,
+//     });
+
+//     const parseForm = () =>
+//       new Promise<{ fields: Record<string, any>; files: Record<string, any> }>(
+//         (resolve, reject) => {
+//           form.parse(incomingReq, (err, fields, files) => {
+//             if (err) reject(err);
+//             else resolve({ fields, files });
+//           });
+//         }
+//       );
+
+//     const { fields, files } = await parseForm();
+
+//     const {
+//       phone_number,
+//       driver_name,
+//       email,
+//       address,
+//       driving_license_no,
+//       license_category,
+//       experience_years,
+//       vehicle_type_experience,
+//       language_spoken,
+//       Brand,
+//       emergency_contact_no,
+//       device_id,
+//       countrycode,
+//       dialcode,
+//       platform,
+//       transmission_type,
+//       license_expiry_dates,
+//       aadhar_card,
+//       pan_card,
+//       type,
+//       refrel_code,
+//       refrence_no,
+//     } = Object.fromEntries(
+//       Object.entries(fields).map(([key, value]) => [key, value[0]])
+//     );
+
+//     const requiredFields = {
+//       phone_number,
+//       driver_name,
+//       email,
+//       address,
+//       driving_license_no,
+//       license_category,
+//       experience_years,
+//       vehicle_type_experience,
+//       language_spoken,
+//       Brand,
+//       emergency_contact_no,
+//       device_id,
+//       countrycode,
+//       dialcode,
+//       platform,
+//       transmission_type,
+//       license_expiry_dates,
+//       aadhar_card,
+//       pan_card,
+//       type,
+//       // refrel_code,
+//     };
+
+//     const missingFields = Object.entries(requiredFields)
+//       .filter(([_, value]) => !value)
+//       .map(([key]) => key);
+
+//     if (missingFields.length > 0) {
+//       return NextResponse.json(
+//         {
+//           status: 0,
+//           message: `Missing required fields: ${missingFields.join(", ")}`,
+//         },
+//         { status: 400 }
+//       );
+//     }
+
+//     // ✅ Check if phone_number or email already exists
+//     const supabase = await createClient();
+//     const { data: existingDrivers, error: checkError } = await supabase
+//       .from("drivers")
+//       .select("driver_id")
+//       .or(`phone_number.eq.${phone_number},email.eq.${email}`);
+
+//     if (checkError) {
+//       return NextResponse.json(
+//         { status: 0, error: checkError.message },
+//         { status: 400 }
+//       );
+//     }
+
+//     if (existingDrivers && existingDrivers.length > 0) {
+//       return NextResponse.json(
+//         { status: 0, message: "Phone number or email already exists" },
+//         { status: 200 }
+//       );
+//     }
+
+//     // ✅ Handle file uploads
+//     // let profilePhotoUrl = "";
+//     let driverNationalIdImage = "";
+//     let drivingLicenseImage = "";
+
+//     // if (files.profile_photo_url) {
+//     //   const file = files.profile_photo_url[0];
+//     //   const newPath = `/uploads/DriverProfilePhoto/${file.originalFilename}`;
+//     //   fs.renameSync(file.path, path.join("public", newPath));
+//     //   profilePhotoUrl = newPath;
+//     // }
+
+//     if (files.driver_national_id_image) {
+//       const file = files.driver_national_id_image[0];
+//       const newPath = `/uploads/DriverDocs/${file.originalFilename}`;
+//       fs.renameSync(file.path, path.join("public", newPath));
+//       driverNationalIdImage = newPath;
+//     }
+
+//     if (files.driving_license_image) {
+//       const file = files.driving_license_image[0];
+//       const newPath = `/uploads/DriverLicence/${file.originalFilename}`;
+//       fs.renameSync(file.path, path.join("public", newPath));
+//       drivingLicenseImage = newPath;
+//     }
+
+//     // ✅ Insert into the database
+//     const otp = "1234"; // Example OTP
+//     const { error: insertError } = await supabase.from("drivers").insert([
+//       {
+//         phone_number,
+//         driver_name,
+//         email,
+//         address,
+//         driving_license_no,
+//         license_category,
+//         experience_years,
+//         vehicle_type_experience,
+//         language_spoken,
+//         // profile_photo_url: profilePhotoUrl,
+//         driver_national_id_image: driverNationalIdImage,
+//         driving_license_image: drivingLicenseImage,
+//         Brand,
+//         emergency_contact_no,
+//         device_id,
+//         countrycode,
+//         otp,
+//         dialcode,
+//         platform,
+//         transmission_type,
+//         license_expiry_dates,
+//         aadhar_card,
+//         pan_card,
+//         type,
+//         refrel_code,
+//         refrence_no,
+//       },
+//     ]);
+
+//     if (insertError) {
+//       return NextResponse.json(
+//         { status: 0, error: insertError.message },
+//         { status: 400 }
+//       );
+//     }
+
+//     return NextResponse.json(
+//       {
+//         status: 1,
+//         message: "OTP sent successfully!",
+//         // profilePhotoUrl,
+//         // driverNationalIdImage,
+//         // drivingLicenseImage,
+//         otp,
+//       },
+//       { status: 200 }
+//     );
+//   } catch (error) {
+//     // catch (error) {
+//     //   console.error("Error:", error);
+//     //   return NextResponse.json(
+//     //     { status: 0, error: "Internal Server Error" },
+//     //     { status: 500 }
+//     //   );
+//     // }
+//     console.error("Error:", error);
+//     const errorMessage = error instanceof Error ? error.message : String(error);
+
+//     return NextResponse.json(
+//       { status: 0, error: errorMessage },
+//       { status: 500 }
+//     );
+//   }
+// }
+
+
+
+
 import { NextResponse } from "next/server";
 import { Readable } from "stream";
 import fs from "fs";
@@ -391,13 +626,11 @@ export const config = {
 
 export async function POST(req: Request) {
   try {
-    // ✅ Convert Next.js req to a readable stream with headers
     const reqStream = new Readable();
     const arrayBuffer = await req.arrayBuffer();
     reqStream.push(Buffer.from(arrayBuffer));
     reqStream.push(null);
 
-    // ✅ Add headers to the Readable stream
     const headers = Object.fromEntries(req.headers.entries());
     const incomingReq = Object.assign(reqStream, {
       headers,
@@ -405,7 +638,6 @@ export async function POST(req: Request) {
       url: req.url,
     }) as unknown as IncomingMessage;
 
-    // ✅ Use multiparty to parse the form
     const form = new multiparty.Form({
       uploadDir: path.join(process.cwd(), "public/uploads/DriverDocs"),
       autoFiles: true,
@@ -471,7 +703,6 @@ export async function POST(req: Request) {
       aadhar_card,
       pan_card,
       type,
-      // refrel_code,
     };
 
     const missingFields = Object.entries(requiredFields)
@@ -488,75 +719,47 @@ export async function POST(req: Request) {
       );
     }
 
-   
     const supabase = await createClient();
-        // Check if email or phone already exists and is VERIFIED
-        const { data: existingVerified, error: checkError } = await supabase
-        .from("drivers")
-        .select("driver_id")
-        .or(`phone_number.eq.${phone_number},email.eq.${email}`)
-        .eq("is_verified", true);
-  
-      if (checkError) {
-        return NextResponse.json(
-          { status: 0, error: checkError.message },
-          { status: 400 }
-        );
-      }
-  
-      if (existingVerified && existingVerified.length > 0) {
-        return NextResponse.json(
-          { status: 0, message: "Phone number or email already exists" },
-          { status: 200 }
-        );
-      }
 
-
-
-       // Check for unverified user to update
-    const { data: existingUnverified, error: unverifiedCheckError } =
-    await supabase
+    // Check if email or phone already exists and is VERIFIED
+    const { data: existingVerified, error: checkError } = await supabase
       .from("drivers")
       .select("driver_id")
       .or(`phone_number.eq.${phone_number},email.eq.${email}`)
-      .eq("is_verified", false)
-      .maybeSingle();
+      .eq("is_verified", true);
 
-  if (unverifiedCheckError) {
-    return NextResponse.json(
-      { status: 0, error: unverifiedCheckError.message },
-      { status: 400 }
-    );
-  }
-    // const { data: existingDrivers, error: checkError } = await supabase
-    //   .from("drivers")
-    //   .select("driver_id")
-    //   .or(`phone_number.eq.${phone_number},email.eq.${email}`)
-      
+    if (checkError) {
+      return NextResponse.json(
+        { status: 0, error: checkError.message },
+        { status: 400 }
+      );
+    }
 
-    // if (checkError) {
-    //   return NextResponse.json(
-    //     { status: 0, error: checkError.message },
-    //     { status: 400 }
-    //   );
-    // }
+    if (existingVerified && existingVerified.length > 0) {
+      return NextResponse.json(
+        { status: 0, message: "Phone number or email already exists" },
+        { status: 200 }
+      );
+    }
 
-    // if (existingDrivers && existingDrivers.length > 0) {
-    //   return NextResponse.json(
-    //     { status: 0, message: "Phone number or email already exists" },
-    //     { status: 200 }
-    //   );
-    // }
+    // Check for unverified user to update
+    const { data: existingUnverified, error: unverifiedCheckError } =
+      await supabase
+        .from("drivers")
+        .select("driver_id")
+        .or(`phone_number.eq.${phone_number},email.eq.${email}`)
+        .eq("is_verified", false)
+        .maybeSingle();
+
+    if (unverifiedCheckError) {
+      return NextResponse.json(
+        { status: 0, error: unverifiedCheckError.message },
+        { status: 400 }
+      );
+    }
 
     let driverNationalIdImage = "";
     let drivingLicenseImage = "";
-
-    // if (files.profile_photo_url) {
-    //   const file = files.profile_photo_url[0];
-    //   const newPath = `/uploads/DriverProfilePhoto/${file.originalFilename}`;
-    //   fs.renameSync(file.path, path.join("public", newPath));
-    //   profilePhotoUrl = newPath;
-    // }
 
     if (files.driver_national_id_image) {
       const file = files.driver_national_id_image[0];
@@ -572,138 +775,75 @@ export async function POST(req: Request) {
       drivingLicenseImage = newPath;
     }
 
-    // ✅ Insert into the database
-    const otp = "1234"; // Example OTP
+    const otp = "1234"; // Generate or send actual OTP here
 
+    const driverData = {
+      phone_number,
+      driver_name,
+      email,
+      address,
+      driving_license_no,
+      license_category,
+      experience_years,
+      vehicle_type_experience,
+      language_spoken,
+      driver_national_id_image: driverNationalIdImage,
+      driving_license_image: drivingLicenseImage,
+      Brand,
+      emergency_contact_no,
+      device_id,
+      countrycode,
+      otp,
+      dialcode,
+      platform,
+      transmission_type,
+      license_expiry_dates,
+      aadhar_card,
+      pan_card,
+      type,
+      refrel_code,
+      refrence_no,
+    };
 
-    
-//     const { error: insertError } = await supabase.from("drivers").insert([
-//       {
-//         phone_number,
-//         driver_name,
-//         email,
-//         address,
-//         driving_license_no,
-//         license_category,
-//         experience_years,
-//         vehicle_type_experience,
-//         language_spoken,
-//         // profile_photo_url: profilePhotoUrl,
-//         driver_national_id_image: driverNationalIdImage,
-//         driving_license_image: drivingLicenseImage,
-//         Brand,
-//         emergency_contact_no,
-//         device_id,
-//         countrycode,
-//         otp,
-//         dialcode,
-//         platform,
-//         transmission_type,
-//         license_expiry_dates,
-//         aadhar_card,
-//         pan_card,
-//         type,
-//         refrel_code,
-//         refrence_no,
-//       },
-//     ]);
+    if (existingUnverified) {
+      // Update unverified record
+      const { error: updateError } = await supabase
+        .from("drivers")
+        .update(driverData)
+        .eq("driver_id", existingUnverified.driver_id);
 
-//     if (insertError) {
-//       return NextResponse.json(
-//         { status: 0, error: insertError.message },
-//         { status: 400 }
-//       );
-//     }
+      if (updateError) {
+        return NextResponse.json(
+          { status: 0, error: updateError.message },
+          { status: 400 }
+        );
+      }
+    } else {
+      // Insert new record
+      const { error: insertError } = await supabase
+        .from("drivers")
+        .insert([driverData]);
 
-//     return NextResponse.json(
-//       {
-//         status: 1,
-//         message: "OTP sent successfully!",
-//         // profilePhotoUrl,
-//         // driverNationalIdImage,
-//         // drivingLicenseImage,
-//         otp,
-//       },
-//       { status: 200 }
-//     );
-//   } catch (error) {
+      if (insertError) {
+        return NextResponse.json(
+          { status: 0, error: insertError.message },
+          { status: 400 }
+        );
+      }
+    }
 
-//     console.error("Error:", error);
-//     const errorMessage = error instanceof Error ? error.message : String(error);
-
-//     return NextResponse.json(
-//       { status: 0, error: errorMessage },
-//       { status: 500 }
-//     );
-//   }
-// }
-const driverData = {
-  phone_number,
-  driver_name,
-  email,
-  address,
-  driving_license_no,
-  license_category,
-  experience_years,
-  vehicle_type_experience,
-  language_spoken,
-  driver_national_id_image: driverNationalIdImage,
-  driving_license_image: drivingLicenseImage,
-  Brand,
-  emergency_contact_no,
-  device_id,
-  countrycode,
-  otp,
-  dialcode,
-  platform,
-  transmission_type,
-  license_expiry_dates,
-  aadhar_card,
-  pan_card,
-  type,
-  refrel_code,
-  refrence_no,
-};
-
-if (existingUnverified) {
-  // Update unverified record
-  const { error: updateError } = await supabase
-    .from("drivers")
-    .update(driverData)
-    .eq("driver_id", existingUnverified.driver_id);
-
-  if (updateError) {
     return NextResponse.json(
-      { status: 0, error: updateError.message },
-      { status: 400 }
+      {
+        status: 1,
+        message: "OTP sent successfully!",
+        otp,
+      },
+      { status: 200 }
     );
+  } catch (error) {
+    console.error("Error:", error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+
+    return NextResponse.json({ status: 0, error: errorMessage }, { status: 500 });
   }
-} else {
-  // Insert new record
-  const { error: insertError } = await supabase
-    .from("drivers")
-    .insert([driverData]);
-
-  if (insertError) {
-    return NextResponse.json(
-      { status: 0, error: insertError.message },
-      { status: 400 }
-    );
-  }
-}
-
-return NextResponse.json(
-  {
-    status: 1,
-    message: "OTP sent successfully!",
-    otp,
-  },
-  { status: 200 }
-);
-} catch (error) {
-console.error("Error:", error);
-const errorMessage = error instanceof Error ? error.message : String(error);
-
-return NextResponse.json({ status: 0, error: errorMessage }, { status: 500 });
-}
 }
