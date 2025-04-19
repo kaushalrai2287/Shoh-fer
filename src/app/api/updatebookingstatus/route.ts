@@ -70,16 +70,49 @@ export async function POST(req: NextRequest) {
 
     if (updateStatusError) throw updateStatusError;
 
-    if (status.toLowerCase() === 'rejected') {
+    // if (status.toLowerCase() === 'rejected') {
       
+    //   const { error: updateDriverStatusError } = await supabase
+    //     .from('booking_assigned_drivers')
+    //     .update({ status: 'rejected', rejected_at: new Date() })
+    //     .eq('booking_id', booking_id)
+    //     .eq('driver_id', driver_id);
+
+    //   if (updateDriverStatusError) throw updateDriverStatusError;
+    // }
+    if (status.toLowerCase() === 'rejected') {
       const { error: updateDriverStatusError } = await supabase
         .from('booking_assigned_drivers')
         .update({ status: 'rejected', rejected_at: new Date() })
         .eq('booking_id', booking_id)
         .eq('driver_id', driver_id);
-
+    
       if (updateDriverStatusError) throw updateDriverStatusError;
+    
+      const { data: locationData, error: locationError } = await supabase
+        .from("booking_locations")
+        .select("customer_latitude, customer_longitude")
+        .eq("booking_id", booking_id)
+        .maybeSingle();
+    
+      if (locationError) throw locationError;
+    
+      if (locationData) {
+      
+        await fetch("/api/assignDriver", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            booking_id,
+            customer_latitude: locationData.customer_latitude,
+            customer_longitude: locationData.customer_longitude,
+          }),
+        });
+      }
     }
+    
     
     if (status.toLowerCase() === 'active') {
       

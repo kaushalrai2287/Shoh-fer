@@ -11,7 +11,9 @@ export async function POST(req: Request) {
     const { driver_id, latitude, longitude } = body;
 
     if (!driver_id || !latitude || !longitude) {
+
       return NextResponse.json({ status: '0', message: 'Missing required fields' });
+      
     }
 
   

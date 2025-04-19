@@ -77,7 +77,8 @@ export async function POST(req: Request) {
       .select("id, reference_otp")
       .eq("driver_phone_no", driver_phone_no)
       .eq("reference_phone_number", reference_phone_number)
-      .single();
+      .maybeSingle()
+
 
     if (error || !data) {
       return NextResponse.json(
@@ -94,7 +95,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // ✅ Update status to 'verified'
+    
     const { error: updateError } = await supabase
       .from("driverAppRefrence")
       .update({

@@ -44,19 +44,19 @@ const formSchema = z.object({
   p_lng: z.string().min(1, "Pick Up Longitude is required"),
   d_lat: z.string().min(1, "Drop Latitude is required"),
   d_lng: z.string().min(1, "Drop Longitude is required"),
-  pickup_date_time:z.string().min(1, "Pick Up Date and Time is required"),
+  pickup_date_time: z.string().min(1, "Pick Up Date and Time is required"),
   // p_date: z.string().min(1, "Pick Up Date and Time is required"),
   p_experience: z.string().min(1, "exp required"),
-  driver_select: z.string(),
+  // driver_select: z.string().optional(),
   vehicle_condition: z.string(),
 
   //new field
   Customer_Email: z.string().email("customer email address").optional(),
   Secondary_Contact_Number: z
-  .string()
-  .regex(/^\d+$/, "Phone must contain only digits")
-  .min(10, "Phone number must be 10 digits")
-  .max(10, "Phone number must be 10 digits").optional(),
+    .string()
+    .regex(/^\d+$/, "Phone must contain only digits")
+    .min(10, "Phone number must be 10 digits")
+    .max(10, "Phone number must be 10 digits").optional(),
   special_instructions: z.string().optional(),
 });
 
@@ -146,22 +146,22 @@ const AddBookings = () => {
   const onSubmit = async (data: FormValues) => {
     try {
       const supabase = createClient();
-  
+
       // Step 1: Check if vehicle with same license plate exists
       const { data: existingVehicle, error: fetchError } = await supabase
         .from("vehicles")
         .select("vehicle_id")
         .eq("license_plate_no", data.name)
         .single();
-  
+
       let vehicle_id: string;
-  
+
       if (fetchError && fetchError.code !== "PGRST116") {
         // "PGRST116" = No rows found, which is fine
         console.error("Error checking existing vehicle:", fetchError.message);
         return;
       }
-  
+
       if (existingVehicle) {
         // Vehicle already exists, use the existing vehicle_id
         vehicle_id = existingVehicle.vehicle_id;
@@ -180,15 +180,15 @@ const AddBookings = () => {
           ])
           .select("vehicle_id")
           .single();
-  
+
         if (insertError) {
           console.error("Vehicle Insert Error:", insertError.message);
           return;
         }
-  
+
         vehicle_id = newVehicle.vehicle_id;
       }
-  
+
       // Step 3: Insert booking
       const { data: bookingData, error: bookingError } = await supabase
         .from("bookings")
@@ -198,25 +198,25 @@ const AddBookings = () => {
             customer_name: data.cperson,
             customer_email: data.Customer_Email,
             customer_phone: data.cnumber,
-            pickup_date_time:data.pickup_date_time,
+            pickup_date_time: data.pickup_date_time,
             pickup_address: data.p_location,
             dropoff_address: data.d_location,
             special_instructions: data.special_instructions,
-            driver_id: data.driver_select,
+            // driver_id: data.driver_select || null,
             Alternate_contact_no: data.Secondary_Contact_Number,
             service_center_id: data.s_list,
           },
         ])
         .select("booking_id")
         .single();
-  
+
       if (bookingError) {
         console.error("Booking Insert Error:", bookingError.message);
         return;
       }
-  
+
       const booking_id = bookingData.booking_id;
-  
+
       // Step 4: Insert booking location
       const { error: locationError } = await supabase
         .from("booking_locations")
@@ -229,100 +229,126 @@ const AddBookings = () => {
             dropoff_lng: data.d_lng,
           },
         ]);
-  
+
       if (locationError) {
         console.error("Booking Location Insert Error:", locationError.message);
         return;
       }
-  
+
+
+      try {
+        const response = await fetch("/api/assignDriver", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            booking_id,
+            customer_latitude: data.p_lat,
+            customer_longitude: data.p_lng,
+          }),
+        });
+
+        const assignResult = await response.json();
+
+        if (response.ok && assignResult.status === 1) {
+          console.log("Driver assigned successfully:", assignResult);
+        } else {
+          console.warn("Driver assignment failed:", assignResult.message || assignResult);
+        }
+      } catch (assignError) {
+        console.error("Error calling assignDriver API:", assignError);
+      }
+
+
       alert("Booking successfully added!");
     } catch (error) {
       console.error("Unexpected error:", error);
     }
   };
-  
-//   const onSubmit = async (data: FormValues) => {
-//     // console.log("Form data submitted:", data); // Debug log
-//     try {
-//       const supabase = createClient();
 
-//       const { data: vehicleData, error: vehicleError } = await supabase
-//         .from("vehicles")
-//         .insert([
-//           {
-//             brand_id: data.b_type,
-//             model_id: data.model,
-//             license_plate_no: data.name,
-//             condition: data.vehicle_condition,
-//             service_center_id: data.s_list,
-//           },
-//         ])
-//         .select("vehicle_id")
-//         .single();
+  //   const onSubmit = async (data: FormValues) => {
+  //     // console.log("Form data submitted:", data); // Debug log
+  //     try {
+  //       const supabase = createClient();
 
-//       if (vehicleError) {
-//         console.error("Vehicle Insert Error:", vehicleError.message);
-//         return;
-//       }
-//     //   console.log("Vehicle data inserted:", vehicleData);
+  //       const { data: vehicleData, error: vehicleError } = await supabase
+  //         .from("vehicles")
+  //         .insert([
+  //           {
+  //             brand_id: data.b_type,
+  //             model_id: data.model,
+  //             license_plate_no: data.name,
+  //             condition: data.vehicle_condition,
+  //             service_center_id: data.s_list,
+  //           },
+  //         ])
+  //         .select("vehicle_id")
+  //         .single();
 
-//       // Proceed to bookings table
-//       const vehicle_id = vehicleData.vehicle_id;
+  //       if (vehicleError) {
+  //         console.error("Vehicle Insert Error:", vehicleError.message);
+  //         return;
+  //       }
+  //     //   console.log("Vehicle data inserted:", vehicleData);
 
-//     //   const { error: bookingError } = await supabase.from("bookings").insert([
-//     //     {
-//     //       vehicle_id,
-//     //       customer_name: data.cperson,
-//     //       customer_phone: data.cnumber,
-//     //       pickup_address: data.p_location,
-//     //       dropoff_address: data.d_location,
-//     //       driver_id: data.driver_select,
-//     //       // pickup_date: data.p_date,
-//     //       service_center_id: data.s_list,
-//     //     },
-//     //   ])
-//     const { data: bookingData, error: bookingError } = await supabase
-//     .from("bookings")
-//     .insert([
-//       {
-//         vehicle_id,
-//         customer_name: data.cperson,
-//         customer_phone: data.cnumber,
-//         pickup_address: data.p_location,
-//         dropoff_address: data.d_location,
-//         driver_id: data.driver_select,
-//         service_center_id: data.s_list,
-//       },
-//     ])
-//     .select("booking_id") // Fetch booking ID after insert
-//     .single();
+  //       // Proceed to bookings table
+  //       const vehicle_id = vehicleData.vehicle_id;
 
-//       if (bookingError) {
-//         console.error("Booking Insert Error:", bookingError.message);
-//         return;
-//       }
-//       const booking_id = bookingData.booking_id;
+  //     //   const { error: bookingError } = await supabase.from("bookings").insert([
+  //     //     {
+  //     //       vehicle_id,
+  //     //       customer_name: data.cperson,
+  //     //       customer_phone: data.cnumber,
+  //     //       pickup_address: data.p_location,
+  //     //       dropoff_address: data.d_location,
+  //     //       driver_id: data.driver_select,
+  //     //       // pickup_date: data.p_date,
+  //     //       service_center_id: data.s_list,
+  //     //     },
+  //     //   ])
+  //     const { data: bookingData, error: bookingError } = await supabase
+  //     .from("bookings")
+  //     .insert([
+  //       {
+  //         vehicle_id,
+  //         customer_name: data.cperson,
+  //         customer_phone: data.cnumber,
+  //         pickup_address: data.p_location,
+  //         dropoff_address: data.d_location,
+  //         driver_id: data.driver_select,
+  //         service_center_id: data.s_list,
+  //       },
+  //     ])
+  //     .select("booking_id") // Fetch booking ID after insert
+  //     .single();
 
-//       const { error: locationError } = await supabase.from("booking_locations").insert([
-//         {
-//           booking_id,
-//           customer_latitude: data.p_lat,
-//           customer_longitude: data.p_lng,
-//           dropoff_lat: data.d_lat,
-//           dropoff_lng: data.d_lng,
-//         },
-//       ]);
-      
-//       if (locationError) {
-//         console.error("Booking Location Insert Error:", locationError.message);
-//         return;
-//       }
+  //       if (bookingError) {
+  //         console.error("Booking Insert Error:", bookingError.message);
+  //         return;
+  //       }
+  //       const booking_id = bookingData.booking_id;
 
-//       alert("Booking successfully added!");
-//     } catch (error) {
-//       console.error("Unexpected error:", error);
-//     }
-//   };
+  //       const { error: locationError } = await supabase.from("booking_locations").insert([
+  //         {
+  //           booking_id,
+  //           customer_latitude: data.p_lat,
+  //           customer_longitude: data.p_lng,
+  //           dropoff_lat: data.d_lat,
+  //           dropoff_lng: data.d_lng,
+  //         },
+  //       ]);
+
+  //       if (locationError) {
+  //         console.error("Booking Location Insert Error:", locationError.message);
+  //         return;
+  //       }
+
+  //       alert("Booking successfully added!");
+  //     } catch (error) {
+  //       console.error("Unexpected error:", error);
+  //     }
+  //   };
 
   const handleClose = (event: { preventDefault: () => void }) => {
     event.preventDefault(); // Prevent default form behavior
@@ -456,35 +482,35 @@ const AddBookings = () => {
                 )}
               </div>
               <div className="inner_form_group">
-                    <label htmlFor="Customer_Email">Customer Email</label>
-                    <input
-                      className="form-control"
-                      id="Customer_Email"
-                      type="text"
-                      {...register("Customer_Email")}
-                    />
-                    {errors.Customer_Email && (
-                      <p className="erro_message">
-                        {errors.Customer_Email.message}
-                      </p>
-                    )}
-                  </div>
-                  <div className="inner_form_group">
-                    <label htmlFor="Secondary_Contact_Number">
-                      Secondary Contact Number
-                    </label>
-                    <input
-                      className="form-control"
-                      id="Secondary_Contact_Number"
-                      type="text"
-                      {...register("Secondary_Contact_Number")}
-                    />
-                    {errors.Secondary_Contact_Number && (
-                      <p className="erro_message">
-                        {errors.Secondary_Contact_Number.message}
-                      </p>
-                    )}
-                  </div>
+                <label htmlFor="Customer_Email">Customer Email</label>
+                <input
+                  className="form-control"
+                  id="Customer_Email"
+                  type="text"
+                  {...register("Customer_Email")}
+                />
+                {errors.Customer_Email && (
+                  <p className="erro_message">
+                    {errors.Customer_Email.message}
+                  </p>
+                )}
+              </div>
+              <div className="inner_form_group">
+                <label htmlFor="Secondary_Contact_Number">
+                  Secondary Contact Number
+                </label>
+                <input
+                  className="form-control"
+                  id="Secondary_Contact_Number"
+                  type="text"
+                  {...register("Secondary_Contact_Number")}
+                />
+                {errors.Secondary_Contact_Number && (
+                  <p className="erro_message">
+                    {errors.Secondary_Contact_Number.message}
+                  </p>
+                )}
+              </div>
               <div className="inner_form_group">
                 <label htmlFor="name">
                   Vehicle Number <span>*</span>
@@ -509,58 +535,58 @@ const AddBookings = () => {
                   rows={1}
                 ></textarea>
               </div>
-              
+
               <div className="inner_form_group">
-  <label htmlFor="pickup_date_time">
-    Pickup Date Time <span>*</span>
-  </label>
-  <Controller
-  control={control}
-  name="pickup_date_time"
-  rules={{ required: "Pickup date and time is required" }}
-  render={({ field }) => {
-    const value = field.value ? new Date(field.value) : null;
-    const isValidDate = value instanceof Date && !isNaN(value.getTime());
+                <label htmlFor="pickup_date_time">
+                  Pickup Date Time <span>*</span>
+                </label>
+                <Controller
+                  control={control}
+                  name="pickup_date_time"
+                  rules={{ required: "Pickup date and time is required" }}
+                  render={({ field }) => {
+                    const value = field.value ? new Date(field.value) : null;
+                    const isValidDate = value instanceof Date && !isNaN(value.getTime());
 
-    const today = new Date();
-    const maxDate = new Date();
-    maxDate.setDate(today.getDate() + 5); // today + 5 days
+                    const today = new Date();
+                    const maxDate = new Date();
+                    maxDate.setDate(today.getDate() + 5); // today + 5 days
 
-    return (
-      <DatePicker
-        placeholderText="Select pickup date and time"
-        selected={isValidDate ? value : null}
-        onChange={(date) => field.onChange(date?.toISOString())}
-        showTimeSelect
-        timeFormat="HH:mm"
-        timeIntervals={15}
-        timeCaption="Time"
-        dateFormat="MMMM d, yyyy h:mm aa"
-        className="form-control"
-        id="pickup_date_time"
-        minDate={today}
-        maxDate={maxDate}
-        popperPlacement="bottom-start"
-        portalId="root-portal"
-      />
-    );
-  }}
-/>
+                    return (
+                      <DatePicker
+                        placeholderText="Select pickup date and time"
+                        selected={isValidDate ? value : null}
+                        onChange={(date) => field.onChange(date?.toISOString())}
+                        showTimeSelect
+                        timeFormat="HH:mm"
+                        timeIntervals={15}
+                        timeCaption="Time"
+                        dateFormat="MMMM d, yyyy h:mm aa"
+                        className="form-control"
+                        id="pickup_date_time"
+                        minDate={today}
+                        maxDate={maxDate}
+                        popperPlacement="bottom-start"
+                        portalId="root-portal"
+                      />
+                    );
+                  }}
+                />
 
 
 
-  {errors.pickup_date_time && (
-    <p className="erro_message">{errors.pickup_date_time.message}</p>
-  )}
-    <div className="down_arrow_btn">
+                {errors.pickup_date_time && (
+                  <p className="erro_message">{errors.pickup_date_time.message}</p>
+                )}
+                <div className="down_arrow_btn">
                   <img
                     src="/images/angle-small-down.svg"
                     alt=""
                     className="img-fluid"
                   />
                 </div>
-  
-</div>
+
+              </div>
 
               <div className="inner_form_group">
                 <label htmlFor="p_location">
@@ -650,19 +676,19 @@ const AddBookings = () => {
                 )}
               </div>
               <div className="inner_form_group">
-                    <label htmlFor="special_instructions">
-                      Special Instructions
-                    </label>
-                    <input
-                      className="form-control"
-                      id="special_instructions"
-                      type="text"
-                      placeholder="Entry Code, Parking details etc"
-                      {...register("special_instructions")}
-                    />
-                  </div>
+                <label htmlFor="special_instructions">
+                  Special Instructions
+                </label>
+                <input
+                  className="form-control"
+                  id="special_instructions"
+                  type="text"
+                  placeholder="Entry Code, Parking details etc"
+                  {...register("special_instructions")}
+                />
+              </div>
 
-              <div className="inner_form_group">
+              {/* <div className="inner_form_group">
                 <label htmlFor="driver_select">Driver Select</label>
                 <select
                   className="form-control"
@@ -684,7 +710,7 @@ const AddBookings = () => {
                     className="img-fluid"
                   />
                 </div>
-              </div>
+              </div> */}
               <div className="inner_form_group">
                 <label htmlFor="p_experience">Previous Experience</label>
                 <input

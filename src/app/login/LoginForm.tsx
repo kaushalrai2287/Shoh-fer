@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { loginUser } from "./action";
 // import { redirect } from "next/navigation";
-
+import { usePermissions } from "../../../utils/services/PermissionsContext"
 const formSchema = z.object({
   email: z
   .string()
@@ -28,6 +28,8 @@ const formSchema = z.object({
 });
 
 export default function LoginForm() {
+  const { fetchPermissions } = usePermissions();
+
   const [serverError, setServerError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -57,6 +59,7 @@ export default function LoginForm() {
       if (error) {
         setServerError(message);
       } else {
+        await fetchPermissions(); // ✅ Call from context
         router.push("/add-service-center/list");
       }
     } finally {
