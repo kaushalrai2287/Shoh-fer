@@ -59,7 +59,7 @@ export default function LoginForm() {
       if (error) {
         setServerError(message);
       } else {
-        await fetchPermissions(); // ✅ Call from context
+        await fetchPermissions(); 
         router.push("/add-service-center/list");
       }
     } finally {

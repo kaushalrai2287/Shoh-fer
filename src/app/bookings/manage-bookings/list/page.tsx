@@ -258,9 +258,9 @@ const ListBooking = () => {
     setLoading(false);
   };
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  // if (loading) {
+  //   return <div>Loading...</div>;
+  // }
   const mappedData = bookings.map((booking) => ({
     Service_Center_Name: booking.service_centers?.name || "Unknown",
     Driver_Name: booking.drivers?.driver_name,
