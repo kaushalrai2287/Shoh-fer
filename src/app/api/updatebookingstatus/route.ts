@@ -100,7 +100,9 @@ export async function POST(req: NextRequest) {
       if (locationData) {
         try {
           // const response = await fetch("/api/DriverDocUpload/DriverPhotoProof", {
-          const response = await fetch("/api/assignDriver", {
+            const baseUrl =
+            process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+            const response = await fetch(`${baseUrl}/api/assignDriver`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
