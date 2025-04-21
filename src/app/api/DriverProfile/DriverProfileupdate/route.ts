@@ -56,7 +56,8 @@ export async function POST(req: Request) {
         }
 
         const supabase = await createClient();
-        const otp = generateOTP();
+        // const otp = generateOTP();
+        const otp = "1234";
 
         const { data: driverData, error: driverError } = await supabase
             .from('drivers')
@@ -119,6 +120,6 @@ export async function POST(req: Request) {
     }
 }
 
-function generateOTP(): number {
-    return Math.floor(1000 + Math.random() * 9000);; 
-}
+// function generateOTP(): number {
+//     return Math.floor(1000 + Math.random() * 9000);; 
+// }

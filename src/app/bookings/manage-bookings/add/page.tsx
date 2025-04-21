@@ -237,7 +237,7 @@ const AddBookings = () => {
 
 
       try {
-        const response = await fetch("/api/assignDriver", {
+        const response =  await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/assignDriver`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

@@ -198,7 +198,8 @@ export async function POST(req: Request) {
     // }
 
   
-    const otp = Math.floor(1000 + Math.random() * 9000); // Random 4-digit OTP
+    // const otp = Math.floor(1000 + Math.random() * 9000); // Random 4-digit OTP
+    const otp = "1234"; // Random 4-digit OTP
 
     
     const { data: existingCombination, error: existingCombinationError } = await supabase
@@ -243,7 +244,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // ✅ Insert new data if combination does not exist
+   
     const { error: insertError } = await supabase
       .from("driverAppRefrence")
       .insert([

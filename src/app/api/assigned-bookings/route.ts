@@ -53,6 +53,8 @@
 // }
 import { NextResponse } from "next/server";
 import { createClient } from "../../../../utils/supabase/client";
+import {haversineDistance} from "../../../../utils/distance"
+
 
 const supabase = createClient();
 
@@ -62,7 +64,15 @@ export async function POST(req: Request) {
 
     if (!driver_id) {
       return NextResponse.json({ error: "Driver ID is required" }, { status: 400 });
+
+
+
     }
+
+
+ 
+
+      
 
     // 1. Get all assigned bookings for this driver except rejected ones
     const { data: assignments, error: assignError } = await supabase
@@ -77,22 +87,80 @@ export async function POST(req: Request) {
       return NextResponse.json({ status: 0, message: "No bookings found" }, { status: 200 });
     }
 
-    // 2. Take the first assignment only
     const assignment = assignments[0];
 
-    // 3. Fetch the corresponding booking
+    
     const { data: bookingData, error: bookingError } = await supabase
       .from("bookings")
-      .select("*")
+      .select("*,booking_id")
       .eq("booking_id", assignment.booking_id)
       .single();
 
     if (bookingError) throw bookingError;
 
-    // 4. Merge the assignment with booking data
+    const BookingID=  bookingData?.booking_id;
+   
+    const{ data: bookingLatLong, error: bookingLatLongError } = await supabase
+    .from("booking_locations")
+    .select("customer_latitude, customer_longitude, dropoff_lat, dropoff_lng")
+    .eq("booking_id", BookingID)
+    .maybeSingle();
+
+
+    let distance_km = null;
+    if (
+      bookingLatLong?.customer_latitude &&
+      bookingLatLong?.customer_longitude &&
+      bookingLatLong?.dropoff_lat &&
+      bookingLatLong?.dropoff_lng
+    ) {
+      distance_km = haversineDistance(
+        bookingLatLong.customer_latitude,
+        bookingLatLong.customer_longitude,
+        bookingLatLong.dropoff_lat,
+        bookingLatLong.dropoff_lng
+      );
+    }
+
+
+    const { data: driverLoc, error: driverLocError } = await supabase
+    .from("drivers")
+    .select("latitude, longitude")
+    .eq("driver_id", driver_id)
+    .maybeSingle();
+
+    
+    let driverPickupDistance = null;
+
+if (
+  bookingLatLong?.customer_latitude &&
+  bookingLatLong?.customer_longitude &&
+  driverLoc?.latitude &&
+  driverLoc?.longitude
+) {
+  const custLat = parseFloat(bookingLatLong.customer_latitude);
+  const custLng = parseFloat(bookingLatLong.customer_longitude);
+  const driverLat = parseFloat(driverLoc.latitude);
+  const driverLng = parseFloat(driverLoc.longitude);
+
+  console.log("Customer Location:", custLat, custLng);
+  console.log("Driver Location:", driverLat, driverLng);
+
+  driverPickupDistance = haversineDistance(
+    driverLat,
+    driverLng,
+    custLat,
+    custLng
+  );
+}
+
+    
     const merged = {
       ...assignment,
-      ...(bookingData || {})
+      ...bookingLatLong,
+      ...(bookingData || {}),
+       distance_km: distance_km ? parseFloat(distance_km.toFixed(2)) : null,
+       driver_pickup_distance_km: driverPickupDistance ? parseFloat(driverPickupDistance.toFixed(2)) : null
     };
 
     return NextResponse.json({ status: 1, data: merged }, { status: 200 });

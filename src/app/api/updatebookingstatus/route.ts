@@ -99,7 +99,7 @@ export async function POST(req: NextRequest) {
     
       if (locationData) {
       
-        await fetch("/api/assignDriver", {
+    await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/assignDriver`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
