@@ -198,7 +198,8 @@ export async function POST(req: Request) {
       .select("*")
       .eq("driver_id", driver_id)
       .eq("status", "pending") // Only return pending ones
-      .not("booking_id", "in", `(${rejectedBookingIds.join(",")})`)// Make sure the rejected booking is not returned
+      // .not("booking_id", "in", rejectedBookingIds) // Make sure the rejected booking is not returned
+      .not("booking_id", "in", `(${rejectedBookingIds.join(",")})`)
       .order("pending_at", { ascending: false })
       .maybeSingle();
 
@@ -210,9 +211,19 @@ export async function POST(req: Request) {
 
     const { data: bookingData, error: bookingError } = await supabase
       .from("bookings")
-      .select("*, booking_id")
+      .select(`
+        *,
+        vehicles:vehicle_id (
+          license_plate_no,
+          brand:brand_id ( name ),
+          model:model_id ( name )
+        )
+      `)
       .eq("booking_id", assignment.booking_id)
-      .single();
+      .maybeSingle();
+      // .select("*, booking_id")
+      // .eq("booking_id", assignment.booking_id)
+      // .single();
 
     if (bookingError) throw bookingError;
 
@@ -266,6 +277,11 @@ export async function POST(req: Request) {
       ...(bookingData || {}),
       distance_km: distance_km ? parseFloat(distance_km.toFixed(2)) : null,
       driver_pickup_distance_km: driverPickupDistance ? parseFloat(driverPickupDistance.toFixed(2)) : null,
+      vehicles: {
+        license_plate_no: bookingData?.vehicles?.license_plate_no || null,
+        brand_name: bookingData?.vehicles?.brand?.name || null,
+        model_name: bookingData?.vehicles?.model?.name || null,
+      },
     };
 
     return NextResponse.json({ status: 1, data: merged }, { status: 200 });

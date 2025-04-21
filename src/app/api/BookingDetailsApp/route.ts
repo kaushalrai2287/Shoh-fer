@@ -15,12 +15,19 @@ export async function POST(req: Request) {
 
     const supabase = createClient();
 
-    
+    // 1. Fetch booking details including vehicle
     const { data: bookingData, error: bookingError } = await supabase
       .from('bookings')
-      .select('*')
-      .eq('booking_id', booking_id)
-      .single();
+      .select(`
+        *,
+        vehicles:vehicle_id (
+          license_plate_no,
+          brand:brand_id ( name ),
+          model:model_id ( name )
+        )
+      `)
+      .eq("booking_id", booking_id)
+      .maybeSingle();
 
     if (bookingError || !bookingData) {
       console.error('Error fetching booking details:', bookingError);
@@ -30,14 +37,42 @@ export async function POST(req: Request) {
       );
     }
 
-    
+    // 2. Separate vehicle details
+    const { vehicles, ...bookingDetails } = bookingData;
+
+    const vehicle_details = {
+      license_plate_no: vehicles?.license_plate_no || null,
+      brand_name: vehicles?.brand?.name || null,
+      model_name: vehicles?.model?.name || null,
+    };
+
+    // 3. Fetch coordinates from booking_locations table
+    const { data: locationData, error: locationError } = await supabase
+      .from("booking_locations")
+      .select("customer_latitude, customer_longitude, dropoff_lat, dropoff_lng")
+      .eq("booking_id", booking_id)
+      .maybeSingle();
+
+    if (locationError) {
+      console.error("Error fetching location details:", locationError);
+      return NextResponse.json(
+        { message: 'Error fetching location data', status: 'error' },
+        { status: 500 }
+      );
+    }
+
     const response = {
       message: 'Booking details fetched successfully',
       status: '1',
-      data: bookingData,
+      data: {
+        ...bookingDetails,
+        vehicle_details,
+        ...locationData, // coordinates directly merged in data
+      },
     };
 
     return NextResponse.json(response, { status: 200 });
+
   } catch (error) {
     console.error('Error:', error);
     return NextResponse.json(
