@@ -99,7 +99,7 @@ export async function POST(req: NextRequest) {
     
       if (locationData) {
       
-    await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/assignDriver`, {
+             await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/assignDriver`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -170,8 +170,8 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ message: 'Booking status updated successfully' }, { status: 200 });
-  } catch (error) {
-    console.error('Error updating status:', error);
+  } catch (error:any) {
+    console.error('Error updating status:', error.message);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

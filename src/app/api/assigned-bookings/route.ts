@@ -143,8 +143,8 @@ if (
   const driverLat = parseFloat(driverLoc.latitude);
   const driverLng = parseFloat(driverLoc.longitude);
 
-  console.log("Customer Location:", custLat, custLng);
-  console.log("Driver Location:", driverLat, driverLng);
+  // console.log("Customer Location:", custLat, custLng);
+  // console.log("Driver Location:", driverLat, driverLng);
 
   driverPickupDistance = haversineDistance(
     driverLat,
