@@ -171,7 +171,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ message: 'Booking status updated successfully' }, { status: 200 });
   } catch (error:any) {
-    console.error('Error updating status:', error.message);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    // console.error('Error updating status:', error.message);
+    return NextResponse.json({ error:error.message }, { status: 500 });
   }
 }
