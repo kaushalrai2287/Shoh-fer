@@ -55,7 +55,7 @@ const ManageDriver = () => {
     const fetchDriver = async () => {
       try {
         const supabase = createClient();
-        const { data, error } = await supabase.from("drivers").select("*");
+        const { data, error } = await supabase.from("drivers").select("*").order("created_at", { ascending: false }); // Get latest first
 
         console.log(data);
 
@@ -239,7 +239,7 @@ const ManageDriver = () => {
     Admin_Verified: "Admin Verified",
     KYC_Status: "KYC Status",
     Police_Verification: "Police Verification",
-    Refrel_Code: "Refrel Code",
+    Refrel_Code: "Referel Code",
     Refrence_Number: "Refrence Number",
     
   };

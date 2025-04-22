@@ -87,33 +87,84 @@ const ListBooking = () => {
     // "Driver_Rating",
   ];
 
+  // useEffect(() => {
+  //   const fetchBookings = async () => {
+  //     setLoading(true);
+
+  //     let query = supabase.from("bookings").select(`
+  //           *, created_at, service_centers(*), drivers(*), vehicles(*, brands(*), models(*))
+  //         `);
+
+  //     if (dateFilter) {
+  //       query = query
+  //         .gte("created_at", `${dateFilter}T00:00:00Z`)
+  //         .lte("created_at", `${dateFilter}T23:59:59Z`);
+  //     }
+
+  //     const { data, error } = await query;
+
+  //     if (error) {
+  //       console.error("Error fetching bookings:", error.message);
+  //     } else {
+  //       setBookings(data);
+  //     }
+
+  //     setLoading(false);
+  //   };
+
+  //   fetchBookings();
+  // }, []);
   useEffect(() => {
     const fetchBookings = async () => {
       setLoading(true);
-
+  
       let query = supabase.from("bookings").select(`
-            *, created_at, service_centers(*), drivers(*), vehicles(*, brands(*), models(*))
-          `);
-
+        *, created_at, service_centers(*), drivers(*), vehicles(*, brands(*), models(*))
+      `);
+  
       if (dateFilter) {
         query = query
           .gte("created_at", `${dateFilter}T00:00:00Z`)
           .lte("created_at", `${dateFilter}T23:59:59Z`);
       }
-
+  
       const { data, error } = await query;
-
+  
       if (error) {
         console.error("Error fetching bookings:", error.message);
       } else {
-        setBookings(data);
+      
+        const sortedData = data.sort((a, b) => {
+          const priority = (status: string) => {
+            switch (status.toLowerCase()) {
+              case "active":
+                return 1;
+              case "pending":
+                return 3;
+              case "accepted":
+                return 2;
+              case "completed":
+                return 4;
+              case "canceled":
+                return 5;
+              case "rejected":
+                return 6;
+              default:
+                return 99;
+            }
+          };
+          return priority(a.status) - priority(b.status);
+        });
+  
+        setBookings(sortedData);
       }
-
+  
       setLoading(false);
     };
-
+  
     fetchBookings();
-  }, []);
+  }, [dateFilter]);
+  
   const handleSearchChange = (
     event: React.ChangeEvent<HTMLInputElement>,
     type: "service" | "driver"
