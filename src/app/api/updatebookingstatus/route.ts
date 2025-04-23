@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '../../../../utils/supabase/client';
+import { assignDriverToBooking } from '../../../../utils/functions/assignDriverToBooking';
 
 const supabase = createClient();
 
@@ -97,34 +98,27 @@ export async function POST(req: NextRequest) {
     
       if (locationError) throw locationError;
     
+      
+
       if (locationData) {
         try {
-          // const response = await fetch("/api/DriverDocUpload/DriverPhotoProof", {
-            const baseUrl =
-            process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-            const response = await fetch(`${baseUrl}/api/assignDriver`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              booking_id,
-              customer_latitude: locationData.customer_latitude,
-              customer_longitude: locationData.customer_longitude,
-            }),
-          });
-    
-          const assignResult = await response.json();
-    
-          if (response.ok && assignResult.status === 1) {
-            console.log("Driver status changed successfully:", assignResult);
+          // Call the assignDriverToBooking function instead of the fetch request
+          const assignResult = await assignDriverToBooking(
+            booking_id,
+            locationData.customer_latitude,
+            locationData.customer_longitude
+          );
+      
+          if (assignResult.error) {
+            console.warn("Driver status change failed:", assignResult.message || assignResult.error);
           } else {
-            console.warn("Driver  status changed successfully::", assignResult.message || assignResult);
+            console.log("Driver status changed successfully:", assignResult);
           }
         } catch (assignError) {
-          console.error("Error calling assignDriver API:", assignError);
+          console.error("Error calling assignDriver function:", assignError);
         }
       }
+      
     }
     
     

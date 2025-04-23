@@ -14,6 +14,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { Controller } from "react-hook-form";
 import { FaCalendarAlt } from "react-icons/fa";
+import { assignDriverToBooking } from "../../../../../utils/functions/assignDriverToBooking";
 
 
 
@@ -236,30 +237,22 @@ const AddBookings = () => {
       }
 
 
-      try {
-        const response =  await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/assignDriver`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            booking_id,
-            customer_latitude: data.p_lat,
-            customer_longitude: data.p_lng,
-          }),
-        });
-
-        const assignResult = await response.json();
-
-        if (response.ok && assignResult.status === 1) {
-          console.log("Driver assigned successfully:", assignResult);
-        } else {
-          console.warn("Driver assignment failed:", assignResult.message || assignResult);
-        }
-      } catch (assignError) {
-        console.error("Error calling assignDriver API:", assignError);
-      }
-
+        try {
+             // Call the assignDriverToBooking function instead of the fetch request
+             const assignResult = await assignDriverToBooking(
+               booking_id,
+               parseFloat(data.p_lat),
+               parseFloat(data.p_lng)
+             );
+         
+             if (assignResult.error) {
+               console.warn("Driver status change failed:", assignResult.message || assignResult.error);
+             } else {
+               console.log("Driver status changed successfully:", assignResult);
+             }
+           } catch (assignError) {
+             console.error("Error calling assignDriver function:", assignError);
+           }
 
       alert("Booking successfully added!");
     } catch (error) {
