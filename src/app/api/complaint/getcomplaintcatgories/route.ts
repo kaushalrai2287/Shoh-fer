@@ -8,7 +8,7 @@ export async function GET() {
   try {
     const { data, error } = await supabase
       .from('complaint_categories')
-      .select('category_name, description');
+      .select('category_name');
 
     if (error) {
       return NextResponse.json({ status: '0', message: 'Failed to fetch categories', error }, { status: 500 });
