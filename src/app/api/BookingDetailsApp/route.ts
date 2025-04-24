@@ -60,6 +60,15 @@ export async function POST(req: Request) {
         { status: 500 }
       );
     }
+        // 4. Check feedback_complaints table for the booking
+        const { data: feedbackData, error: feedbackError } = await supabase
+        .from("feedback_complaints")
+        .select("id") // selecting a single field is enough to check existence
+        .eq("booking_id", booking_id)
+        .limit(1); // only need to check if at least one row exists
+  
+      const hasFeedbackOrComplaint = feedbackData && feedbackData.length > 0 ? 'yes' : 'no';
+  
 
     const response = {
       message: 'Booking details fetched successfully',
@@ -68,6 +77,7 @@ export async function POST(req: Request) {
         ...bookingDetails,
         vehicle_details,
         ...locationData, // coordinates directly merged in data
+        has_complaint: hasFeedbackOrComplaint,
       },
     };
 

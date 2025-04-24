@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
         raised_by: 'driver',
         type_of_complaints: complaintCategory,
         complaint_box: complaintMessage,
-        created_at: new Date().toISOString(), // optional if your DB has default timestamp
+        created_at: new Date().toISOString(), 
       }])
       .select();
 
