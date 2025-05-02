@@ -300,13 +300,13 @@ const FeedbackComplaints = () => {
   //   setFilteredData(updatedData); 
   // };
   const handleCommentChange = async (tripId: string, comment: string) => {
-    // Update the state for immediate feedback
+  
     const updatedData = filteredData.map((item) =>
       item.trip_id === tripId ? { ...item, comments: comment } : item
     );
     setFilteredData(updatedData);
   
-    // Persist the comment change to the database
+  
     const { error } = await supabase
       .from("feedback_complaints")
       .update({ comments: comment })
@@ -319,7 +319,7 @@ const FeedbackComplaints = () => {
     }
   };
   
-  // Filter data based on filters state
+
   const applyFilters = () => {
     let filtered = [...data]; 
 
@@ -347,17 +347,17 @@ const FeedbackComplaints = () => {
     Type_Of_Complaints: item.type_of_complaints,
     Raised_by: item.raised_by,
     Raised_For: item.raised_for,
-    Trip_id: item.trip_id.toString(), // Convert trip_id to string for safe usage
+    Trip_id: item.trip_id.toString(), 
     Complaint_Box: item.complaint_box,
     Request: (
       <select
         value={item.request}
         onChange={(e) =>
           handleRequestUpdate(item.trip_id, e.target.value, item.comments || "")
-        } // Handle status update via dropdown
+        } 
         style={{
           cursor: "pointer",
-          color: getStatusColor(item.request), // Apply color based on status
+          color: getStatusColor(item.request), 
           fontWeight: "bold",
         }}
       >
@@ -371,7 +371,7 @@ const FeedbackComplaints = () => {
       item.request === "Pending" ? (
         <textarea
           value={item.comments || ""}
-          onChange={(e) => handleCommentChange(item.trip_id, e.target.value)} // Handle comment change
+          onChange={(e) => handleCommentChange(item.trip_id, e.target.value)} 
           placeholder="Enter resolution comments..."
           style={{ width: "200px", height: "50px" }}
         />
@@ -389,13 +389,12 @@ const FeedbackComplaints = () => {
     });
   };
 
-  // Handle form submit to apply filters
+ 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    applyFilters(); // Apply the filters when the form is submitted
+    applyFilters(); 
   };
 
-  // Prepare data for CSV export
   const csvData = filteredData.map((item) => ({
     "Complaints For": item.type_of_complaints,
     "Raised By": item.raised_by,
@@ -478,7 +477,7 @@ const FeedbackComplaints = () => {
                     className="close_btn"
                     onClick={() => {
                       setFilters({ trip_id: "", request: "" });
-                      setFilteredData(data); // Reset filters
+                      setFilteredData(data); 
                     }}
                   >
                     Clear
@@ -503,7 +502,7 @@ const FeedbackComplaints = () => {
             <div className="filter_data_table">
               <DataTable
                 columns={columns}
-                data={mappedData} // Use filtered and mapped data
+                data={mappedData} 
                 showRequestButton={true}
               />
             </div>

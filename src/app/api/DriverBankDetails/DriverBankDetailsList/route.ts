@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 // import { createClient } from "@supabase/supabase-js";
 import { createClient } from "../../../../../utils/supabase/client";
+import { decrypt } from "../../../../../utils/functions/encryptBankDetails";
 
 const supabase = createClient();
 
@@ -22,7 +23,8 @@ export async function POST(req:Request) {
             .select("account_no, ifsc_code, branch_name, bank_name")
             .eq("driver_id", driver_id)
             .single();
-
+            const decryptedAccountNo = decrypt(data?.account_no || '');
+            // console.log("Decrypted Account No:", decryptedAccountNo); 
         if (error || !data) {
             return NextResponse.json({ status: "error", message: "Bank details not found." }, { status: 404 });
         }
@@ -30,7 +32,8 @@ export async function POST(req:Request) {
         return NextResponse.json({
             status: "success",
             message: "Bank details retrieved successfully",
-            data
+            ...data,
+            account_no: decryptedAccountNo
         });
     } catch (error) {
         return NextResponse.json({ status: "error", message: "Invalid request" }, { status: 400 });

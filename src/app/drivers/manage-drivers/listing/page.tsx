@@ -10,6 +10,7 @@ import Link from "next/link";
 import { createClient } from "../../../../../utils/supabase/client";
 import { CSVLink } from "react-csv";
 import HeadingBredcrum from "../../../../../components/HeadingBredcrum";
+import { decrypt } from "../../../../../utils/functions/encryptBankDetails";
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 type Driver = {
   driver_id: number;
@@ -17,13 +18,13 @@ type Driver = {
   phone_number: string;
   email: string | null;
   address: string;
-  dob: string; // Date format as a string (e.g., 'YYYY-MM-DD')
+  dob: string;
   driving_license_no: string;
   license_category: string;
   experience_years: number;
   vehicle_type: string | null;
   language_spoken: string | null;
-  rating: number; // Numeric (e.g., 3.5)
+  rating: number;
   profile_photo_url: string | null;
   driver_document: string | null;
   is_active: boolean;
@@ -32,9 +33,14 @@ type Driver = {
   vehicle_type_experience: string;
   emergency_contact_no: string;
   driver_national_id_image: string;
-  isadminverified: string; // 'Approved' | 'Pending' | 'Rejected'
-  kyc_status: string; // 'Approved' | 'Pending' | 'Rejected'
-  police_verification_status: string; // 'Approved' | 'Pending' | 'Rejected'
+  isadminverified: string;
+  kyc_status: string;
+  police_verification_status: string;
+
+  // Add these for bank details
+  account_no?: string;
+  ifsc_code?: string;
+  branch_name?: string;
 };
 
 const ManageDriver = () => {
@@ -55,21 +61,44 @@ const ManageDriver = () => {
     const fetchDriver = async () => {
       try {
         const supabase = createClient();
-        const { data, error } = await supabase.from("drivers").select("*").order("created_at", { ascending: false }); // Get latest first
-
-        console.log(data);
-
-        if (error) throw error;
-
-        setDriver(data || []);
-        setFilteredDriver(data || []); 
+  
+        // Fetch all drivers
+        const { data: drivers, error: driverError } = await supabase
+          .from("drivers")
+          .select("*")
+          .order("created_at", { ascending: false });
+  
+        if (driverError) throw driverError;
+  
+        // Fetch all driver bank details
+        const { data: bankDetails, error: bankError } = await supabase
+          .from("driver_bank_details")
+          .select("driver_id, account_no, ifsc_code, branch_name");
+  
+        if (bankError) throw bankError;
+  
+        // Map bank details to drivers
+        const enrichedDrivers = drivers.map((driver) => {
+          const bank = bankDetails.find((b) => b.driver_id === driver.driver_id);
+          return {
+            ...driver,
+            account_no: bank?.account_no || "",
+            ifsc_code: bank?.ifsc_code || "",
+            branch_name: bank?.branch_name || "",
+          };
+        });
+        console.log("Enriched Drivers:", enrichedDrivers);
+  
+        setDriver(enrichedDrivers);
+        setFilteredDriver(enrichedDrivers);
       } catch (err) {
-        console.error("Error fetching service centers:", err);
+        console.error("Error fetching driver data:", err);
       }
     };
-
+  
     fetchDriver();
   }, []);
+  
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);
@@ -181,43 +210,6 @@ const ManageDriver = () => {
     }
   };
 
-  // const handleRequestToggle = async (id: number, currentStatus: boolean) => {
-  //     const confirmToggle = window.confirm("Are you sure you want to change the status?");
-  //     if (!confirmToggle) return;
-
-  //     try {
-  //       const supabase = createClient();
-
-  //       setIsToggled(true);
-
-  //       const { error } = await supabase
-  //         .from("drivers")
-  //         .update({ is_approved : currentStatus })
-  //         .eq("driver_id", id);
-
-  //       if (error) {
-  //         console.error("Error updating service center status:", error);
-  //         alert("Failed to update the status.");
-  //         setIsToggled(false);
-  //       } else {
-
-  //         const updatedDriver = driver.map((center) =>
-  //             center.driver_id === id
-  //                 ? { ...center, is_approved: currentStatus }
-  //                 : center
-  //         );
-  //         setDriver(updatedDriver);
-  //         setFilteredDriver(updatedDriver);
-
-  //         alert("Status updated successfully.");
-  //         setIsToggled(false);  // Hide loading indicator
-  //       }
-  //     } catch (err) {
-  //       console.error("Unexpected error updating status:", err);
-  //       alert("An unexpected error occurred.");
-  //       setIsToggled(false); // Hide loading indicator
-  //     }
-  //   };
 
   const columns = {
     Name: "Name",
@@ -241,6 +233,9 @@ const ManageDriver = () => {
     Police_Verification: "Police Verification",
     Refrel_Code: "Referel Code",
     Refrence_Number: "Refrence Number",
+    account_no: "Bank Account No",
+    ifsc_code: "IFSC Code",
+    branch_name: "Branch Name",
     
   };
 
@@ -253,12 +248,16 @@ const ManageDriver = () => {
     "Yrs_of_exp",
     "Type_of_Vehicle_driven",
     "Refrel_Code",
-    "Photo",
     "Brands",
     "License_Category",
+    "Photo",
+    
     "Language_Spoken",
    
     "Refrence_Number",
+    "account_no",
+    "ifsc_code",
+    "branch_name",
     "driver_national_id_image",
     "driving_license_image"
   ];
@@ -387,6 +386,9 @@ const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>, id: numb
     Driving_Licence: center.driving_license_no,
     Refrel_Code: center.refrel_code,
     Refrence_Number: center.refrence_no,
+    account_no: center.account_no ? center.account_no : "",
+    ifsc_code: center.ifsc_code,
+    branch_name: center.branch_name,
     // Photo: 'image path',
     Photo: (
         <>

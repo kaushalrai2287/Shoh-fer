@@ -15,6 +15,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { Controller } from "react-hook-form";
 import { FaCalendarAlt } from "react-icons/fa";
 import { assignDriverToBooking } from "../../../../../utils/functions/assignDriverToBooking";
+import { generateBookingId } from "../../../../../utils/functions/generateBookingId";
 
 
 
@@ -195,9 +196,10 @@ const AddBookings = () => {
         .from("bookings")
         .insert([
           {
+            actual_booking_id:generateBookingId(),
             vehicle_id,
             customer_name: data.cperson,
-            customer_email: data.Customer_Email,
+            customer_email: data.Customer_Email, 
             customer_phone: data.cnumber,
             pickup_date_time: data.pickup_date_time,
             pickup_address: data.p_location,

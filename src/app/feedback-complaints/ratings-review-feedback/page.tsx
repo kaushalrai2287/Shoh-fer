@@ -36,7 +36,7 @@ const FeedbackComplaintsRating = () => {
           const formattedData = result.data.map((item: any) => ({
             service_center_name: item.service_center_name || "N/A",
             driver_name: item.driver_name || "N/A",
-            trip_id: item.booking_id || "N/A",
+            trip_id: item.actual_booking_id|| "N/A",
             feedback: item.feedback || "No Feedback",
             rating: renderRatingStars(item.rating),
           }));

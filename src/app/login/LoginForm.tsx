@@ -8,6 +8,8 @@ import { z } from "zod";
 import { loginUser } from "./action";
 // import { redirect } from "next/navigation";
 import { usePermissions } from "../../../utils/services/PermissionsContext"
+import { requestPushNotification } from "../../../utils/pushNotification";
+import { createClient } from "../../../utils/supabase/client";
 const formSchema = z.object({
   email: z
   .string()
@@ -45,20 +47,36 @@ export default function LoginForm() {
       password: "",
     },
   });
-
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setServerError(null);
     setIsLoading(true);
-
+  
     try {
       const { error, message } = await loginUser({
         email: data.email,
         password: data.password,
       });
-
+  
       if (error) {
         setServerError(message);
       } else {
+        const supabase = createClient();
+        const { data: userData, error: userError } = await supabase.auth.getUser();
+  
+        if (!userError && userData?.user) {
+          const token = await requestPushNotification();
+          if (token) {
+            await fetch("/api/saveToken", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                token,
+                user_id: userData.user.id,
+              }),
+            });
+          }
+        }
+  
         await fetchPermissions(); 
         router.push("/add-service-center/list");
       }
@@ -66,6 +84,26 @@ export default function LoginForm() {
       setIsLoading(false);
     }
   };
+  // const onSubmit = async (data: z.infer<typeof formSchema>) => {
+  //   setServerError(null);
+  //   setIsLoading(true);
+
+  //   try {
+  //     const { error, message } = await loginUser({
+  //       email: data.email,
+  //       password: data.password,
+  //     });
+
+  //     if (error) {
+  //       setServerError(message);
+  //     } else {
+  //       await fetchPermissions(); 
+  //       router.push("/add-service-center/list");
+  //     }
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
 
   return (
     <main className="main_section">

@@ -62,12 +62,12 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation"; // Use router for redirection
-import { requestPushNotification } from "../../utils/pushNotification";
-import { createClient } from "../../utils/supabase/client";
+// import { requestPushNotification } from "../../utils/pushNotification";
+// import { createClient } from "../../utils/supabase/client";
 
 export default function HomePage() {
-  const [token, setToken] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
+  // const [token, setToken] = useState<string | null>(null);
+  // const [userId, setUserId] = useState<string | null>(null);
   const router = useRouter(); // Initialize router for redirection
 
   useEffect(() => {
@@ -83,41 +83,44 @@ export default function HomePage() {
     }
   }, []);
   
-  useEffect(() => {
-    const checkUserAndRequestNotification = async () => {
-      const supabase = createClient();
+//   useEffect(() => {
+//     const checkUserAndRequestNotification = async () => {
+//       const supabase = createClient();
 
-      // Get the authenticated user details
-      const { data, error } = await supabase.auth.getUser();
+//       // Get the authenticated user details
+//       const { data, error } = await supabase.auth.getUser();
+//       // const { data, error } = await supabase.auth.getUser();
+// console.log("User data from getUser():", data, error);
+
       
-      if (error || !data?.user) {
-        // If no user is logged in, redirect to the login page
-        // console.error("No user logged in");
-        router.push(`/login?next=${encodeURIComponent(window.location.pathname)}`);
-        return;
-      }
+//       if (error || !data?.user) {
+//         // If no user is logged in, redirect to the login page
+//         // console.error("No user logged in");
+//         router.push(`/login?next=${encodeURIComponent(window.location.pathname)}`);
+//         return;
+//       }
 
-      // Save the user_id
-      setUserId(data.user.id);
+//       // Save the user_id
+//       setUserId(data.user.id);
 
-      // Request push notification token
-      const t = await requestPushNotification();
-      if (t) {
-        setToken(t);
-        saveTokenToDatabase(t, data.user.id); // Save token with user_id
-      }
-    };
+//       // Request push notification token
+//       const t = await requestPushNotification();
+//       if (t) {
+//         setToken(t);
+//         saveTokenToDatabase(t, data.user.id); // Save token with user_id
+//       }
+//     };
 
-    checkUserAndRequestNotification();
-  }, [router]); // Add router as a dependency
+//     checkUserAndRequestNotification();
+//   }, [router]); // Add router as a dependency
 
-  const saveTokenToDatabase = async (token: string, user_id: string) => {
-    await fetch("/api/saveToken", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token, user_id }),
-    });
-  };
+//   const saveTokenToDatabase = async (token: string, user_id: string) => {
+//     await fetch("/api/saveToken", {
+//       method: "POST",
+//       headers: { "Content-Type": "application/json" },
+//       body: JSON.stringify({ token, user_id }),
+//     });
+//   };
 
   return (
     <main>

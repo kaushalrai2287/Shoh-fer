@@ -110,7 +110,8 @@ const { data: bookings, error: bookingError } = await supabase
   .select('*, vehicles(license_plate_no, brand_id, model_id)')
   .eq('driver_id', driver_id)
   .gte('created_at', `${today}T00:00:00.000Z`)
-  .lt('created_at', `${today}T23:59:59.999Z`);
+  .lt('created_at', `${today}T23:59:59.999Z`)
+  .order('created_at', { ascending: false });
 
 if (bookingError) {
   console.error('Error fetching booking details:', bookingError);

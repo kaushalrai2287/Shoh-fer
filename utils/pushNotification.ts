@@ -30,6 +30,7 @@ export const requestPushNotification = async (): Promise<string | null> => {
     if (permission === "granted") {
       const token = await getToken(messaging, {
         vapidKey: "BDCJuMBOPgYNoB6meWRhnTODDT41fU0zujFB7v2tIfD7v2gaIHupJ5jI9hCpMI2dnQtbTNFksnmZUbyH9olDuog",
+        
       });
       return token;
     } else {
