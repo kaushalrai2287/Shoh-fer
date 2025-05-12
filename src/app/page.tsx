@@ -73,7 +73,7 @@ export default function HomePage() {
   useEffect(() => {
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker
-        .register("/firebase.sw.js")
+        .register("/firebase-messaging-sw.js")
         .then((registration) => {
           console.log("Service Worker registered:", registration);
         })

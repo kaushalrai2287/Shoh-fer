@@ -50,7 +50,7 @@ const ListBooking = () => {
     Service_Center_Name: "Service Center Name",
     Driver_Name: "Driver Name",
    
-    Trip_Id:"Trip Id",
+    Trip_Id:" Booking ID",
   
     Brand: "Brand",
     Model: "Model",

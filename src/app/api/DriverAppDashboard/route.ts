@@ -103,15 +103,39 @@ export async function POST(req: Request) {
 //         { status: 500 }
 //       );
 //     }
-const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+const today = new Date().toISOString().split('T')[0];
+const { data: assignedBookings, error: assignedError } = await supabase
+  .from('booking_assigned_drivers')
+  .select('booking_id')
+  .eq('driver_id', driver_id);
+
+if (assignedError) {
+  console.error('Error fetching assigned bookings:', assignedError);
+  return NextResponse.json(
+    { message: 'Error fetching assigned bookings', status: 'error' },
+    { status: 500 }
+  );
+}
+
+
+const bookingIds = assignedBookings.map(b => b.booking_id);
+
+if (bookingIds.length === 0) {
+  return NextResponse.json(
+    { message: 'No bookings found for driver', status: 'success', data: [] },
+    { status: 200 }
+  );
+}
+
+
 
 const { data: bookings, error: bookingError } = await supabase
   .from('bookings')
   .select('*, vehicles(license_plate_no, brand_id, model_id)')
-  .eq('driver_id', driver_id)
+  .in('booking_id', bookingIds)
   .gte('created_at', `${today}T00:00:00.000Z`)
   .lt('created_at', `${today}T23:59:59.999Z`)
-  .order('created_at', { ascending: false });
+  // .order('created_at', { ascending: false });
 
 if (bookingError) {
   console.error('Error fetching booking details:', bookingError);
@@ -120,13 +144,26 @@ if (bookingError) {
     { status: 500 }
   );
 }
-const bookingIds = bookings.map(booking => booking.booking_id);
+type BookingStatus = 'active' | 'accepted' | string;
+
+const priority: Record<BookingStatus, number> = {
+  active: 1,
+  accepted: 2,
+  // all others default to 99 when accessed
+};
+
+bookings.sort((a, b) => {
+  const aPriority = priority[a.status as BookingStatus] ?? 99;
+  const bPriority = priority[b.status as BookingStatus] ?? 99;
+  return aPriority - bPriority || new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+});
+// Optional: If needed for next steps
+const filteredBookingIds = bookings.map(booking => booking.booking_id);
 
 const { data: bookingLocation, error: bookingLocationError } = await supabase
-.from('booking_locations')
-.select('customer_latitude,booking_id, customer_longitude,dropoff_lat,dropoff_lng')
-.in('booking_id', bookingIds);
-
+  .from('booking_locations')
+  .select('customer_latitude, booking_id, customer_longitude, dropoff_lat, dropoff_lng')
+  .in('booking_id', filteredBookingIds);
 
 if (bookingLocationError) {
   console.error('Error fetching booking Location:', bookingLocationError);
@@ -135,6 +172,39 @@ if (bookingLocationError) {
     { status: 500 }
   );
 }
+
+// const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+
+// const { data: bookings, error: bookingError } = await supabase
+//   .from('bookings')
+//   .select('*, vehicles(license_plate_no, brand_id, model_id)')
+//   .eq('driver_id', driver_id)
+//   .gte('created_at', `${today}T00:00:00.000Z`)
+//   .lt('created_at', `${today}T23:59:59.999Z`)
+//   .order('created_at', { ascending: false });
+
+// if (bookingError) {
+//   console.error('Error fetching booking details:', bookingError);
+//   return NextResponse.json(
+//     { message: 'Error fetching booking details', status: 'error' },
+//     { status: 500 }
+//   );
+// }
+// const bookingIds = bookings.map(booking => booking.booking_id);
+
+// const { data: bookingLocation, error: bookingLocationError } = await supabase
+// .from('booking_locations')
+// .select('customer_latitude,booking_id, customer_longitude,dropoff_lat,dropoff_lng')
+// .in('booking_id', bookingIds);
+
+
+// if (bookingLocationError) {
+//   console.error('Error fetching booking Location:', bookingLocationError);
+//   return NextResponse.json(
+//     { message: 'Error fetching booking Location', status: 'error' },
+//     { status: 500 }
+//   );
+// }
 
 // Enrich bookings with brand and model names
 const enrichedBookings = await Promise.all(

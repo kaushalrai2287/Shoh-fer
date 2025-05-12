@@ -1,134 +1,4 @@
-// // final code
-// "use client";
 
-// import React, { useState } from "react";
-// import Image from "next/image";
-// import Header from "../../../../components/Header";
-// import Sidemenu from "../../../../components/Sidemenu";
-// import { DataTable } from "../../../../components/ui/datatable";
-// import Link from "next/link";
-
-// const FeedbackComplaints = () => {
-//   const [isToggled, setIsToggled] = useState(false); // State for toggle
-
-//   const toggleClass = () => {
-//     setIsToggled(!isToggled); // Toggle the state
-//   };
-
-//   const columns = {
-//     Raised_by: "Raised By",
-//     Raised_For: "Raised For",
-//     Trip_id: "Trip ID",
-//     Complaint_Box: "Complaint Box",
-//     Request: "Request",
-//   };
-
-//   const data = [
-//     {
-//       Raised_by: "ABC Servicing",
-//       Raised_For: "Rahul",
-//       Trip_id: "45",
-//       Complaint_Box: '"Lorem ipsum dolor sit amet"',
-//       Request: "Approved",
-//       editLink: "#", // Edit page link
-//       deleteLink: "#", // Delete page link
-//     },
-//   ];
-
-//   return (
-//     <main className="Service_center_list_main">
-//       <Header />
-//       <div className={`inner_mainbox ${isToggled ? "toggled-class" : ""}`}>
-//         <div className="inner_left">
-//           <Sidemenu onToggle={toggleClass} />
-//         </div>
-//         <div className="inner_right">
-//           <div className="filter_box">
-//             <div className="filter_heading_btnbox">
-//               <div className="service_form_heading">
-//                 <span>
-//                   <img
-//                     src="/images/settings-sliders.svg"
-//                     alt=""
-//                     className="img-fluid"
-//                   />
-//                 </span>
-//                 Filter By
-//               </div>
-//             </div>
-//             <div className="filter_formbox">
-//               <form action="">
-//                 <div className="inner_form_group">
-//                   <label htmlFor="trip_id">Trip ID</label>
-//                   <input
-//                     className="form-control"
-//                     type="text"
-//                     name="trip_id"
-//                     id="trip_id"
-//                   />
-//                 </div>
-//                 <div className="inner_form_group">
-//                   <label htmlFor="Status">Request</label>
-//                   <select className="form-control" name="Status" id="Status">
-//                     <option value="">Select Request</option>
-//                     <option value="Approved">Approved</option>
-//                     <option value="Reject">Reject</option>
-//                   </select>
-//                   <div className="down_arrow_btn">
-//                     <img
-//                       src="/images/angle-small-down.svg"
-//                       alt=""
-//                       className="img-fluid"
-//                     />
-//                   </div>
-//                 </div>
-//                 <div className="inner_form_group inner_form_group_submit">
-//                   <input type="submit" className="submite_btn" value="Search" />
-//                   <input
-//                     type="submit"
-//                     className="close_btn"
-//                     value="Export All"
-//                   />
-//                   <div>
-//                     <input
-//                       type="button"
-//                       className="close_btn"
-//                       value="Clear"
-//                       //   onClick={handleClearFilters} // Attach the handler here
-//                     />
-//                   </div>
-//                 </div>
-//               </form>
-//             </div>
-//           </div>
-//           <div className="data_listing_box mt-3">
-//             <div className="filter_heading_btnbox">
-//               <div className="service_form_heading">
-//                 <span>
-//                   <img
-//                     src="/images/rating-list.svg"
-//                     alt=""
-//                     className="img-fluid"
-//                   />
-//                 </span>
-//                 Ratings & Feedback List
-//               </div>
-//             </div>
-//             <div className="filter_data_table">
-//               <DataTable
-//                 columns={columns}
-//                 data={data}
-//                 showRequestButton={true}
-//               />
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//     </main>
-//   );
-// };
-
-// export default FeedbackComplaints;
 "use client";
 import React, { useEffect, useState } from "react";
 import Header from "../../../../components/Header";
@@ -145,7 +15,8 @@ interface FeedbackComplaint {
   type_of_complaints: string;
   raised_by: string;
   raised_for: string;
-  trip_id: string;
+  // trip_id: string;
+  actual_booking_id: string;
   complaint_box: string;
   request: string;
   created_at: string;
@@ -157,7 +28,7 @@ const FeedbackComplaints = () => {
   const [data, setData] = useState<FeedbackComplaint[]>([]);
   const [filteredData, setFilteredData] = useState<FeedbackComplaint[]>([]); 
   const [filters, setFilters] = useState({
-    trip_id: "",
+    actual_booking_id: "",
     request: "",
   });
 
@@ -169,7 +40,7 @@ const FeedbackComplaints = () => {
     Type_Of_Complaints: "Complaints By (Service Center/Driver)",
     Raised_by: "Raised By",
     Raised_For: "Raised For",
-    Trip_id: "Trip ID",
+    actual_booking_id: "Booking ID",
     Complaint_Box: "Complaint Box",
     Request: "Request",
     Date_And_Time: "Date and Time of Request Raised",
@@ -266,7 +137,7 @@ const FeedbackComplaints = () => {
   // };
 
 
-  const handleRequestUpdate = async (tripId: string, newStatus: string, comments: string) => {
+  const handleRequestUpdate = async (actual_booking_id: string, newStatus: string, comments: string) => {
     if (newStatus === "Resolved" && !comments.trim()) {
       alert("Resolution comments are required to resolve the complaint.");
       return;
@@ -284,7 +155,7 @@ const FeedbackComplaints = () => {
         request: newStatus,
         comments: newStatus === "Resolved" ? comments : null, // Save comments only if resolved
       })
-      .eq("trip_id", tripId);
+      .eq("actual_booking_id",actual_booking_id );
   
     if (error) {
       console.error("Error updating status:", error.message);
@@ -299,10 +170,10 @@ const FeedbackComplaints = () => {
   //   );
   //   setFilteredData(updatedData); 
   // };
-  const handleCommentChange = async (tripId: string, comment: string) => {
+  const handleCommentChange = async (actual_booking_id: string, comment: string) => {
   
     const updatedData = filteredData.map((item) =>
-      item.trip_id === tripId ? { ...item, comments: comment } : item
+      item.actual_booking_id === actual_booking_id ? { ...item, comments: comment } : item
     );
     setFilteredData(updatedData);
   
@@ -310,7 +181,7 @@ const FeedbackComplaints = () => {
     const { error } = await supabase
       .from("feedback_complaints")
       .update({ comments: comment })
-      .eq("trip_id", tripId);
+      .eq("actual_booking_id", actual_booking_id);
   
     if (error) {
       console.error("Error updating comments:", error.message);
@@ -323,13 +194,13 @@ const FeedbackComplaints = () => {
   const applyFilters = () => {
     let filtered = [...data]; 
 
-    if (filters.trip_id) {
+    if (filters.actual_booking_id) {
       filtered = filtered.filter(
         (item) =>
-          item.trip_id
+          item.actual_booking_id
             .toString()
             .toLowerCase()
-            .includes(filters.trip_id.toLowerCase()) 
+            .includes(filters.actual_booking_id.toLowerCase()) 
       );
     }
 
@@ -347,13 +218,13 @@ const FeedbackComplaints = () => {
     Type_Of_Complaints: item.type_of_complaints,
     Raised_by: item.raised_by,
     Raised_For: item.raised_for,
-    Trip_id: item.trip_id.toString(), 
+    actual_booking_id: item.actual_booking_id, 
     Complaint_Box: item.complaint_box,
     Request: (
       <select
         value={item.request}
         onChange={(e) =>
-          handleRequestUpdate(item.trip_id, e.target.value, item.comments || "")
+          handleRequestUpdate(item.actual_booking_id, e.target.value, item.comments || "")
         } 
         style={{
           cursor: "pointer",
@@ -371,7 +242,7 @@ const FeedbackComplaints = () => {
       item.request === "Pending" ? (
         <textarea
           value={item.comments || ""}
-          onChange={(e) => handleCommentChange(item.trip_id, e.target.value)} 
+          onChange={(e) => handleCommentChange(item.actual_booking_id, e.target.value)} 
           placeholder="Enter resolution comments..."
           style={{ width: "200px", height: "50px" }}
         />
@@ -399,7 +270,7 @@ const FeedbackComplaints = () => {
     "Complaints For": item.type_of_complaints,
     "Raised By": item.raised_by,
     "Raised For": item.raised_for,
-    "Trip ID": item.trip_id,
+    "Booking ID": item.actual_booking_id,
     "Complaint Box": item.complaint_box,
     Request: item.request,
     "Date and Time": format(new Date(item.created_at), "dd/MM/yyyy HH:mm:ss"),
@@ -437,13 +308,13 @@ const FeedbackComplaints = () => {
             <div className="filter_formbox">
               <form onSubmit={handleFormSubmit}>
                 <div className="inner_form_group">
-                  <label htmlFor="trip_id">Trip ID</label>
+                  <label htmlFor="actual_booking_id">Booking ID</label>
                   <input
                     className="form-control"
                     type="text"
-                    name="trip_id"
-                    id="trip_id"
-                    value={filters.trip_id}
+                    name="actual_booking_id"
+                    id="actual_booking_id"
+                    value={filters.actual_booking_id}
                     onChange={handleFilterChange}
                   />
                 </div>
@@ -476,7 +347,7 @@ const FeedbackComplaints = () => {
                     type="button"
                     className="close_btn"
                     onClick={() => {
-                      setFilters({ trip_id: "", request: "" });
+                      setFilters({ actual_booking_id: "", request: "" });
                       setFilteredData(data); 
                     }}
                   >

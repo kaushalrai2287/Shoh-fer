@@ -164,10 +164,10 @@ const formSchema = z.object({
   message: z
     .string()
     .min(1, "Service Center Name is required"),
-    // .regex(/^[a-zA-Z\s]+$/, "message must only contain letters"),
+  // .regex(/^[a-zA-Z\s]+$/, "message must only contain letters"),
   service_centers: z
     .array(
-      z.object({ value: z.union([z.string(), z.number()]), label: z.string() })
+      z.object({ value: z.union([z.string(), z.number()]), label: z.string(), user_id: z.union([z.string(), z.number()]), })
     )
     .min(1, "At least one service center must be selected"),
   name: z.string().min(1, "Title is required"),
@@ -225,34 +225,7 @@ const NotificatioServicecenteradd = () => {
   const toggleClass = () => {
     setIsToggled(!isToggled);
   };
-  const onSubmit = async (data: FormValues) => {
-    try {
-      const formData = new FormData();
-      formData.append("message", data.message);
-      formData.append("name", data.name);
-      formData.append("service_centers", JSON.stringify(data.service_centers));
 
-      if (data.upload && data.upload.length > 0) {
-        formData.append("upload", data.upload[0]); // Add uploaded file
-      }
-
-      const response = await fetch("/api/Notification/ToServiceCenter", {
-        method: "POST",
-        body: formData,
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        alert(result.message); // Success message
-      } else {
-        alert(result.error); // Error message
-      }
-    } catch (err) {
-      console.error("Unexpected Error:", err);
-      alert("Something went wrong.");
-    }
-  };
 
   // const onSubmit = async (data: FormValues) => {
   //     try {
@@ -291,6 +264,34 @@ const NotificatioServicecenteradd = () => {
     event.preventDefault(); // Prevent default form behavior
     router.push("/notifications/driver/list"); // Navigate to the desired page
   };
+  const onSubmit = async (data: FormValues) => {
+    try {
+      const formData = new FormData();
+      formData.append("message", data.message);
+      formData.append("name", data.name);
+      formData.append("service_centers", JSON.stringify(data.service_centers));
+      console.log(data.service_centers);
+      if (data.upload && data.upload.length > 0) {
+        formData.append("upload", data.upload[0]); 
+      }
+
+      const response = await fetch("/api/Notification/ToServiceCenter", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        alert(result.message); // Success message
+      } else {
+        alert(result.error); // Error message
+      }
+    } catch (err) {
+      console.error("Unexpected Error:", err);
+      alert("Something went wrong.");
+    }
+  };
 
   useEffect(() => {
     const fetchServiceCenters = async () => {
@@ -308,8 +309,9 @@ const NotificatioServicecenteradd = () => {
           const formattedServiceCenters = data.map((center: any) => ({
             value: center.service_center_id,
             label: center.name, // Assuming 'name' is the column containing service center name
+            user_id: center.auth_id,
           }));
-
+          console.log("Formatted Service Centers:", formattedServiceCenters);
           setServiceCenters(formattedServiceCenters);
         }
       } catch (err) {
@@ -348,7 +350,7 @@ const NotificatioServicecenteradd = () => {
                 <label htmlFor="state">
                   Select Service Center <span>*</span>
                 </label>
-                <Controller
+                {/* <Controller
                   control={control}
                   name="service_centers" // Only name, no register
                   render={({ field }) => (
@@ -362,7 +364,43 @@ const NotificatioServicecenteradd = () => {
                       classNamePrefix="react-select"
                     />
                   )}
+                /> */}
+                <Controller
+                  control={control}
+                  name="service_centers"
+                  render={({ field }) => {
+                    const allOption = { value: "*", label: "Select All" };
+
+                    const handleChange = (selectedOptions: any) => {
+                      // If "Select All" is selected
+                      if (selectedOptions.some((opt: any) => opt.value === "*")) {
+                        // Select all service centers
+                        field.onChange(serviceCenters);
+                      } else {
+                        field.onChange(selectedOptions);
+                      }
+                    };
+
+                    const value = field.value.length === serviceCenters.length
+                      ? [allOption, ...field.value]
+                      : field.value;
+
+                    return (
+                      <Select
+                        {...field}
+                        options={[allOption, ...serviceCenters]}
+                        isMulti
+                        isLoading={loading}
+                        placeholder="Select Service Centers"
+                        className="react-select-container"
+                        classNamePrefix="react-select"
+                        onChange={handleChange}
+                        value={value}
+                      />
+                    );
+                  }}
                 />
+
 
                 {errors.service_centers && (
                   <p className="erro_message">
@@ -422,7 +460,7 @@ const NotificatioServicecenteradd = () => {
               </div>
               <div className="inner_form_group">
                 <label htmlFor="upload">
-                  Upload Document 
+                  Upload Document
                 </label>
                 <input
                   className="form-control"

@@ -17,9 +17,6 @@ import { FaCalendarAlt } from "react-icons/fa";
 import { assignDriverToBooking } from "../../../../../utils/functions/assignDriverToBooking";
 import { generateBookingId } from "../../../../../utils/functions/generateBookingId";
 
-
-
-
 const formSchema = z.object({
   b_type: z.string().min(1, "Brand is required"),
   model: z.string().min(1, "model is required"),
@@ -58,9 +55,17 @@ const formSchema = z.object({
     .string()
     .regex(/^\d+$/, "Phone must contain only digits")
     .min(10, "Phone number must be 10 digits")
-    .max(10, "Phone number must be 10 digits").optional(),
+    .max(10, "Phone number must be 10 digits")
+    .optional(),
   special_instructions: z.string().optional(),
+  segment: z.string().min(1, "Segment is required"),
 });
+interface ModelData {
+  segment_id: string;
+  segments: {
+    name: string;
+  };
+}
 
 type FormValues = z.infer<typeof formSchema>;
 const router = useRouter;
@@ -78,6 +83,8 @@ const AddBookings = () => {
     { driver_id: string; driver_name: string }[]
   >([]);
   const [selectedBrand, setSelectedBrand] = useState<string>("");
+  const [segments, setSegments] = useState<{ id: string; name: string }[]>([]);
+  const [selectedSegment, setSelectedSegment] = useState<string>("");
 
   const {
     register,
@@ -85,6 +92,7 @@ const AddBookings = () => {
     control,
     formState: { errors },
     setValue,
+    watch, // <-- Add this line
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
   });
@@ -133,6 +141,35 @@ const AddBookings = () => {
     };
     fetchServiceCenters();
   }, []);
+
+  useEffect(() => {
+    const fetchSegment = async () => {
+      const supabase = createClient();
+      const { data: modelData, error } = await supabase
+        .from("models")
+        .select("segment_id, segments(name)")
+        .eq("id", watch("model"))
+       .single<ModelData>();
+console.log(modelData);
+      if (error) {
+        console.error("Error fetching segment:", error.message);
+        return;
+      }
+
+      if (modelData?.segments) {
+        setSelectedSegment(modelData.segments.name);
+        setValue("segment", modelData.segments.name); // Pre-fill in form
+      } else {
+        setSelectedSegment("");
+        setValue("segment", "");
+      }
+    };
+
+    if (watch("model")) {
+      fetchSegment();
+    }
+  }, [watch("model")]);
+
   useEffect(() => {
     const fetchDrivers = async () => {
       const supabase = createClient();
@@ -196,10 +233,10 @@ const AddBookings = () => {
         .from("bookings")
         .insert([
           {
-            actual_booking_id:generateBookingId(),
+            // actual_booking_id:generateBookingId(),
             vehicle_id,
             customer_name: data.cperson,
-            customer_email: data.Customer_Email, 
+            customer_email: data.Customer_Email,
             customer_phone: data.cnumber,
             pickup_date_time: data.pickup_date_time,
             pickup_address: data.p_location,
@@ -217,9 +254,7 @@ const AddBookings = () => {
         console.error("Booking Insert Error:", bookingError.message);
         return;
       }
-
       const booking_id = bookingData.booking_id;
-
       // Step 4: Insert booking location
       const { error: locationError } = await supabase
         .from("booking_locations")
@@ -232,124 +267,37 @@ const AddBookings = () => {
             dropoff_lng: data.d_lng,
           },
         ]);
-
       if (locationError) {
         console.error("Booking Location Insert Error:", locationError.message);
         return;
       }
+      try {
+        const assignResult = await assignDriverToBooking(
+          booking_id,
+          parseFloat(data.p_lat),
+          parseFloat(data.p_lng)
+        );
 
-
-        try {
-             // Call the assignDriverToBooking function instead of the fetch request
-             const assignResult = await assignDriverToBooking(
-               booking_id,
-               parseFloat(data.p_lat),
-               parseFloat(data.p_lng)
-             );
-         
-             if (assignResult.error) {
-               console.warn("Driver status change failed:", assignResult.message || assignResult.error);
-             } else {
-               console.log("Driver status changed successfully:", assignResult);
-             }
-           } catch (assignError) {
-             console.error("Error calling assignDriver function:", assignError);
-           }
-
+        if (assignResult.error) {
+          console.warn(
+            "Driver status change failed:",
+            assignResult.message || assignResult.error
+          );
+        } else {
+          console.log("Driver status changed successfully:", assignResult);
+        }
+      } catch (assignError) {
+        console.error("Error calling assignDriver function:", assignError);
+      }
       alert("Booking successfully added!");
     } catch (error) {
       console.error("Unexpected error:", error);
     }
   };
-
-  //   const onSubmit = async (data: FormValues) => {
-  //     // console.log("Form data submitted:", data); // Debug log
-  //     try {
-  //       const supabase = createClient();
-
-  //       const { data: vehicleData, error: vehicleError } = await supabase
-  //         .from("vehicles")
-  //         .insert([
-  //           {
-  //             brand_id: data.b_type,
-  //             model_id: data.model,
-  //             license_plate_no: data.name,
-  //             condition: data.vehicle_condition,
-  //             service_center_id: data.s_list,
-  //           },
-  //         ])
-  //         .select("vehicle_id")
-  //         .single();
-
-  //       if (vehicleError) {
-  //         console.error("Vehicle Insert Error:", vehicleError.message);
-  //         return;
-  //       }
-  //     //   console.log("Vehicle data inserted:", vehicleData);
-
-  //       // Proceed to bookings table
-  //       const vehicle_id = vehicleData.vehicle_id;
-
-  //     //   const { error: bookingError } = await supabase.from("bookings").insert([
-  //     //     {
-  //     //       vehicle_id,
-  //     //       customer_name: data.cperson,
-  //     //       customer_phone: data.cnumber,
-  //     //       pickup_address: data.p_location,
-  //     //       dropoff_address: data.d_location,
-  //     //       driver_id: data.driver_select,
-  //     //       // pickup_date: data.p_date,
-  //     //       service_center_id: data.s_list,
-  //     //     },
-  //     //   ])
-  //     const { data: bookingData, error: bookingError } = await supabase
-  //     .from("bookings")
-  //     .insert([
-  //       {
-  //         vehicle_id,
-  //         customer_name: data.cperson,
-  //         customer_phone: data.cnumber,
-  //         pickup_address: data.p_location,
-  //         dropoff_address: data.d_location,
-  //         driver_id: data.driver_select,
-  //         service_center_id: data.s_list,
-  //       },
-  //     ])
-  //     .select("booking_id") // Fetch booking ID after insert
-  //     .single();
-
-  //       if (bookingError) {
-  //         console.error("Booking Insert Error:", bookingError.message);
-  //         return;
-  //       }
-  //       const booking_id = bookingData.booking_id;
-
-  //       const { error: locationError } = await supabase.from("booking_locations").insert([
-  //         {
-  //           booking_id,
-  //           customer_latitude: data.p_lat,
-  //           customer_longitude: data.p_lng,
-  //           dropoff_lat: data.d_lat,
-  //           dropoff_lng: data.d_lng,
-  //         },
-  //       ]);
-
-  //       if (locationError) {
-  //         console.error("Booking Location Insert Error:", locationError.message);
-  //         return;
-  //       }
-
-  //       alert("Booking successfully added!");
-  //     } catch (error) {
-  //       console.error("Unexpected error:", error);
-  //     }
-  //   };
-
   const handleClose = (event: { preventDefault: () => void }) => {
     event.preventDefault(); // Prevent default form behavior
     router.push("/bookings/manage-bookings/list"); // Navigate to the desired page
   };
-
   return (
     <main className="add_service_center_main">
       <Header />
@@ -402,7 +350,6 @@ const AddBookings = () => {
               </div>
               <div className="inner_form_group">
                 <label htmlFor="model">Model</label>
-
                 <select
                   className="form-control"
                   {...register("model")}
@@ -423,6 +370,29 @@ const AddBookings = () => {
                   />
                 </div>
               </div>
+              <div className="inner_form_group">
+                <label htmlFor="segment">
+                  Segment <span>*</span>
+                </label>
+                <select
+                  className="form-control"
+                  {...register("segment")}
+                  value={selectedSegment}
+                  onChange={(e) => {
+                    setSelectedSegment(e.target.value);
+                    setValue("segment", e.target.value);
+                  }}
+                >
+                  <option value="">Select Segment</option>
+                  <option value="Economy">Economy</option>
+                  <option value="Premium">Premium</option>
+                  <option value="Luxury">Luxury</option>
+                </select>
+                {errors.segment && (
+                  <p className="erro_message">{errors.segment.message}</p>
+                )}
+              </div>
+
               <div className="inner_form_group">
                 <label htmlFor="s_list">Service Center</label>
                 <select
@@ -530,7 +500,6 @@ const AddBookings = () => {
                   rows={1}
                 ></textarea>
               </div>
-
               <div className="inner_form_group">
                 <label htmlFor="pickup_date_time">
                   Pickup Date Time <span>*</span>
@@ -541,12 +510,11 @@ const AddBookings = () => {
                   rules={{ required: "Pickup date and time is required" }}
                   render={({ field }) => {
                     const value = field.value ? new Date(field.value) : null;
-                    const isValidDate = value instanceof Date && !isNaN(value.getTime());
-
+                    const isValidDate =
+                      value instanceof Date && !isNaN(value.getTime());
                     const today = new Date();
                     const maxDate = new Date();
                     maxDate.setDate(today.getDate() + 5); // today + 5 days
-
                     return (
                       <DatePicker
                         placeholderText="Select pickup date and time"
@@ -567,11 +535,10 @@ const AddBookings = () => {
                     );
                   }}
                 />
-
-
-
                 {errors.pickup_date_time && (
-                  <p className="erro_message">{errors.pickup_date_time.message}</p>
+                  <p className="erro_message">
+                    {errors.pickup_date_time.message}
+                  </p>
                 )}
                 <div className="down_arrow_btn">
                   <img
@@ -580,9 +547,7 @@ const AddBookings = () => {
                     className="img-fluid"
                   />
                 </div>
-
               </div>
-
               <div className="inner_form_group">
                 <label htmlFor="p_location">
                   Pick Up Location <span>*</span>
@@ -683,29 +648,6 @@ const AddBookings = () => {
                 />
               </div>
 
-              {/* <div className="inner_form_group">
-                <label htmlFor="driver_select">Driver Select</label>
-                <select
-                  className="form-control"
-                  {...register("driver_select")}
-                  id="driver_select"
-                  name="driver_select"
-                >
-                  <option value="">Select Driver</option>
-                  {drivers.map((driver) => (
-                    <option key={driver.driver_id} value={driver.driver_id}>
-                      {driver.driver_name}
-                    </option>
-                  ))}
-                </select>
-                <div className="down_arrow_btn">
-                  <img
-                    src="/images/angle-small-down.svg"
-                    alt=""
-                    className="img-fluid"
-                  />
-                </div>
-              </div> */}
               <div className="inner_form_group">
                 <label htmlFor="p_experience">Previous Experience</label>
                 <input
@@ -755,5 +697,4 @@ const AddBookings = () => {
     </main>
   );
 };
-
 export default AddBookings;

@@ -75,6 +75,7 @@ export async function POST(req: Request) {
       status: '1',
       data: {
         ...bookingDetails,
+        // actual_booking_id: bookingDetails.actual_booking_id || null, // explicitly included
         vehicle_details,
         ...locationData, // coordinates directly merged in data
         has_complaint: hasFeedbackOrComplaint,

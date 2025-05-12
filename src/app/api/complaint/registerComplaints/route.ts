@@ -7,10 +7,10 @@ const supabase = createClient();
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { driver_id, booking_id, complaintCategory, complaintMessage } = body;
+    const { driver_id,actual_booking_id, booking_id, complaintCategory, complaintMessage } = body;
 
     // Validation (optional, but recommended)
-    if (!driver_id || !booking_id || !complaintCategory || !complaintMessage) {
+    if (!driver_id || !actual_booking_id || !booking_id || !complaintCategory || !complaintMessage) {
       return NextResponse.json({ status: '0', message: 'Missing required fields' }, { status: 400 });
     }
 
@@ -19,6 +19,7 @@ export async function POST(req: NextRequest) {
       .insert([{
         driver_id,
         booking_id,
+        actual_booking_id,
         raised_by: 'driver',
         type_of_complaints: complaintCategory,
         complaint_box: complaintMessage,
