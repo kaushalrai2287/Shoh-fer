@@ -57,48 +57,52 @@ const ManageDriver = () => {
   const toggleClass = () => {
     setIsToggled(!isToggled);
   };
-  useEffect(() => {
-    const fetchDriver = async () => {
-      try {
-        const supabase = createClient();
-  
-        // Fetch all drivers
-        const { data: drivers, error: driverError } = await supabase
-          .from("drivers")
-          .select("*")
-          .order("created_at", { ascending: false });
-  
-        if (driverError) throw driverError;
-  
-        // Fetch all driver bank details
-        const { data: bankDetails, error: bankError } = await supabase
-          .from("driver_bank_details")
-          .select("driver_id, account_no, ifsc_code, branch_name");
-  
-        if (bankError) throw bankError;
-  
-        // Map bank details to drivers
-        const enrichedDrivers = drivers.map((driver) => {
-          const bank = bankDetails.find((b) => b.driver_id === driver.driver_id);
-          return {
-            ...driver,
-            account_no: bank?.account_no || "",
-            ifsc_code: bank?.ifsc_code || "",
-            branch_name: bank?.branch_name || "",
-          };
-        });
-        console.log("Enriched Drivers:", enrichedDrivers);
-  
-        setDriver(enrichedDrivers);
-        setFilteredDriver(enrichedDrivers);
-      } catch (err) {
-        console.error("Error fetching driver data:", err);
-      }
-    };
-  
-    fetchDriver();
-  }, []);
-  
+useEffect(() => {
+  const fetchDriver = async () => {
+    try {
+      const supabase = createClient();
+
+      // Fetch all drivers
+      const { data: drivers, error: driverError } = await supabase
+        .from("drivers")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (driverError) throw driverError;
+
+      // Fetch driver bank details with is_delete = false
+      const { data: bankDetails, error: bankError } = await supabase
+        .from("driver_bank_details")
+        .select("driver_id, account_no, ifsc_code, branch_name")
+        .eq("is_delete", false); 
+
+      if (bankError) throw bankError;
+
+      // console.log("Bank Details (not soft-deleted):", bankDetails);
+
+      // Map bank details to drivers
+      const enrichedDrivers = drivers.map((driver) => {
+        const bank = bankDetails.find((b) => b.driver_id === driver.driver_id);
+        return {
+          ...driver,
+          account_no: bank?.account_no || "",
+          ifsc_code: bank?.ifsc_code || "",
+          branch_name: bank?.branch_name || "",
+        };
+      });
+
+      console.log("Enriched Drivers:", enrichedDrivers);
+
+      setDriver(enrichedDrivers);
+      setFilteredDriver(enrichedDrivers);
+    } catch (err) {
+      console.error("Error fetching driver data:", err);
+    }
+  };
+
+  fetchDriver();
+}, []);
+
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);

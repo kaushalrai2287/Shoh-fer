@@ -59,6 +59,7 @@ const formSchema = z.object({
     .optional(),
   special_instructions: z.string().optional(),
   segment: z.string().min(1, "Segment is required"),
+  segment_id: z.string().min(1, "Segment ID is required"), // <-- Add this
 });
 interface ModelData {
   segment_id: string;
@@ -150,19 +151,27 @@ const AddBookings = () => {
         .select("segment_id, segments(name)")
         .eq("id", watch("model"))
        .single<ModelData>();
-console.log(modelData);
+// console.log(modelData);
       if (error) {
         console.error("Error fetching segment:", error.message);
         return;
       }
-
-      if (modelData?.segments) {
-        setSelectedSegment(modelData.segments.name);
-        setValue("segment", modelData.segments.name); // Pre-fill in form
-      } else {
-        setSelectedSegment("");
-        setValue("segment", "");
-      }
+ if (modelData?.segments) {
+      setSelectedSegment(modelData.segments.name);
+      setValue("segment", modelData.segments.name); // For display
+      setValue("segment_id", modelData.segment_id); // Store ID in form
+    } else {
+      setSelectedSegment("");
+      setValue("segment", "");
+      setValue("segment_id", "");
+    }
+      // if (modelData?.segments) {
+      //   setSelectedSegment(modelData.segments.name);
+      //   setValue("segment", modelData.segments.name); // Pre-fill in form
+      // } else {
+      //   setSelectedSegment("");
+      //   setValue("segment", "");
+      // }
     };
 
     if (watch("model")) {
@@ -245,6 +254,7 @@ console.log(modelData);
             // driver_id: data.driver_select || null,
             Alternate_contact_no: data.Secondary_Contact_Number,
             service_center_id: data.s_list,
+            segment_id: data.segment_id,
           },
         ])
         .select("booking_id")

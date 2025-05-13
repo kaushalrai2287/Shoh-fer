@@ -22,6 +22,7 @@ export async function POST(req:Request) {
             .from("driver_bank_details")
             .select("account_no, ifsc_code, branch_name, bank_name")
             .eq("driver_id", driver_id)
+            .eq("is_delete", false)
             .single();
             const decryptedAccountNo = decrypt(data?.account_no || '');
             // console.log("Decrypted Account No:", decryptedAccountNo); 
@@ -35,7 +36,7 @@ export async function POST(req:Request) {
             ...data,
             account_no: decryptedAccountNo
         });
-    } catch (error) {
-        return NextResponse.json({ status: "error", message: "Invalid request" }, { status: 400 });
+    } catch (error:any) {
+        return NextResponse.json({ status: "error", message: error.message }, { status: 400 });
     }
 }
