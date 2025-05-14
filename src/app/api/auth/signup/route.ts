@@ -683,41 +683,58 @@ export async function POST(req: Request) {
     );
 
     const requiredFields = {
-      phone_number,
-      driver_name,
-      email,
-      address,
-      driving_license_no,
-      license_category,
-      experience_years,
-      vehicle_type_experience,
-      language_spoken,
-      Brand,
-      emergency_contact_no,
-      device_id,
-      countrycode,
-      dialcode,
-      platform,
-      transmission_type,
-      license_expiry_dates,
-      aadhar_card,
-      pan_card,
-      type,
-    };
+  phone_number,
+  driver_name,
+  email,
+  address,
+  driving_license_no,
+  license_category,
+  experience_years,
+  vehicle_type_experience,
+  language_spoken,
+  Brand,
+  emergency_contact_no,
+  device_id,
+  countrycode,
+  dialcode,
+  platform,
+  transmission_type,
+  license_expiry_dates,
+  type,
+};
 
-    const missingFields = Object.entries(requiredFields)
-      .filter(([_, value]) => !value)
-      .map(([key]) => key);
+const missingFields = Object.entries(requiredFields)
+  .filter(([_, value]) => !value)
+  .map(([key]) => key);
 
-    if (missingFields.length > 0) {
-      return NextResponse.json(
-        {
-          status: 0,
-          message: `Missing required fields: ${missingFields.join(", ")}`,
-        },
-        { status: 400 }
-      );
-    }
+// Custom check: At least one of aadhar_card or pan_card must be provided
+if (!aadhar_card && !pan_card) {
+  missingFields.push("aadhar_card or pan_card (at least one required)");
+}
+
+if (missingFields.length > 0) {
+  return NextResponse.json(
+    {
+      status: 0,
+      message: `Missing required fields: ${missingFields.join(", ")}`,
+    },
+    { status: 400 }
+  );
+}
+
+    // const missingFields = Object.entries(requiredFields)
+    //   .filter(([_, value]) => !value)
+    //   .map(([key]) => key);
+
+    // if (missingFields.length > 0) {
+    //   return NextResponse.json(
+    //     {
+    //       status: 0,
+    //       message: `Missing required fields: ${missingFields.join(", ")}`,
+    //     },
+    //     { status: 400 }
+    //   );
+    // }
 
     const supabase = await createClient();
 

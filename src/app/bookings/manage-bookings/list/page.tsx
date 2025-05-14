@@ -30,7 +30,7 @@ interface Booking {
   Invoice_url:string;
   status: string;
   created_at: string | Date; // Add this li
-
+ actual_booking_id?: string; // <-- Add this line
   // vehicle: Vehicle;
 }
 
@@ -352,7 +352,9 @@ const ListBooking = () => {
     Drop_Location: booking.dropoff_address,
     Previous_Experince: "3 years",
     Driver_Rating: booking.driver_rating || "N/A",
-    Trip_Id: booking.booking_id,
+    // Trip_Id: booking.booking_id,
+    Trip_Id: booking.actual_booking_id || booking.booking_id, // Prefer actual_booking_id
+
     Invoice: (
       <a
         href={booking.Invoice_url || "#"}

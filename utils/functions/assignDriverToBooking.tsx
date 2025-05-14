@@ -48,11 +48,15 @@ export async function assignDriverToBooking(
     const rejectedIds = rejectedDrivers?.map((d) => d.driver_id) || [];
 
   
-    const { data: drivers, error: driverError } = await supabase.rpc("find_nearest_driver", {
-      lat: customer_latitude,
-      lng: customer_longitude,
-    });
-
+    // const { data: drivers, error: driverError } = await supabase.rpc("find_nearest_driver", {
+    //   lat: customer_latitude,
+    //   lng: customer_longitude,
+    // });
+ const { data: drivers, error: driverError } = await supabase.rpc("get_available_drivers_by_segment", {
+  target_booking_id: booking_id,
+  lat: customer_latitude,
+  lng: customer_longitude,
+});
     if (driverError) {
       console.error("Error calling stored procedure 'find_nearest_driver':", driverError);
       return { message: "Error finding drivers", error: driverError };

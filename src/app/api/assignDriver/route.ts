@@ -204,11 +204,17 @@ export async function POST(req: Request) {
     // console.log("Rejected driver IDs:", rejectedIds);
 
     // Call stored procedure to find nearest drivers
-    const { data: drivers, error: driverError } = await supabase.rpc("find_nearest_driver", {
-      lat: customer_latitude,
-      lng: customer_longitude,
-    });
-
+    const { data: drivers, error: driverError } = await supabase.rpc("get_available_drivers_by_segment", {
+  target_booking_id: booking_id,
+  lat: customer_latitude,
+  lng: customer_longitude,
+});
+console.log("Drivers returned by stored procedure:", drivers);
+    // const { data: drivers, error: driverError } = await supabase.rpc("get_available_drivers_by_segment", {
+    //   lat: customer_latitude,
+    //   lng: customer_longitude,
+    // });
+// find_nearest_driver
     if (driverError) {
       console.error("Error calling stored procedure 'find_nearest_driver':", driverError);
       return NextResponse.json({ message: "Error finding drivers", error: driverError }, { status: 500 });
