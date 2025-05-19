@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '../../../../utils/supabase/client';
+import { haversineDistance } from '../../../../utils/distance';
 
 export async function POST(req: Request) {
   try {
@@ -68,7 +69,24 @@ export async function POST(req: Request) {
         .limit(1); // only need to check if at least one row exists
   
       const hasFeedbackOrComplaint = feedbackData && feedbackData.length > 0 ? 'yes' : 'no';
-  
+  // Assuming your haversineDistance function is like:
+// function haversineDistance(lat1, lon1, lat2, lon2) => number (in KM)
+
+let distance_km: number | null = null;
+
+if (
+  locationData?.customer_latitude &&
+  locationData?.customer_longitude &&
+  locationData?.dropoff_lat &&
+  locationData?.dropoff_lng
+) {
+  distance_km = haversineDistance(
+    Number(locationData.customer_latitude),
+    Number(locationData.customer_longitude),
+    Number(locationData.dropoff_lat),
+    Number(locationData.dropoff_lng)
+  );
+}
 
     const response = {
       message: 'Booking details fetched successfully',
@@ -79,6 +97,7 @@ export async function POST(req: Request) {
         vehicle_details,
         ...locationData, // coordinates directly merged in data
         has_complaint: hasFeedbackOrComplaint,
+         distance_km: distance_km, 
       },
     };
 

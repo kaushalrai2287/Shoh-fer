@@ -202,7 +202,7 @@ export async function POST(req: Request) {
       .not("booking_id", "in", `(${rejectedBookingIds.join(",")})`)
       .order("pending_at", { ascending: false })
       .maybeSingle();
-
+// console.log("Assignment:", assignment);
     if (assignError) throw assignError;
 
     if (!assignment) {
@@ -256,6 +256,7 @@ export async function POST(req: Request) {
       .eq("driver_id", driver_id)
       .maybeSingle();
 
+
     let driverPickupDistance = null;
     if (
       bookingLatLong?.customer_latitude &&
@@ -269,7 +270,9 @@ export async function POST(req: Request) {
       const driverLng = parseFloat(driverLoc.longitude);
 
       driverPickupDistance = haversineDistance(driverLat, driverLng, custLat, custLng);
+
     }
+
 
     const merged = {
       ...assignment,

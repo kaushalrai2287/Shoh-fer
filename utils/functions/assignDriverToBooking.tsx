@@ -38,7 +38,8 @@ export async function assignDriverToBooking(
       .from("booking_assigned_drivers")
       .select("driver_id")
       .eq("booking_id", booking_id)
-      .eq("status", "rejected");
+      .in("status", ["rejected", "cancelled"]);
+      // .eq("status", "rejected");
 
     if (rejectedError) {
       console.error("Error fetching rejected drivers:", rejectedError);
@@ -46,7 +47,7 @@ export async function assignDriverToBooking(
     }
 
     const rejectedIds = rejectedDrivers?.map((d) => d.driver_id) || [];
-
+// console.log("Rejected driver IDs:", rejectedIds);
   
     // const { data: drivers, error: driverError } = await supabase.rpc("find_nearest_driver", {
     //   lat: customer_latitude,
