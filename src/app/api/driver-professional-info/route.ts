@@ -38,11 +38,11 @@ export async function GET(req: Request) {
       await supabase.from("driver_license_category").select("*");
 
     if (licenseCategoryError) throw licenseCategoryError;
-    const { data: segements, error: segementsError } = await supabase
+    const { data: segments, error: segmentsError } = await supabase
       .from("segments")
       .select("*");
 
-    if (segementsError) throw segementsError;
+    if (segmentsError) throw segmentsError;
     // Fetch license expiry dates
 
     // Fetch spoken languages
@@ -57,7 +57,7 @@ export async function GET(req: Request) {
         brands,
         driving,
         licenseCategories,
-        segements,
+        segments,
       },
     });
   } catch (error: any) {
