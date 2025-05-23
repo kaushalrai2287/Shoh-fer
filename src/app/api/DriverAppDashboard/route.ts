@@ -81,28 +81,7 @@ export async function POST(req: Request) {
         { status: 200 }
       );
     }
-    // Fetch booking details
-    // const { data: bookings, error: bookingError } = await supabase
-    //   .from('bookings')
-    //   .select('*')
-    //   .eq('driver_id', driver_id);
-//     const today = new Date().toISOString().split('T')[0]; 
 
-// const { data: bookings, error: bookingError } = await supabase
-//   .from('bookings')
-//   .select('*',)
-//   .eq('driver_id', driver_id)
-//   .gte('created_at', `${today}T00:00:00.000Z`) 
-//   .lt('created_at', `${today}T23:59:59.999Z`); 
-
-
-//     if (bookingError) {
-//       console.error('Error fetching booking details:', bookingError);
-//       return NextResponse.json(
-//         { message: 'Error fetching booking details', status: 'error' },
-//         { status: 500 }
-//       );
-//     }
 const today = new Date().toISOString().split('T')[0];
 const { data: assignedBookings, error: assignedError } = await supabase
   .from('booking_assigned_drivers')
@@ -120,13 +99,29 @@ if (assignedError) {
 
 const bookingIds = assignedBookings.map(b => b.booking_id);
 
+// if (bookingIds.length === 0) {
+//   return NextResponse.json(
+//     { message: 'No bookings found for driver', status: 'success', data: [] },
+//     { status: 200 }
+//   );
+// }
+
 if (bookingIds.length === 0) {
   return NextResponse.json(
-    { message: 'No bookings found for driver', status: 'success', data: [] },
+    {
+      message: 'No bookings found for driver',
+      status: '1',
+      data: {
+        DriverOnlineStatus: driverData.is_online,
+        isAdminVerified: formatStatus(driverData.isadminverified, 'Admin verification'),
+        kyc: formatStatus(driverData.kyc_status, 'KYC'),
+        policeverification: formatStatus(driverData.police_verification_status, 'Police verification'),
+        bookings: [],
+      },
+    },
     { status: 200 }
   );
 }
-
 
 
 const { data: bookings, error: bookingError } = await supabase
@@ -173,38 +168,6 @@ if (bookingLocationError) {
   );
 }
 
-// const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
-
-// const { data: bookings, error: bookingError } = await supabase
-//   .from('bookings')
-//   .select('*, vehicles(license_plate_no, brand_id, model_id)')
-//   .eq('driver_id', driver_id)
-//   .gte('created_at', `${today}T00:00:00.000Z`)
-//   .lt('created_at', `${today}T23:59:59.999Z`)
-//   .order('created_at', { ascending: false });
-
-// if (bookingError) {
-//   console.error('Error fetching booking details:', bookingError);
-//   return NextResponse.json(
-//     { message: 'Error fetching booking details', status: 'error' },
-//     { status: 500 }
-//   );
-// }
-// const bookingIds = bookings.map(booking => booking.booking_id);
-
-// const { data: bookingLocation, error: bookingLocationError } = await supabase
-// .from('booking_locations')
-// .select('customer_latitude,booking_id, customer_longitude,dropoff_lat,dropoff_lng')
-// .in('booking_id', bookingIds);
-
-
-// if (bookingLocationError) {
-//   console.error('Error fetching booking Location:', bookingLocationError);
-//   return NextResponse.json(
-//     { message: 'Error fetching booking Location', status: 'error' },
-//     { status: 500 }
-//   );
-// }
 
 // Enrich bookings with brand and model names
 const enrichedBookings = await Promise.all(
