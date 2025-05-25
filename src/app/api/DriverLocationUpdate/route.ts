@@ -129,17 +129,20 @@ export async function POST(req: Request) {
     console.log('API called');
 
     const body = await req.json();
-    const { driver_id,booking_id, latitude, longitude } = body;
+    const { driver_id, booking_id, latitude, longitude } = body;
 
     if (!driver_id || !latitude || !longitude) {
       console.error('Missing required fields', body);
       return NextResponse.json({ status: '0', message: 'Missing required fields' });
     }
 
+    // Convert booking_id to number if it exists
+    const numericBookingId = booking_id ? Number(booking_id) : null;
+
     // Always insert a new row into driver_locations
     const { data: insertData, error: insertError } = await supabase
     .from('driver_locations')
-    .insert([{ driver_id, latitude,booking_id, longitude }])
+    .insert([{ driver_id, latitude, booking_id: numericBookingId, longitude }])
     .select(); //
 
     // console.log('Insert Data:', insertData);
