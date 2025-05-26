@@ -185,30 +185,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ status: '1', message: 'Location unchanged' });
     }
 
-    // If there's a booking_id, check if we need to update previous entries
-    if (numericBookingId) {
-      // Update any recent null booking_id entries to this booking_id
-      const { error: updateError } = await supabase
-        .from('driver_locations')
-        .update({ booking_id: numericBookingId })
-        .eq('driver_id', driver_id)
-        .is('booking_id', null)
-        .gte('updated_at', new Date(Date.now() - 5 * 60 * 1000).toISOString()); // Last 5 minutes
-
-      if (updateError) {
-        console.error('Update previous entries error:', updateError);
-        return NextResponse.json({ status: '0', message: updateError.message });
-      }
-    }
-
-    // Insert new location record
+    // Always insert new location record
     const { data: insertData, error: insertError } = await supabase
       .from('driver_locations')
       .insert([{
         driver_id,
         latitude,
         longitude,
-        booking_id: numericBookingId,
+        booking_id: numericBookingId, // Will be null when no booking, or the booking_id when there is one
         updated_at: new Date().toISOString()
       }])
       .select();
