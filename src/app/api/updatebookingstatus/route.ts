@@ -170,11 +170,11 @@ export async function POST(req: NextRequest) {
       if (assignDriverError) throw assignDriverError;
 
 
-      const { error: updateLocationError } = await supabase
-        .from('driver_locations')
-        .update({ booking_id })
-        .eq('driver_id', driver_id);
-      if (updateLocationError) throw updateLocationError;
+      // const { error: updateLocationError } = await supabase
+      //   .from('driver_locations')
+      //   .update({ booking_id })
+      //   .eq('driver_id', driver_id);
+      // if (updateLocationError) throw updateLocationError;
     }
 
     return NextResponse.json({ message: 'Booking status updated successfully' }, { status: 200 });

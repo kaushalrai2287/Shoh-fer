@@ -133,10 +133,17 @@ interface DriverData {
 
 export async function POST(req: Request) {
   try {
-    console.log('API called');
+    console.log('API called with body:', JSON.stringify(req.body));
 
     const body = await req.json();
     const { driver_id, booking_id, latitude, longitude } = body;
+
+    console.log('Parsed data:', {
+      driver_id,
+      booking_id,
+      latitude,
+      longitude
+    });
 
     if (!driver_id || !latitude || !longitude) {
       console.error('Missing required fields', body);
@@ -145,6 +152,7 @@ export async function POST(req: Request) {
 
     // Convert booking_id to number if it exists
     const numericBookingId = booking_id ? Number(booking_id) : null;
+    console.log('Numeric booking ID:', numericBookingId);
 
     // First check if driver exists and is online
     const { data: driverData, error: driverError } = await supabase
@@ -185,6 +193,21 @@ export async function POST(req: Request) {
       return NextResponse.json({ status: '1', message: 'Location unchanged' });
     }
 
+    // Check existing entries for this driver
+    const { data: existingEntries, error: checkError } = await supabase
+      .from('driver_locations')
+      .select('id, booking_id')
+      .eq('driver_id', driver_id)
+      .order('updated_at', { ascending: false })
+      .limit(1);
+
+    if (checkError) {
+      console.error('Error checking existing entries:', checkError);
+      return NextResponse.json({ status: '0', message: 'Error checking existing entries' });
+    }
+
+    console.log('Existing entries:', existingEntries);
+
     // Always insert new location record
     const { data: insertData, error: insertError } = await supabase
       .from('driver_locations')
@@ -192,7 +215,7 @@ export async function POST(req: Request) {
         driver_id,
         latitude,
         longitude,
-        booking_id: numericBookingId, // Will be null when no booking, or the booking_id when there is one
+        booking_id: numericBookingId,
         updated_at: new Date().toISOString()
       }])
       .select();
@@ -219,7 +242,14 @@ export async function POST(req: Request) {
     }
     console.log('Updated driver data:', updateDriverData);
 
-    return NextResponse.json({ status: '1', message: 'Location updated successfully' });
+    return NextResponse.json({ 
+      status: '1', 
+      message: 'Location updated successfully',
+      details: {
+        inserted: insertData,
+        updated: updateDriverData
+      }
+    });
 
   } catch (err: any) {
     console.error('Server error:', err);
