@@ -208,14 +208,14 @@ export async function POST(req: Request) {
 
     console.log('Existing entries:', existingEntries);
 
-    // Always insert new location record
+    // Always insert new location record with the current booking_id
     const { data: insertData, error: insertError } = await supabase
       .from('driver_locations')
       .insert([{
         driver_id,
         latitude,
         longitude,
-        booking_id: numericBookingId,
+        booking_id: numericBookingId, // This will be null if no booking_id is provided
         updated_at: new Date().toISOString()
       }])
       .select();
