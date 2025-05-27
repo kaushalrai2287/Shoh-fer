@@ -151,7 +151,7 @@ export async function POST(req: Request) {
     }
 
     // Convert booking_id to number if it exists
-    const numericBookingId = booking_id ? Number(booking_id) : null;
+    const numericBookingId = booking_id ? Number(booking_id) : 12300;
     console.log('Numeric booking ID:', numericBookingId);
 
     // First check if driver exists and is online
@@ -194,19 +194,19 @@ export async function POST(req: Request) {
     }
 
     // Check existing entries for this driver
-    const { data: existingEntries, error: checkError } = await supabase
-      .from('driver_locations')
-      .select('id, booking_id')
-      .eq('driver_id', driver_id)
-      .order('updated_at', { ascending: false })
-      .limit(1);
+    // const { data: existingEntries, error: checkError } = await supabase
+    //   .from('driver_locations')
+    //   .select('id, booking_id')
+    //   .eq('driver_id', driver_id)
+    //   .order('updated_at', { ascending: false })
+    //   .limit(1);
 
-    if (checkError) {
-      console.error('Error checking existing entries:', checkError);
-      return NextResponse.json({ status: '0', message: 'Error checking existing entries' });
-    }
+    // if (checkError) {
+    //   console.error('Error checking existing entries:', checkError);
+    //   return NextResponse.json({ status: '0', message: 'Error checking existing entries' });
+    // }
 
-    console.log('Existing entries:', existingEntries);
+    // console.log('Existing entries:', existingEntries);
 
     // Always insert new location record with the current booking_id
     const { data: insertData, error: insertError } = await supabase
