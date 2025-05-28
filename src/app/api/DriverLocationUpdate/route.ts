@@ -151,7 +151,7 @@ export async function POST(req: Request) {
     }
 
     // Convert booking_id to number if it exists
-    const numericBookingId = booking_id ? Number(booking_id) : 12300;
+    const numericBookingId = booking_id ? Number(booking_id) : null;
     console.log('Numeric booking ID:', numericBookingId);
 
     // First check if driver exists and is online
